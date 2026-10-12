@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Face Detection API (tracking.js) untuk Deteksi Wajah Realtime di Browser -->
+    <!-- Face Detection API (tracking.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
 
@@ -146,17 +146,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1);
-        }
-
-        /* CANVAS UNTUK OVERLAY TRACKING WAJAH */
-        canvas.tracker-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 3;
             transform: scaleX(-1);
         }
 
@@ -450,7 +439,6 @@
                 
                 <div class="camera-container">
                     <video id="game-video" autoplay playsinline muted></video>
-                    <canvas id="tracker-canvas" class="tracker-canvas"></canvas>
 
                     <div class="camera-header-info">
                         <span class="info-pill" id="badge-subject"><i class="fa-solid fa-book"></i> IPAS SD</span>
@@ -464,11 +452,11 @@
 
                     <div class="camera-split-zones">
                         <div class="zone-left" id="zone-left">
-                            <span class="zone-badge" id="badge-left"><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
+                            <span class="zone-badge" id="badge-left"><i class="fa-solid fa-circle-check"></i> BENAR</span>
                             <span class="person-count-pill" id="count-left"><i class="fa-solid fa-user"></i> 0 Orang</span>
                         </div>
                         <div class="zone-right" id="zone-right">
-                            <span class="zone-badge" id="badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
+                            <span class="zone-badge" id="badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH</span>
                             <span class="person-count-pill" id="count-right"><i class="fa-solid fa-user"></i> 0 Orang</span>
                         </div>
                     </div>
@@ -528,7 +516,7 @@
             </div>
         </div>
 
-        <!-- 4. PANEL GURU -->
+        <!-- 4. PANEL GURU (DENGAN REVISI: DILENGKAPI OTOMATIS BENAR/SALAH TANPA PERLU MENGETIK OPTION A & B) -->
         <div id="screen-teacher" class="screen">
             <div class="card" style="text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -539,30 +527,19 @@
                 </div>
 
                 <div style="background: #f8fafc; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 12px; font-size: 1rem; color: var(--primary);">Buat Soal Baru</h3>
+                    <h3 style="margin-bottom: 12px; font-size: 1rem; color: var(--primary);">Buat Soal Pernyataan Baru</h3>
                     
                     <div class="form-group">
-                        <label>Teks Pertanyaan</label>
-                        <input type="text" id="input-q-text" placeholder="Masukkan soal...">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>Pilihan A (Kiri)</label>
-                            <input type="text" id="input-q-a" placeholder="Teks A">
-                        </div>
-                        <div class="form-group">
-                            <label>Pilihan B (Kanan)</label>
-                            <input type="text" id="input-q-b" placeholder="Teks B">
-                        </div>
+                        <label>Teks Pertanyaan / Pernyataan</label>
+                        <input type="text" id="input-q-text" placeholder="Contoh: Fotosintesis tumbuhan menghasilkan oksigen...">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="form-group">
                             <label>Kunci Jawaban</label>
                             <select id="select-q-key">
-                                <option value="A">A (Kiri)</option>
-                                <option value="B">B (Kanan)</option>
+                                <option value="A">BENAR (Posisi Kiri)</option>
+                                <option value="B">SALAH (Posisi Kanan)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -702,7 +679,6 @@
                     const halfWidth = videoWidth / 2;
 
                     event.data.forEach(function(rect) {
-                        // Karena video di-mirror, koordinat X dibalik
                         const mirroredX = videoWidth - (rect.x + rect.width);
                         if (mirroredX < halfWidth) {
                             l++;
@@ -715,7 +691,6 @@
                     rightCount = r;
                 }
 
-                // Update UI Indikator Jumlah Siswa
                 document.getElementById('count-left').innerHTML = `<i class="fa-solid fa-user"></i> ${leftCount} Orang`;
                 document.getElementById('count-right').innerHTML = `<i class="fa-solid fa-user"></i> ${rightCount} Orang`;
             });
@@ -805,7 +780,6 @@
 
             const q = questions[currentQuestionIndex];
 
-            // Reset Tampilan
             const zoneLeft = document.getElementById('zone-left');
             const zoneRight = document.getElementById('zone-right');
             const badgeLeft = document.getElementById('badge-left');
@@ -816,8 +790,8 @@
             badgeLeft.className = "zone-badge";
             badgeRight.className = "zone-badge";
 
-            badgeLeft.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${q.optionA} (A)`;
-            badgeRight.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${q.optionB} (B)`;
+            badgeLeft.innerHTML = `<i class="fa-solid fa-circle-check"></i> BENAR`;
+            badgeRight.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> SALAH`;
 
             const overlay = document.getElementById('status-overlay');
             overlay.className = "status-overlay";
@@ -844,7 +818,6 @@
             }, 1000);
         }
 
-        /* LOGIKA EVALUASI POIN KELOMPOK DARI JUMLAH ORANG DI KAMERA */
         function evaluateAnswer() {
             const q = questions[currentQuestionIndex];
             const zoneLeft = document.getElementById('zone-left');
@@ -857,7 +830,6 @@
             const statusDetail = document.getElementById('status-detail');
             const nextTimerText = document.getElementById('next-timer-text');
 
-            // Highlight Jawaban Benar (Satu Hijau, Satu Merah)
             if (q.answer === 'A') {
                 zoneLeft.classList.add('reveal-correct');
                 zoneRight.classList.add('reveal-wrong');
@@ -870,7 +842,6 @@
                 badgeLeft.classList.add('badge-wrong');
             }
 
-            // ATURAN POIN KELOMPOK
             let groupWon = false;
             let correctPeople = (q.answer === 'A') ? leftCount : rightCount;
             let wrongPeople = (q.answer === 'A') ? rightCount : leftCount;
@@ -938,7 +909,7 @@
             showScreen('screen-welcome');
         }
 
-        /* 6. PANEL GURU */
+        /* 6. PANEL GURU (REVISI: TANPA FORM MENGETIK A/B, OTOMATIS TERSIMPAN BENAR/SALAH) */
         function renderTeacherQuestions() {
             const container = document.getElementById('questions-list-container');
             document.getElementById('q-count').textContent = questions.length;
@@ -956,8 +927,7 @@
                     </div>
                     <p style="margin: 6px 0; font-weight:600; font-size:0.9rem;">${q.question}</p>
                     <div style="font-size:0.8rem; color:#475569;">
-                        <span style="color:${q.answer === 'A' ? 'green' : 'black'};">A (Kiri): ${q.optionA}</span> | 
-                        <span style="color:${q.answer === 'B' ? 'green' : 'black'};">B (Kanan): ${q.optionB}</span>
+                        <span>Kunci Jawaban: <strong style="color:${q.answer === 'A' ? '#22c55e' : '#ef4444'};">${q.answer === 'A' ? 'BENAR (Kiri)' : 'SALAH (Kanan)'}</strong></span>
                     </div>
                 `;
                 container.appendChild(item);
@@ -966,13 +936,11 @@
 
         function addQuestion() {
             const text = document.getElementById('input-q-text').value.trim();
-            const optA = document.getElementById('input-q-a').value.trim();
-            const optB = document.getElementById('input-q-b').value.trim();
             const key = document.getElementById('select-q-key').value;
             const timer = parseInt(document.getElementById('input-q-timer').value) || 10;
 
-            if (!text || !optA || !optB) {
-                alert("Mohon lengkapi semua isian!");
+            if (!text) {
+                alert("Mohon masukkan teks pertanyaan!");
                 return;
             }
 
@@ -980,8 +948,8 @@
                 id: Date.now(),
                 subject: "Umum SD",
                 question: text,
-                optionA: optA,
-                optionB: optB,
+                optionA: "BENAR",
+                optionB: "SALAH",
                 answer: key,
                 timer: timer
             };
@@ -991,8 +959,6 @@
             renderTeacherQuestions();
 
             document.getElementById('input-q-text').value = '';
-            document.getElementById('input-q-a').value = '';
-            document.getElementById('input-q-b').value = '';
         }
 
         function deleteQuestion(index) {
