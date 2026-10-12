@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Kamera Benar-Salah - Deep Learning Kurmer 2026</title>
+    <title>Game Kamera Kelompok Benar-Salah - Deep Learning Kurmer 2026</title>
     <!-- Google Fonts & FontAwesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Face Detection API (tracking.js) untuk Deteksi Wajah Realtime di Browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
+
     <style>
         :root {
             --primary: #4338ca;
@@ -58,10 +62,7 @@
             color: #38bdf8;
         }
 
-        .header-nav {
-            display: flex;
-            gap: 10px;
-        }
+        .header-nav { display: flex; gap: 10px; }
 
         .btn {
             padding: 8px 16px;
@@ -110,11 +111,7 @@
         h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; }
         p.subtitle { color: #64748b; margin-bottom: 20px; font-size: 0.9rem; }
 
-        .form-group {
-            margin-bottom: 18px;
-            text-align: left;
-        }
-
+        .form-group { margin-bottom: 18px; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 0.9rem; }
         input, select {
             width: 100%;
@@ -125,7 +122,6 @@
             outline: none;
             transition: 0.2s;
         }
-        input:focus { border-color: var(--primary-light); }
 
         .game-layout {
             display: flex;
@@ -153,7 +149,18 @@
             transform: scaleX(-1);
         }
 
-        /* SOAL TERINTEGRASI DI DALAM KAMERA (BAGIAN ATAS) */
+        /* CANVAS UNTUK OVERLAY TRACKING WAJAH */
+        canvas.tracker-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+            transform: scaleX(-1);
+        }
+
+        /* SOAL TERINTEGRASI DI DALAM KAMERA */
         .camera-question-overlay {
             position: absolute;
             top: 52px;
@@ -163,13 +170,12 @@
             color: white;
             padding: 14px 20px;
             border-radius: 16px;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
             text-align: center;
             z-index: 8;
             backdrop-filter: blur(8px);
             border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             line-height: 1.4;
             min-height: 60px;
             display: flex;
@@ -177,7 +183,6 @@
             justify-content: center;
         }
 
-        /* HEADER INFO DI DALAM KAMERA */
         .camera-header-info {
             position: absolute;
             top: 12px;
@@ -200,7 +205,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* GARIS PEMBATAS TENGAH KAMERA */
         .camera-divider-line {
             position: absolute;
             top: 0;
@@ -213,7 +217,6 @@
             z-index: 5;
         }
 
-        /* ZONA KIRI & KANAN */
         .camera-split-zones {
             position: absolute;
             inset: 0;
@@ -227,62 +230,47 @@
             background: transparent;
             transition: all 0.3s ease;
             display: flex;
-            align-items: flex-end;
+            flex-direction: column;
+            justify-content: flex-end;
             padding: 20px;
         }
 
-        .zone-left {
-            justify-content: flex-start;
-            border-right: 1px dashed rgba(255, 255, 255, 0.4);
-        }
+        .zone-left { align-items: flex-start; border-right: 1px dashed rgba(255, 255, 255, 0.4); }
+        .zone-right { align-items: flex-end; }
 
-        .zone-right {
-            justify-content: flex-end;
-        }
-
-        /* BINGKAI PINGGIRAN (BORDER ONLY) SETELAH SOAL SELESAI */
-        .zone-left.reveal-correct {
-            box-shadow: inset 0 0 0 12px #22c55e; /* PINGGIRAN HIJAU TEBAL */
-            background: rgba(34, 197, 94, 0.12); /* TINT TRANSPARAN KECIL AGAR KAMERA JELAS */
-        }
-
-        .zone-right.reveal-correct {
+        /* BINGKAI PINGGIRAN HASIL */
+        .zone-left.reveal-correct, .zone-right.reveal-correct {
             box-shadow: inset 0 0 0 12px #22c55e;
             background: rgba(34, 197, 94, 0.12);
         }
 
-        .zone-left.reveal-wrong {
-            box-shadow: inset 0 0 0 12px #ef4444; /* PINGGIRAN MERAH TEBAL */
-            background: rgba(239, 68, 68, 0.12);
-        }
-
-        .zone-right.reveal-wrong {
+        .zone-left.reveal-wrong, .zone-right.reveal-wrong {
             box-shadow: inset 0 0 0 12px #ef4444;
             background: rgba(239, 68, 68, 0.12);
         }
 
         .zone-badge {
-            padding: 8px 18px;
+            padding: 8px 16px;
             border-radius: 12px;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: white;
             text-transform: uppercase;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(4px);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s;
         }
 
-        .zone-badge.badge-correct {
-            background: rgba(34, 197, 94, 0.95) !important;
-            border-color: white !important;
-        }
-
-        .zone-badge.badge-wrong {
-            background: rgba(239, 68, 68, 0.95) !important;
-            border-color: white !important;
+        .person-count-pill {
+            margin-top: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(0,0,0,0.7);
+            color: #38bdf8;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .timer-badge {
@@ -310,7 +298,6 @@
             100% { transform: translateX(-50%) scale(1.08); }
         }
 
-        /* OVERLAY NOTIFIKASI HASIL RINGKAS */
         .status-overlay {
             position: absolute;
             inset: 0;
@@ -319,19 +306,18 @@
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 800;
             z-index: 10;
             text-transform: uppercase;
-            letter-spacing: 2px;
             pointer-events: none;
         }
 
         .status-overlay.active { display: flex; }
 
         .status-box {
-            background: rgba(15, 23, 42, 0.85);
-            padding: 15px 30px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 18px 30px;
             border-radius: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(8px);
@@ -339,9 +325,9 @@
             flex-direction: column;
             align-items: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            text-align: center;
         }
 
-        /* PODIUM & RESULT */
         .podium {
             display: flex;
             justify-content: center;
@@ -361,14 +347,12 @@
             padding-top: 10px;
             color: white;
             font-weight: 700;
-            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
         }
 
         .podium-1 { height: 160px; background: linear-gradient(to top, #ca8a04, #fef08a); color: #713f12; }
         .podium-2 { height: 125px; background: linear-gradient(to top, #64748b, #cbd5e1); color: #1e293b; }
         .podium-3 { height: 95px; background: linear-gradient(to top, #b45309, #fde68a); color: #451a03; }
 
-        /* MODAL TES KAMERA */
         .modal {
             display: none;
             position: fixed;
@@ -411,18 +395,17 @@
         }
 
         @media (max-width: 600px) {
-            .camera-container { height: 420px; }
+            .camera-container { height: 400px; }
             .camera-question-overlay { font-size: 0.95rem; top: 45px; padding: 10px; }
-            .zone-badge { font-size: 0.8rem; padding: 6px 12px; }
+            .zone-badge { font-size: 0.75rem; padding: 5px 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Aplikasi -->
     <header>
         <div class="logo">
-            <i class="fa-solid fa-camera-retro"></i> GAME KAMERA B-S
+            <i class="fa-solid fa-camera-retro"></i> GAME KAMERA KELOMPOK
         </div>
         <div class="header-nav">
             <button class="btn btn-warning" onclick="openCameraTest()">
@@ -439,70 +422,66 @@
         <!-- 1. BERANDA / UTAMA -->
         <div id="screen-welcome" class="screen active">
             <div class="card">
-                <h1><i class="fa-solid fa-gamepad"></i> Game Kamera Benar-Salah</h1>
-                <p class="subtitle">Deep Learning Kurikulum Merdeka 2026 (SD)</p>
+                <h1><i class="fa-solid fa-users-between-lines"></i> Game Kamera Kelompok</h1>
+                <p class="subtitle">Deteksi Otomatis Jumlah Siswa di Kamera (Kurmer 2026)</p>
                 
                 <div class="form-group">
-                    <label><i class="fa-solid fa-user"></i> Nama / Nickname Siswa</label>
-                    <input type="text" id="input-player-name" placeholder="Ketik nama kamu..." autocomplete="off">
+                    <label><i class="fa-solid fa-users"></i> Nama Kelompok Siswa</label>
+                    <input type="text" id="input-player-name" placeholder="Masukkan nama kelompok..." autocomplete="off">
                 </div>
 
                 <div class="form-group">
                     <label><i class="fa-solid fa-shield-halved"></i> Mode Permainan</label>
                     <select id="select-game-mode">
-                        <option value="elimination">Mode Bertahan (Tereliminasi Jika Salah)</option>
-                        <option value="point">Mode Poin (Bermain Sampai Selesai)</option>
+                        <option value="point">Mode Poin Kelompok (Bermain Sampai Selesai)</option>
+                        <option value="elimination">Mode Bertahan (Gugur Jika Kelompok Salah)</option>
                     </select>
                 </div>
 
                 <button class="btn btn-success" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.05rem;" onclick="startGame()">
-                    <i class="fa-solid fa-play"></i> Mulai Bermain Sekarang
+                    <i class="fa-solid fa-play"></i> Mulai Permainan Kelompok
                 </button>
             </div>
         </div>
 
-        <!-- 2. GAMEPLAY FULL KAMERA (SOAL DI DALAM KAMERA, PINGGIRAN BORDER HIJAU/MERAH, TANPA TOMBOL BAWAH) -->
+        <!-- 2. GAMEPLAY FULL KAMERA -->
         <div id="screen-game" class="screen">
             <div class="game-layout">
                 
-                <!-- Layar Kamera Utama -->
                 <div class="camera-container">
                     <video id="game-video" autoplay playsinline muted></video>
+                    <canvas id="tracker-canvas" class="tracker-canvas"></canvas>
 
-                    <!-- Info Atas Kamera -->
                     <div class="camera-header-info">
                         <span class="info-pill" id="badge-subject"><i class="fa-solid fa-book"></i> IPAS SD</span>
-                        <span class="info-pill" id="label-player-name"><i class="fa-solid fa-user"></i> Siswa</span>
+                        <span class="info-pill" id="label-player-name"><i class="fa-solid fa-users"></i> Kelompok</span>
                         <span class="info-pill" id="badge-progress">Soal 1 / 10</span>
                     </div>
 
-                    <!-- SOAL TERINTEGRASI DI DALAM KAMERA -->
                     <div class="camera-question-overlay" id="text-question">
                         Memuat pertanyaan...
                     </div>
 
-                    <!-- Layer Terbelah 2: Kiri (A) & Kanan (B) -->
                     <div class="camera-split-zones">
                         <div class="zone-left" id="zone-left">
                             <span class="zone-badge" id="badge-left"><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
+                            <span class="person-count-pill" id="count-left"><i class="fa-solid fa-user"></i> 0 Orang</span>
                         </div>
                         <div class="zone-right" id="zone-right">
                             <span class="zone-badge" id="badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
+                            <span class="person-count-pill" id="count-right"><i class="fa-solid fa-user"></i> 0 Orang</span>
                         </div>
                     </div>
 
-                    <!-- Garis Tegak Pembatas Tengah -->
                     <div class="camera-divider-line"></div>
-
-                    <!-- Timer Countdown -->
                     <div class="timer-badge" id="badge-timer">10</div>
 
-                    <!-- Overlay Notifikasi Ringkas & Countdown Jeda 5 Detik -->
                     <div id="status-overlay" class="status-overlay">
                         <div class="status-box">
-                            <i id="status-icon" class="fa-solid" style="font-size: 3rem; margin-bottom: 5px;"></i>
-                            <span id="status-text" style="font-size: 1.6rem;"></span>
-                            <span id="next-timer-text" style="font-size: 0.9rem; margin-top: 8px; font-weight: 600; text-transform: none; color: #cbd5e1;">
+                            <i id="status-icon" class="fa-solid" style="font-size: 2.8rem; margin-bottom: 5px;"></i>
+                            <span id="status-text" style="font-size: 1.4rem;"></span>
+                            <p id="status-detail" style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;"></p>
+                            <span id="next-timer-text" style="font-size: 0.85rem; margin-top: 10px; font-weight: 600; color: #38bdf8;">
                                 Soal berikutnya dalam 5 detik...
                             </span>
                         </div>
@@ -516,31 +495,31 @@
         <div id="screen-result" class="screen">
             <div class="card">
                 <h1><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Hasil Akhir Permainan</h1>
-                <p class="subtitle">Peringkat & Skor Pembelajaran Deep Learning</p>
+                <p class="subtitle">Skor & Peringkat Kelompok Pembelajaran SD</p>
 
                 <div class="podium">
                     <div class="podium-place podium-2">
-                        <i class="fa-solid fa-medal" style="font-size: 1.3rem; margin-bottom: 4px;"></i>
+                        <i class="fa-solid fa-medal" style="font-size: 1.3rem;"></i>
                         <span>2nd</span>
                         <small id="podium-2-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
                     </div>
                     <div class="podium-1 podium-place">
-                        <i class="fa-solid fa-crown" style="font-size: 1.8rem; margin-bottom: 4px;"></i>
+                        <i class="fa-solid fa-crown" style="font-size: 1.8rem;"></i>
                         <span>1st</span>
                         <small id="podium-1-name" style="font-size: 0.8rem; text-align: center; margin-top: 4px;">-</small>
                     </div>
                     <div class="podium-3 podium-place">
-                        <i class="fa-solid fa-award" style="font-size: 1.2rem; margin-bottom: 4px;"></i>
+                        <i class="fa-solid fa-award" style="font-size: 1.2rem;"></i>
                         <span>3rd</span>
                         <small id="podium-3-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
                     </div>
                 </div>
 
                 <div style="background: #f1f5f9; padding: 15px; border-radius: 14px; margin-bottom: 18px; text-align: left;">
-                    <h3 style="margin-bottom: 6px; color: var(--primary); font-size: 1rem;"><i class="fa-solid fa-chart-pie"></i> Ringkasan Hasil Anda:</h3>
+                    <h3 style="margin-bottom: 6px; color: var(--primary); font-size: 1rem;"><i class="fa-solid fa-chart-pie"></i> Performa Kelompok Anda:</h3>
                     <p style="font-size:0.9rem;">Status: <strong id="user-final-status">-</strong></p>
                     <p style="font-size:0.9rem;">Total Poin: <strong id="user-final-score">0</strong> Poin</p>
-                    <p style="font-size:0.9rem;">Jawaban Benar: <strong id="user-final-correct">0</strong> dari 10 Soal</p>
+                    <p style="font-size:0.9rem;">Soal Berhasil Dimenangkan: <strong id="user-final-correct">0</strong> dari 10 Soal</p>
                 </div>
 
                 <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="resetToWelcome()">
@@ -613,18 +592,14 @@
     <!-- MODAL TES KAMERA -->
     <div id="modal-camera-test" class="modal">
         <div class="modal-content">
-            <h3><i class="fa-solid fa-video"></i> Pengujian Kamera</h3>
+            <h3><i class="fa-solid fa-video"></i> Pengujian Deteksi Kamera</h3>
             <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px;">
-                Uji tampilan kamera & garis terbelah tanpa warna awal.
+                Uji coba deteksi wajah otomatis di depan kamera.
             </p>
 
             <div class="test-video-box">
                 <video id="test-video" autoplay playsinline muted></video>
                 <div class="camera-divider-line"></div>
-                <div class="camera-split-zones">
-                    <div class="zone-left"><span class="zone-badge">BENAR (A)</span></div>
-                    <div class="zone-right"><span class="zone-badge">SALAH (B)</span></div>
-                </div>
             </div>
 
             <div id="camera-test-status" style="font-weight: 700; margin-bottom: 12px; color: var(--warning); font-size: 0.9rem;">
@@ -637,7 +612,6 @@
         </div>
     </div>
 
-    <!-- LOGIKA JAVASCRIPT & SOUND SYNTHESIZER -->
     <script>
         /* 1. AUDIO SYNTHESIZER */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -648,7 +622,6 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             const now = audioCtx.currentTime;
 
             if (type === 'correct') {
@@ -677,7 +650,7 @@
             }
         }
 
-        /* 2. DATA SOAL DEEP LEARNING KURMER 2026 */
+        /* 2. DATA SOAL KURMER 2026 */
         const defaultQuestions = [
             { id: 1, subject: "IPAS SD", question: "Proses fotosintesis tumbuhan menghasilkan oksigen dan glukosa.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
             { id: 2, subject: "Matematika", question: "Hasil perhitungan dari 150 + 50 - 80 adalah 110.", optionA: "BENAR", optionB: "SALAH", answer: "B", timer: 10 },
@@ -693,8 +666,8 @@
 
         let questions = JSON.parse(localStorage.getItem('game_questions')) || defaultQuestions;
         let currentQuestionIndex = 0;
-        let gameMode = 'elimination';
-        let playerName = 'Siswa';
+        let gameMode = 'point';
+        let playerName = 'Kelompok';
         let userScore = 0;
         let userCorrectCount = 0;
         let isEliminated = false;
@@ -703,7 +676,51 @@
         let timeLeft = 10;
         let mediaStream = null;
 
-        /* 3. KAMERA STREAM */
+        // Count Wajah Realtime
+        let leftCount = 0;
+        let rightCount = 0;
+        let trackingTracker = null;
+
+        /* 3. COMPUTER VISION (DETEKSI WAJAH KAMERA) */
+        function initFaceTracker() {
+            const video = document.getElementById('game-video');
+            const tracker = new tracking.ObjectTracker('face');
+            tracker.setInitialScale(4);
+            tracker.setStepSize(2);
+            tracker.setEdgesDensity(0.1);
+
+            trackingTracker = tracking.track('#game-video', tracker);
+
+            tracker.on('track', function(event) {
+                if (event.data.length === 0) {
+                    leftCount = 0;
+                    rightCount = 0;
+                } else {
+                    let l = 0;
+                    let r = 0;
+                    const videoWidth = video.videoWidth || 640;
+                    const halfWidth = videoWidth / 2;
+
+                    event.data.forEach(function(rect) {
+                        // Karena video di-mirror, koordinat X dibalik
+                        const mirroredX = videoWidth - (rect.x + rect.width);
+                        if (mirroredX < halfWidth) {
+                            l++;
+                        } else {
+                            r++;
+                        }
+                    });
+
+                    leftCount = l;
+                    rightCount = r;
+                }
+
+                // Update UI Indikator Jumlah Siswa
+                document.getElementById('count-left').innerHTML = `<i class="fa-solid fa-user"></i> ${leftCount} Orang`;
+                document.getElementById('count-right').innerHTML = `<i class="fa-solid fa-user"></i> ${rightCount} Orang`;
+            });
+        }
+
         async function startCamera(videoElementId) {
             try {
                 if (mediaStream) { stopCamera(); }
@@ -715,7 +732,7 @@
                 if (videoElement) { videoElement.srcObject = mediaStream; }
                 return true;
             } catch (err) {
-                console.warn("Kamera tidak diizinkan:", err);
+                console.warn("Kamera tidak aktif:", err);
                 return false;
             }
         }
@@ -735,7 +752,7 @@
 
             const success = await startCamera('test-video');
             if (success) {
-                statusEl.textContent = "Kamera Berfungsi Baik!";
+                statusEl.textContent = "Kamera Berfungsi!";
                 statusEl.style.color = "var(--success)";
             } else {
                 statusEl.textContent = "Kamera Ditolak / Tidak Ditemukan";
@@ -761,7 +778,7 @@
         async function startGame() {
             const inputName = document.getElementById('input-player-name').value.trim();
             if (!inputName) {
-                alert("Silakan masukkan nama Anda!");
+                alert("Silakan masukkan nama kelompok Anda!");
                 return;
             }
 
@@ -772,10 +789,11 @@
             userCorrectCount = 0;
             isEliminated = false;
 
-            document.getElementById('label-player-name').innerHTML = `<i class="fa-solid fa-user"></i> ${playerName}`;
+            document.getElementById('label-player-name').innerHTML = `<i class="fa-solid fa-users"></i> ${playerName}`;
 
             showScreen('screen-game');
             await startCamera('game-video');
+            initFaceTracker();
             loadQuestion();
         }
 
@@ -787,7 +805,7 @@
 
             const q = questions[currentQuestionIndex];
 
-            // Reset Tampilan Zona Kamera (Hapus Efek Border Warna)
+            // Reset Tampilan
             const zoneLeft = document.getElementById('zone-left');
             const zoneRight = document.getElementById('zone-right');
             const badgeLeft = document.getElementById('badge-left');
@@ -801,11 +819,9 @@
             badgeLeft.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${q.optionA} (A)`;
             badgeRight.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${q.optionB} (B)`;
 
-            // Hide Overlay Status
             const overlay = document.getElementById('status-overlay');
             overlay.className = "status-overlay";
 
-            // Load Teks Soal Di Dalam Kamera
             document.getElementById('badge-subject').innerHTML = `<i class="fa-solid fa-book"></i> ${q.subject}`;
             document.getElementById('badge-progress').textContent = `Soal ${currentQuestionIndex + 1} / ${questions.length}`;
             document.getElementById('text-question').textContent = q.question;
@@ -828,6 +844,7 @@
             }, 1000);
         }
 
+        /* LOGIKA EVALUASI POIN KELOMPOK DARI JUMLAH ORANG DI KAMERA */
         function evaluateAnswer() {
             const q = questions[currentQuestionIndex];
             const zoneLeft = document.getElementById('zone-left');
@@ -837,9 +854,10 @@
             const overlay = document.getElementById('status-overlay');
             const statusIcon = document.getElementById('status-icon');
             const statusText = document.getElementById('status-text');
+            const statusDetail = document.getElementById('status-detail');
             const nextTimerText = document.getElementById('next-timer-text');
 
-            // REVEAL PINGGIRAN KAMERA (BORDER HIJAU DAN MERAH) - KAMERA TETAP JELAS TERLIHAT
+            // Highlight Jawaban Benar (Satu Hijau, Satu Merah)
             if (q.answer === 'A') {
                 zoneLeft.classList.add('reveal-correct');
                 zoneRight.classList.add('reveal-wrong');
@@ -852,13 +870,38 @@
                 badgeLeft.classList.add('badge-wrong');
             }
 
-            playSound('correct');
-            statusIcon.className = "fa-solid fa-flag-checkered";
-            statusText.textContent = "WAKTU HABIS!";
+            // ATURAN POIN KELOMPOK
+            let groupWon = false;
+            let correctPeople = (q.answer === 'A') ? leftCount : rightCount;
+            let wrongPeople = (q.answer === 'A') ? rightCount : leftCount;
+
+            if (correctPeople > wrongPeople) {
+                groupWon = true;
+            }
+
+            if (groupWon) {
+                playSound('correct');
+                userCorrectCount++;
+                userScore += 100;
+                statusIcon.className = "fa-solid fa-trophy";
+                statusIcon.style.color = "#22c55e";
+                statusText.textContent = "KELOMPOK MENDAPAT POIN!";
+                statusDetail.textContent = `Siswa di jawaban BENAR (${correctPeople} org) lebih banyak dari SALAH (${wrongPeople} org).`;
+            } else {
+                playSound('wrong');
+                statusIcon.className = "fa-solid fa-circle-xmark";
+                statusIcon.style.color = "#ef4444";
+                statusText.textContent = "TIDAK MENDAPAT POIN!";
+                statusDetail.textContent = `Siswa di jawaban SALAH (${wrongPeople} org) lebih banyak / sama dengan BENAR (${correctPeople} org).`;
+
+                if (gameMode === 'elimination') {
+                    isEliminated = true;
+                    statusText.textContent = "KELOMPOK TERELIMINASI!";
+                }
+            }
 
             overlay.classList.add('active');
 
-            // JEDA 5 DETIK UNTUK MELIHAT KAMERA DENGAN BORDER BERWARNA
             let pauseTime = 5;
             nextTimerText.textContent = `Soal berikutnya dalam ${pauseTime} detik...`;
 
@@ -879,7 +922,7 @@
             stopCamera();
             showScreen('screen-result');
 
-            document.getElementById('user-final-score').textContent = userCorrectCount * 10;
+            document.getElementById('user-final-score').textContent = userScore;
             document.getElementById('user-final-correct').textContent = userCorrectCount;
             
             const statusEl = document.getElementById('user-final-status');
@@ -887,8 +930,8 @@
             statusEl.style.color = "var(--success)";
 
             document.getElementById('podium-1-name').textContent = `${playerName}`;
-            document.getElementById('podium-2-name').textContent = "Siswa B";
-            document.getElementById('podium-3-name').textContent = "Siswa C";
+            document.getElementById('podium-2-name').textContent = "Kelompok B";
+            document.getElementById('podium-3-name').textContent = "Kelompok C";
         }
 
         function resetToWelcome() {
