@@ -1,1020 +1,1075 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GAME KAMERA BENAR-SALAH - Deep Learning Kurmer 2026</title>
-  <!-- Google Fonts & FontAwesome Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    :root {
-      --primary: #4F46E5;
-      --primary-dark: #4338CA;
-      --secondary: #06B6D4;
-      --success: #10B981;
-      --danger: #EF4444;
-      --warning: #F59E0B;
-      --dark: #0F172A;
-      --light: #F8FAFC;
-      --card-bg: rgba(255, 255, 255, 0.92);
-      --radius: 20px;
-      --shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
-      color: #334155;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 1100px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(12px);
-    }
-
-    /* Header */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.1);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 1.2rem;
-      letter-spacing: -0.5px;
-    }
-
-    .brand i {
-      color: var(--secondary);
-      font-size: 1.5rem;
-    }
-
-    .audio-toggle {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: white;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .audio-toggle:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: scale(1.05);
-    }
-
-    /* Screen Views */
-    .view {
-      display: none;
-      flex: 1;
-      padding: 24px;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .view.active {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 32px;
-      width: 100%;
-      max-width: 600px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
-    }
-
-    .card-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .card-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--dark);
-      margin-bottom: 8px;
-    }
-
-    .card-subtitle {
-      font-size: 0.95rem;
-      color: #64748B;
-    }
-
-    /* Form Inputs & Buttons */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #475569;
-      margin-bottom: 8px;
-    }
-
-    input[type="text"], select {
-      width: 100%;
-      padding: 14px 18px;
-      border: 2px solid #E2E8F0;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    input[type="text"]:focus, select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 16px 24px;
-      border: none;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Kamera Benar-Salah - Deep Learning Kurmer 2026</title>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    .btn-secondary { background: #E2E8F0; color: var(--dark); }
-    .btn-secondary:hover { background: #CBD5E1; }
+    <style>
+        :root {
+            --primary: #4338ca;
+            --primary-light: #6366f1;
+            --secondary: #0ea5e9;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.96);
+        }
 
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            user-select: none;
+        }
 
-    /* Camera Feed Component */
-    .camera-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      border: 3px solid rgba(255,255,255,0.2);
-    }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
 
-    video.camera-feed {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* Mirror view */
-    }
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            z-index: 100;
+        }
 
-    .camera-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-      transition: background 0.3s;
-    }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #38bdf8;
+        }
 
-    .camera-overlay.state-correct {
-      background: rgba(16, 185, 129, 0.4);
-      border: 6px solid var(--success);
-    }
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
 
-    .camera-overlay.state-wrong {
-      background: rgba(239, 68, 68, 0.4);
-      border: 6px solid var(--danger);
-    }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
 
-    .camera-badge {
-      align-self: flex-start;
-      background: rgba(0, 0, 0, 0.6);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: var(--primary-light); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-secondary { background: #475569; color: white; }
 
-    .camera-badge .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--danger);
-      animation: pulse 1s infinite;
-    }
+        .container {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+        .screen { display: none; width: 100%; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
 
-    /* Game HUD & Arena */
-    .game-hud {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      color: white;
-    }
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 25px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+            text-align: center;
+            margin-bottom: 15px;
+        }
 
-    .timer-circle {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: var(--card-bg);
-      color: var(--dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      font-weight: 800;
-      border: 4px solid var(--primary);
-      box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-    }
+        h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; }
+        p.subtitle { color: #64748b; margin-bottom: 20px; font-size: 0.9rem; }
 
-    .question-card {
-      background: white;
-      border-radius: var(--radius);
-      padding: 28px;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-    }
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
 
-    .question-tag {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #EEF2FF;
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 0.8rem;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 0.9rem; }
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus { border-color: var(--primary-light); }
 
-    .question-text {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--dark);
-      line-height: 1.4;
-    }
+        /* GAME LAYOUT PARAMS */
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 12px;
+        }
 
-    /* Option Buttons (A / B) */
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      width: 100%;
-    }
+        /* SOAL DI ATAS KAMERA */
+        .question-box {
+            background: white;
+            border-radius: 18px;
+            padding: 16px 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 3px solid var(--primary-light);
+        }
 
-    .option-btn {
-      padding: 24px 16px;
-      border-radius: 18px;
-      border: 3px solid transparent;
-      background: white;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-      box-shadow: var(--shadow);
-    }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 700;
+        }
 
-    .option-btn .label {
-      font-size: 2rem;
-      font-weight: 800;
-    }
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+        }
 
-    .option-btn .text {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #475569;
-    }
+        /* KAMERA DENGAN GARIS TERBELAH 2 ZONA (1 KAMERA) */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        }
 
-    .option-btn.btn-a { border-color: #3B82F6; color: #2563EB; }
-    .option-btn.btn-b { border-color: #EC4899; color: #DB2777; }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Efek Cermin */
+        }
 
-    .option-btn:hover:not(:disabled) {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-    }
+        /* Garis Tengah Pembatas Kamera */
+        .camera-divider-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(-50%);
+            box-shadow: 0 0 12px rgba(255,255,255,0.8);
+            z-index: 5;
+        }
 
-    .option-btn.selected {
-      background: #F1F5F9;
-      box-shadow: inset 0 0 0 3px var(--dark);
-    }
+        /* ZONA KIRI & KANAN */
+        .camera-split-zones {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            pointer-events: none;
+            z-index: 4;
+        }
 
-    .option-btn.is-correct {
-      background: #D1FAE5 !important;
-      border-color: var(--success) !important;
-      color: #065F46 !important;
-    }
+        .zone-left {
+            flex: 1;
+            background: rgba(34, 197, 94, 0.18); /* Tint Hijau BENAR */
+            border-right: 2px dashed rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 12px;
+        }
 
-    .option-btn.is-wrong {
-      background: #FEE2E2 !important;
-      border-color: var(--danger) !important;
-      color: #991B1B !important;
-    }
+        .zone-right {
+            flex: 1;
+            background: rgba(239, 68, 68, 0.18); /* Tint Merah SALAH */
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 12px;
+        }
 
-    /* Host Controls & Tables */
-    .host-dashboard {
-      width: 100%;
-      background: white;
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-    }
+        .zone-badge {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+        }
 
-    .table-responsive {
-      width: 100%;
-      overflow-x: auto;
-      margin-top: 16px;
-    }
+        .badge-left { background: rgba(34, 197, 94, 0.9); }
+        .badge-right { background: rgba(239, 68, 68, 0.9); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
+        .player-tag {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 6;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #E2E8F0;
-      font-size: 0.9rem;
-    }
+        .timer-badge {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--warning);
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 7;
+            animation: pulse 1s infinite alternate;
+        }
 
-    th {
-      background: #F8FAFC;
-      font-weight: 700;
-      color: #475569;
-    }
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            100% { transform: translateX(-50%) scale(1.08); }
+        }
 
-    /* Leaderboard Podium */
-    .podium-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 16px;
-      margin: 32px 0;
-      width: 100%;
-    }
+        .status-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            backdrop-filter: blur(6px);
+        }
 
-    .podium-step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 30%;
-    }
+        .status-overlay.correct { display: flex; background: rgba(34, 197, 94, 0.88); }
+        .status-overlay.wrong { display: flex; background: rgba(239, 68, 68, 0.88); }
 
-    .podium-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #E2E8F0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-      border: 3px solid white;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+        /* JAWABAN DI BAWAH KAMERA (KIRI BENAR/A, KANAN SALAH/B) */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
 
-    .podium-box {
-      width: 100%;
-      border-radius: 16px 16px 0 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      padding: 16px 8px;
-      font-weight: 800;
-    }
+        .btn-answer {
+            padding: 18px 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
 
-    .rank-1 .podium-box { background: linear-gradient(180deg, #F59E0B, #D97706); height: 140px; }
-    .rank-2 .podium-box { background: linear-gradient(180deg, #94A3B8, #64748B); height: 110px; }
-    .rank-3 .podium-box { background: linear-gradient(180deg, #D97706, #B45309); height: 80px; }
+        .btn-answer-a { background: linear-gradient(135deg, #16a34a, #15803d); } /* Hijau Kiri */
+        .btn-answer-b { background: linear-gradient(135deg, #dc2626, #b91c1c); } /* Merah Kanan */
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      .card { padding: 20px; }
-      .options-grid { grid-template-columns: 1fr; }
-      .question-text { font-size: 1.15rem; }
-    }
-  </style>
+        .btn-answer:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.1); }
+        .btn-answer:disabled { cursor: not-allowed; opacity: 0.85; }
+
+        .btn-answer.selected {
+            border: 4px solid #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-answer.correct-reveal { background: #22c55e !important; border: 4px solid white; }
+        .btn-answer.wrong-reveal { background: #ef4444 !important; border: 4px solid white; }
+
+        /* PODIUM & RESULT */
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 12px;
+            margin: 20px 0;
+            height: 180px;
+        }
+
+        .podium-place {
+            width: 85px;
+            background: linear-gradient(to top, var(--primary), var(--primary-light));
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+        }
+
+        .podium-1 { height: 160px; background: linear-gradient(to top, #ca8a04, #fef08a); color: #713f12; }
+        .podium-2 { height: 125px; background: linear-gradient(to top, #64748b, #cbd5e1); color: #1e293b; }
+        .podium-3 { height: 95px; background: linear-gradient(to top, #b45309, #fde68a); color: #451a03; }
+
+        /* MODAL TES KAMERA */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .test-video-box {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background: #000;
+            border-radius: 14px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .question-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            .camera-container { height: 280px; }
+            .question-text { font-size: 1rem; min-height: 40px; }
+            .btn-answer { font-size: 0.95rem; padding: 14px 8px; }
+            .zone-badge { font-size: 0.75rem; padding: 4px 8px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-  <!-- Top Navigation Header -->
-  <header>
-    <div class="brand">
-      <i class="fa-solid fa-camera-retro"></i>
-      <span>GAME KAMERA BENAR-SALAH</span>
-    </div>
-    <button class="audio-toggle" id="audioToggleBtn" title="Aktifkan/Matikan Suara">
-      <i class="fa-solid fa-volume-high"></i>
-    </button>
-  </header>
-
-  <!-- SCREEN 1: LANDING & ROLE SELECTION -->
-  <div id="screenLanding" class="view active">
-    <div class="card">
-      <div class="card-header">
-        <h1 class="card-title">Selamat Datang! 👋</h1>
-        <p class="card-subtitle">Pembelajaran Interaktif & Fun berbasis Kurikulum Merdeka 2026</p>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button class="btn btn-primary" onclick="App.showScreen('screenStudentJoin')">
-          <i class="fa-solid fa-user-graduate"></i> Masuk Sebagai Siswa
-        </button>
-        <button class="btn btn-secondary" onclick="App.showScreen('screenHostDashboard')">
-          <i class="fa-solid fa-chalkboard-user"></i> Menu Guru / Host
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCREEN 2: STUDENT JOIN -->
-  <div id="screenStudentJoin" class="view">
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">Gabung Permainan 🚀</h2>
-        <p class="card-subtitle">Sistem otomatis mendeteksi perangkat kelas aktif</p>
-      </div>
-
-      <div class="form-group">
-        <label for="studentName">Nama / Nickname Siswa</label>
-        <input type="text" id="studentName" placeholder="Contoh: Budi Prasetyo" autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label>Uji & Aktifkan Kamera Perangkat</label>
-        <div class="camera-wrapper" style="height: 180px; margin-bottom: 8px;">
-          <video id="previewCamera" class="camera-feed" autoplay playsinline muted></video>
-          <div class="camera-overlay">
-            <div class="camera-badge"><div class="dot"></div> PRATINJAU</div>
-          </div>
+    <!-- Header Aplikasi -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-camera-retro"></i> GAME KAMERA B-S
         </div>
-        <button class="btn btn-secondary" onclick="App.initCamera('previewCamera')">
-          <i class="fa-solid fa-video"></i> Tes Kamera
-        </button>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-top: 16px;">
-        <button class="btn btn-secondary" onclick="App.showScreen('screenLanding')">Batal</button>
-        <button class="btn btn-primary" onclick="App.joinAsStudent()">Masuk Game</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCREEN 3: ARENA GAME SISWA -->
-  <div id="screenStudentArena" class="view">
-    <div class="game-hud">
-      <div>
-        <h3 id="hudStudentName" style="font-weight: 800;">Siswa</h3>
-        <p id="hudStatus" style="font-size: 0.85rem; opacity: 0.8;">Status: Bertahan 🟢</p>
-      </div>
-      <div class="timer-circle" id="timerDisplay">10</div>
-    </div>
-
-    <!-- Live Camera Feed Viewer -->
-    <div class="camera-wrapper" id="arenaCameraWrapper">
-      <video id="arenaCamera" class="camera-feed" autoplay playsinline muted></video>
-      <div class="camera-overlay" id="cameraOverlay">
-        <div class="camera-badge"><div class="dot"></div> KAMERA LIVE SISWA</div>
-        <div id="answerFeedbackText" style="text-align: center; font-weight: 800; font-size: 1.5rem; color: white;"></div>
-      </div>
-    </div>
-
-    <!-- Question Card -->
-    <div class="question-card">
-      <span class="question-tag" id="questionCategory">MATA PELAJARAN</span>
-      <h2 class="question-text" id="questionText">Memuat Pertanyaan...</h2>
-    </div>
-
-    <!-- Options A / B -->
-    <div class="options-grid">
-      <button class="option-btn btn-a" id="btnOptionA" onclick="App.submitAnswer('A')">
-        <span class="label">A</span>
-        <span class="text" id="labelOptionA">Pilihan A</span>
-      </button>
-      <button class="option-btn btn-b" id="btnOptionB" onclick="App.submitAnswer('B')">
-        <span class="label">B</span>
-        <span class="text" id="labelOptionB">Pilihan B</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- SCREEN 4: MENU GURU / HOST DASHBOARD -->
-  <div id="screenHostDashboard" class="view">
-    <div class="host-dashboard">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2><i class="fa-solid fa-sliders"></i> Panel Kelola Guru</h2>
-        <button class="btn btn-secondary" style="width: auto; padding: 8px 16px;" onclick="App.showScreen('screenLanding')">Keluar</button>
-      </div>
-
-      <div class="form-group">
-        <label>Mode Permainan</label>
-        <select id="gameModeSelect">
-          <option value="elimination">Mode Bertahan (Eliminasi Langsung)</option>
-          <option value="point">Mode Poin (Bermain Hingga Akhir)</option>
-        </select>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button class="btn btn-success" onclick="App.startHostGame()">
-          <i class="fa-solid fa-play"></i> Mulai Game Kelas
-        </button>
-        <button class="btn btn-secondary" onclick="App.resetDefaultQuestions()">
-          <i class="fa-solid fa-rotate-left"></i> Reset Soal Kurmer 2026
-        </button>
-      </div>
-
-      <h3>Daftar Bank Soal SD (Deep Learning Kurmer 2026)</h3>
-      <div class="table-responsive">
-        <table id="questionsTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Mata Pelajaran</th>
-              <th>Pertanyaan</th>
-              <th>Kunci</th>
-              <th>Waktu</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Loaded dynamically -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCREEN 5: LEADERBOARD / HASIL AKHIR -->
-  <div id="screenLeaderboard" class="view">
-    <div class="card" style="max-width: 700px; text-align: center;">
-      <h1 class="card-title">🏆 HASIL AKHIR PERMAINAN 🏆</h1>
-      <p class="card-subtitle">Selamat kepada para pemenang dan seluruh siswa hebat!</p>
-
-      <!-- Top 3 Podium -->
-      <div class="podium-container" id="podiumDisplay">
-        <!-- Rendered via JS -->
-      </div>
-
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Peringkat</th>
-              <th>Nama Siswa</th>
-              <th>Skor</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody">
-            <!-- Rendered via JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <button class="btn btn-primary" style="margin-top: 24px;" onclick="App.showScreen('screenLanding')">
-        Kembali ke Halaman Utama
-      </button>
-    </div>
-  </div>
-</div>
-
-<script>
-/**
- * AUDIO ENGINE (Web Audio API)
- * Menghasilkan efek suara sintetis tanpa dependency file eksternal.
- */
-class SoundEngine {
-  constructor() {
-    this.ctx = null;
-    this.enabled = true;
-  }
-
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-  }
-
-  playTone(freq, type, duration) {
-    if (!this.enabled) return;
-    this.init();
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + duration);
-    } catch (e) { console.error(e); }
-  }
-
-  playCorrect() {
-    this.playTone(523.25, 'sine', 0.15); // C5
-    setTimeout(() => this.playTone(659.25, 'sine', 0.2), 100); // E5
-    setTimeout(() => this.playTone(783.99, 'sine', 0.3), 200); // G5
-  }
-
-  playWrong() {
-    this.playTone(220, 'sawtooth', 0.2);
-    setTimeout(() => this.playTone(196, 'sawtooth', 0.3), 150);
-  }
-
-  playTick() {
-    this.playTone(800, 'square', 0.05);
-  }
-}
-
-/**
- * BANK SOAL DEEP LEARNING KURIKULUM MERDEKA 2026 (SD)
- * Berorientasi pada HOTS, Problem Solving, dan Pembelajaran Bermakna.
- */
-const DEFAULT_QUESTIONS = [
-  {
-    id: 1,
-    subject: "IPAS (Deep Learning)",
-    question: "Saat mati lampu di rumah, kamu menyalakan senter. Perubahan energi yang terjadi adalah energi kimia baterai menjadi energi listrik lalu menjadi energi cahaya. Benar atau Salah?",
-    optionA: "Benar",
-    optionB: "Salah",
-    answer: "A",
-    duration: 12
-  },
-  {
-    id: 2,
-    subject: "Matematika Pemecahan Masalah",
-    question: "Siti membeli 3 bungkus pensil. Setiap bungkus berisi 8 pensil. Pensil tersebut dibagikan rata kepada 4 temannya. Masing-masing teman mendapat 6 pensil. Benar atau Salah?",
-    optionA: "Benar",
-    optionB: "Salah",
-    answer: "A",
-    duration: 10
-  },
-  {
-    id: 3,
-    subject: "Bahasa Indonesia Literacy",
-    question: "Kalimat berikut: 'Adit menyiram tanaman bunga matahari di halaman rumah' adalah contoh dari kalimat pasif. Benar atau Salah?",
-    optionA: "Benar",
-    optionB: "Salah",
-    answer: "B",
-    duration: 10
-  },
-  {
-    id: 4,
-    subject: "Pancasila & Karakter",
-    question: "Gotong royong membersihkan ruang kelas bersama teman tanpa membeda-bedakan suku adalah pengamalan Sila ke-3 Pancasila. Benar atau Salah?",
-    optionA: "Benar",
-    optionB: "Salah",
-    answer: "A",
-    duration: 10
-  },
-  {
-    id: 5,
-    subject: "IPAS Lingkungan Hidup",
-    question: "Membuang sampah plastik ke sungai dapat dibenarkan karena plastik akan hancur dan larut secara alami dalam air sungai dalam hitungan hari. Benar atau Salah?",
-    optionA: "Benar",
-    optionB: "Salah",
-    answer: "B",
-    duration: 10
-  }
-];
-
-/**
- * MAIN GAME CONTROLLER APPLICATION
- */
-class GameApp {
-  constructor() {
-    this.sound = new SoundEngine();
-    this.questions = [...DEFAULT_QUESTIONS];
-    this.currentQuestionIdx = 0;
-    this.timer = null;
-    this.timeLeft = 0;
-    this.selectedAnswer = null;
-    this.score = 0;
-    this.isEliminated = false;
-    this.gameMode = 'elimination'; // 'elimination' or 'point'
-    this.mediaStream = null;
-    
-    // Multi-device sync channel (WebRTC / BroadcastChannel fallback)
-    this.broadcast = new BroadcastChannel('game_kamera_channel');
-    this.setupBroadcast();
-  }
-
-  init() {
-    this.renderQuestionsTable();
-    
-    document.getElementById('audioToggleBtn').addEventListener('click', () => {
-      this.sound.enabled = !this.sound.enabled;
-      document.getElementById('audioToggleBtn').innerHTML = this.sound.enabled ? 
-        '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
-    });
-  }
-
-  showScreen(screenId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
-  }
-
-  /* Setup Kamera Browser */
-  async initCamera(videoElementId) {
-    try {
-      if (this.mediaStream) {
-        this.mediaStream.getTracks().forEach(track => track.stop());
-      }
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 360 } },
-        audio: false
-      });
-      const videoEl = document.getElementById(videoElementId);
-      if (videoEl) {
-        videoEl.srcObject = this.mediaStream;
-      }
-    } catch (err) {
-      alert("Kamera tidak dapat diakses atau izin ditolak. Permainan tetap dapat berjalan tanpa kamera.");
-      console.warn("Camera Error: ", err);
-    }
-  }
-
-  /* Multi-Device Communication Sync */
-  setupBroadcast() {
-    this.broadcast.onmessage = (event) => {
-      const data = event.data;
-      if (data.type === 'START_GAME') {
-        this.gameMode = data.mode;
-        this.startStudentGame();
-      } else if (data.type === 'NEXT_QUESTION') {
-        this.loadQuestion(data.question);
-      } else if (data.type === 'SHOW_RESULT') {
-        this.revealAnswer(data.correctAnswer);
-      }
-    };
-  }
-
-  joinAsStudent() {
-    const name = document.getElementById('studentName').value.trim();
-    if (!name) {
-      alert("Silakan masukkan nama atau nickname Anda terlebih dahulu!");
-      return;
-    }
-    document.getElementById('hudStudentName').innerText = name;
-    this.initCamera('arenaCamera');
-    this.showScreen('screenStudentArena');
-    this.loadQuestion(this.questions[0]);
-  }
-
-  loadQuestion(q) {
-    this.selectedAnswer = null;
-    const overlay = document.getElementById('cameraOverlay');
-    overlay.className = 'camera-overlay';
-    document.getElementById('answerFeedbackText').innerText = '';
-
-    const btnA = document.getElementById('btnOptionA');
-    const btnB = document.getElementById('btnOptionB');
-    btnA.className = 'option-btn btn-a';
-    btnB.className = 'option-btn btn-b';
-    btnA.disabled = false;
-    btnB.disabled = false;
-
-    document.getElementById('questionCategory').innerText = q.subject;
-    document.getElementById('questionText').innerText = q.question;
-    document.getElementById('labelOptionA').innerText = q.optionA;
-    document.getElementById('labelOptionB').innerText = q.optionB;
-
-    this.startTimer(q.duration, () => {
-      this.revealAnswer(q.answer);
-    });
-  }
-
-  submitAnswer(choice) {
-    if (this.selectedAnswer !== null) return; // Kunci jawaban
-    this.selectedAnswer = choice;
-
-    const btnA = document.getElementById('btnOptionA');
-    const btnB = document.getElementById('btnOptionB');
-
-    if (choice === 'A') btnA.classList.add('selected');
-    if (choice === 'B') btnB.classList.add('selected');
-
-    btnA.disabled = true;
-    btnB.disabled = true;
-  }
-
-  startTimer(seconds, onComplete) {
-    clearInterval(this.timer);
-    this.timeLeft = seconds;
-    const display = document.getElementById('timerDisplay');
-    display.innerText = this.timeLeft;
-
-    this.timer = setInterval(() => {
-      this.timeLeft--;
-      display.innerText = this.timeLeft;
-      this.sound.playTick();
-
-      if (this.timeLeft <= 0) {
-        clearInterval(this.timer);
-        onComplete();
-      }
-    }, 1000);
-  }
-
-  revealAnswer(correctAnswer) {
-    const overlay = document.getElementById('cameraOverlay');
-    const feedback = document.getElementById('answerFeedbackText');
-    const btnA = document.getElementById('btnOptionA');
-    const btnB = document.getElementById('btnOptionB');
-
-    // Highlight jawaban
-    if (correctAnswer === 'A') btnA.classList.add('is-correct');
-    else btnA.classList.add('is-wrong');
-
-    if (correctAnswer === 'B') btnB.classList.add('is-correct');
-    else btnB.classList.add('is-wrong');
-
-    // Evaluasi Jawaban Siswa
-    if (this.selectedAnswer === correctAnswer) {
-      this.score += 100;
-      overlay.classList.add('state-correct');
-      feedback.innerText = "JAWABAN BENAR! 🟢";
-      this.sound.playCorrect();
-    } else {
-      overlay.classList.add('state-wrong');
-      feedback.innerText = this.selectedAnswer === null ? "WAKTU HABIS! 🔴" : "JAWABAN SALAH! 🔴";
-      this.sound.playWrong();
-
-      if (this.gameMode === 'elimination') {
-        this.isEliminated = true;
-        document.getElementById('hudStatus').innerText = "Status: Tereliminasi 🔴";
-      }
-    }
-
-    // Lanjut Soal Berikutnya / Selesai
-    setTimeout(() => {
-      this.currentQuestionIdx++;
-      if (this.currentQuestionIdx < this.questions.length && !this.isEliminated) {
-        this.loadQuestion(this.questions[this.currentQuestionIdx]);
-      } else {
-        this.finishGame();
-      }
-    }, 3000);
-  }
-
-  startHostGame() {
-    this.gameMode = document.getElementById('gameModeSelect').value;
-    this.broadcast.postMessage({ type: 'START_GAME', mode: this.gameMode });
-    this.currentQuestionIdx = 0;
-    this.showScreen('screenStudentArena');
-    this.loadQuestion(this.questions[0]);
-  }
-
-  finishGame() {
-    this.showScreen('screenLeaderboard');
-    this.renderLeaderboard();
-  }
-
-  renderLeaderboard() {
-    const studentName = document.getElementById('studentName').value || "Siswa 1";
-    const leaderboardData = [
-      { rank: 1, name: studentName, score: this.score, status: this.isEliminated ? 'Tereliminasi' : 'Bertahan' },
-      { rank: 2, name: "Budi (Perangkat 2)", score: 80, status: 'Tereliminasi' },
-      { rank: 3, name: "Siti (Perangkat 3)", score: 60, status: 'Tereliminasi' }
-    ];
-
-    // Render Podium Top 3
-    const podiumHtml = `
-      <div class="podium-step rank-2">
-        <div class="podium-avatar">🥈</div>
-        <div class="podium-box">
-          <span>${leaderboardData[1].name}</span>
-          <small>${leaderboardData[1].score} Pts</small>
+        <div class="header-nav">
+            <button class="btn btn-warning" onclick="openCameraTest()">
+                <i class="fa-solid fa-video"></i> Tes Kamera
+            </button>
+            <button class="btn btn-secondary" onclick="showScreen('screen-teacher')">
+                <i class="fa-solid fa-user-gear"></i> Panel Guru
+            </button>
         </div>
-      </div>
-      <div class="podium-step rank-1">
-        <div class="podium-avatar">👑</div>
-        <div class="podium-box">
-          <span>${leaderboardData[0].name}</span>
-          <small>${leaderboardData[0].score} Pts</small>
+    </header>
+
+    <div class="container">
+
+        <!-- 1. HALAMAN UTAMA / MASUK PERMAINAN -->
+        <div id="screen-welcome" class="screen active">
+            <div class="card">
+                <h1><i class="fa-solid fa-gamepad"></i> Game Kamera Benar-Salah</h1>
+                <p class="subtitle">Materi Deep Learning Kurikulum Merdeka 2026 (Kelas SD)</p>
+                
+                <div class="form-group">
+                    <label><i class="fa-solid fa-user"></i> Nama / Nickname Siswa</label>
+                    <input type="text" id="input-player-name" placeholder="Ketik nama kamu di sini..." autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fa-solid fa-shield-halved"></i> Mode Permainan</label>
+                    <select id="select-game-mode">
+                        <option value="elimination">Mode Bertahan (Tereliminasi Jika Salah)</option>
+                        <option value="point">Mode Poin (Bermain Sampai Selesai)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.05rem;" onclick="startGame()">
+                    <i class="fa-solid fa-play"></i> Mulai Bermain Sekarang
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="podium-step rank-3">
-        <div class="podium-avatar">🥉</div>
-        <div class="podium-box">
-          <span>${leaderboardData[2].name}</span>
-          <small>${leaderboardData[2].score} Pts</small>
+
+        <!-- 2. HALAMAN PERMAINAN (SOAL ATAS, 1 KAMERA TERBELAH 2 ZONA, JAWABAN BAWAH) -->
+        <div id="screen-game" class="screen">
+            <div class="game-layout">
+                
+                <!-- Kotak Pertanyaan (Atas Kamera) -->
+                <div class="question-box">
+                    <div class="question-header">
+                        <span id="badge-subject"><i class="fa-solid fa-book"></i> IPAS SD</span>
+                        <span id="badge-progress">Soal 1 / 10</span>
+                    </div>
+                    <div class="question-text" id="text-question">
+                        Memuat pertanyaan...
+                    </div>
+                </div>
+
+                <!-- Pratinjau 1 Kamera dengan Garis Pembatas Terbelah 2 Zona -->
+                <div class="camera-container">
+                    <!-- Stream Video Tunggal -->
+                    <video id="game-video" autoplay playsinline muted></video>
+
+                    <!-- Layer Terbelah 2: Kiri (BENAR/A), Kanan (SALAH/B) -->
+                    <div class="camera-split-zones">
+                        <div class="zone-left">
+                            <span class="zone-badge badge-left"><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
+                        </div>
+                        <div class="zone-right">
+                            <span class="zone-badge badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
+                        </div>
+                    </div>
+
+                    <!-- Garis Tegak Pembatas di Tengah -->
+                    <div class="camera-divider-line"></div>
+
+                    <!-- Timer Countdown di Tengah Atas -->
+                    <div class="timer-badge" id="badge-timer">10</div>
+
+                    <!-- Tag Nama Siswa -->
+                    <div class="player-tag">
+                        <i class="fa-solid fa-user-astronaut"></i> <span id="label-player-name">Siswa</span>
+                    </div>
+
+                    <!-- Overlay Notifikasi Hasil Jawaban -->
+                    <div id="status-overlay" class="status-overlay">
+                        <i id="status-icon" class="fa-solid"></i>
+                        <span id="status-text" style="font-size: 1.6rem; margin-top: 8px;"></span>
+                    </div>
+                </div>
+
+                <!-- Tombol Jawaban di Bawah Kamera (Kiri = BENAR/A, Kanan = SALAH/B) -->
+                <div class="answers-grid">
+                    <button id="btn-opt-a" class="btn-answer btn-answer-a" onclick="submitAnswer('A')">
+                        <span><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
+                        <small id="text-opt-a" style="font-weight: 400; font-size: 0.85rem;">Pilihan A</small>
+                    </button>
+                    <button id="btn-opt-b" class="btn-answer btn-answer-b" onclick="submitAnswer('B')">
+                        <span><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
+                        <small id="text-opt-b" style="font-weight: 400; font-size: 0.85rem;">Pilihan B</small>
+                    </button>
+                </div>
+
+            </div>
         </div>
-      </div>
-    `;
-    document.getElementById('podiumDisplay').innerHTML = podiumHtml;
 
-    // Render Table
-    const tbody = document.getElementById('leaderboardBody');
-    tbody.innerHTML = leaderboardData.map(d => `
-      <tr>
-        <td><b>#${d.rank}</b></td>
-        <td>${d.name}</td>
-        <td><b>${d.score}</b></td>
-        <td><span style="color: ${d.status === 'Bertahan' ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${d.status}</span></td>
-      </tr>
-    `).join('');
-  }
+        <!-- 3. HALAMAN LEADERBOARD & HASIL -->
+        <div id="screen-result" class="screen">
+            <div class="card">
+                <h1><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Hasil Akhir Permainan</h1>
+                <p class="subtitle">Peringkat & Skor Pembelajaran Deep Learning</p>
 
-  renderQuestionsTable() {
-    const tbody = document.querySelector('#questionsTable tbody');
-    if (!tbody) return;
-    tbody.innerHTML = this.questions.map((q, idx) => `
-      <tr>
-        <td>${idx + 1}</td>
-        <td><b>${q.subject}</b></td>
-        <td>${q.question}</td>
-        <td><span class="question-tag">${q.answer}</span></td>
-        <td>${q.duration}s</td>
-      </tr>
-    `).join('');
-  }
+                <div class="podium">
+                    <div class="podium-place podium-2">
+                        <i class="fa-solid fa-medal" style="font-size: 1.3rem; margin-bottom: 4px;"></i>
+                        <span>2nd</span>
+                        <small id="podium-2-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
+                    </div>
+                    <div class="podium-1 podium-place">
+                        <i class="fa-solid fa-crown" style="font-size: 1.8rem; margin-bottom: 4px;"></i>
+                        <span>1st</span>
+                        <small id="podium-1-name" style="font-size: 0.8rem; text-align: center; margin-top: 4px;">-</small>
+                    </div>
+                    <div class="podium-3 podium-place">
+                        <i class="fa-solid fa-award" style="font-size: 1.2rem; margin-bottom: 4px;"></i>
+                        <span>3rd</span>
+                        <small id="podium-3-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
+                    </div>
+                </div>
 
-  resetDefaultQuestions() {
-    this.questions = [...DEFAULTQUESTIONS];
-    this.renderQuestionsTable();
-    alert("Bank Soal Deep Learning Kurikulum Merdeka 2026 berhasil diperbarui!");
-  }
-}
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 14px; margin-bottom: 18px; text-align: left;">
+                    <h3 style="margin-bottom: 6px; color: var(--primary); font-size: 1rem;"><i class="fa-solid fa-chart-pie"></i> Ringkasan Hasil Anda:</h3>
+                    <p style="font-size:0.9rem;">Status: <strong id="user-final-status">-</strong></p>
+                    <p style="font-size:0.9rem;">Total Poin: <strong id="user-final-score">0</strong> Poin</p>
+                    <p style="font-size:0.9rem;">Jawaban Benar: <strong id="user-final-correct">0</strong> dari 10 Soal</p>
+                </div>
 
-// Inisialisasi Aplikasi Web
-const App = new GameApp();
-window.addEventListener('DOMContentLoaded', () => App.init());
-</script>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="resetToWelcome()">
+                    <i class="fa-solid fa-rotate-right"></i> Main Lagi
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. PANEL GURU / KELOLA SOAL -->
+        <div id="screen-teacher" class="screen">
+            <div class="card" style="text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="font-size:1.3rem;"><i class="fa-solid fa-chalkboard-user"></i> Panel Kelola Soal Guru</h2>
+                    <button class="btn btn-secondary" onclick="showScreen('screen-welcome')">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </button>
+                </div>
+
+                <!-- Form Tambah Soal -->
+                <div style="background: #f8fafc; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 12px; font-size: 1rem; color: var(--primary);">Buat Soal Baru</h3>
+                    
+                    <div class="form-group">
+                        <label>Teks Pertanyaan</label>
+                        <input type="text" id="input-q-text" placeholder="Masukkan soal pembelajaran...">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>Pilihan A (BENAR - Kiri)</label>
+                            <input type="text" id="input-q-a" placeholder="Teks Pilihan A">
+                        </div>
+                        <div class="form-group">
+                            <label>Pilihan B (SALAH - Kanan)</label>
+                            <input type="text" id="input-q-b" placeholder="Teks Pilihan B">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label>Kunci Jawaban</label>
+                            <select id="select-q-key">
+                                <option value="A">A (Kiri)</option>
+                                <option value="B">B (Kanan)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Durasi (Detik)</label>
+                            <input type="number" id="input-q-timer" value="10">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="addQuestion()">
+                        <i class="fa-solid fa-plus"></i> Tambahkan Soal
+                    </button>
+                </div>
+
+                <h3>Daftar Soal Aktif (<span id="q-count">0</span>)</h3>
+                <div id="questions-list-container" style="margin-top: 12px;"></div>
+
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-warning" onclick="resetDefaultQuestions()">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset ke 10 Soal Default Kurmer 2026
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL TES KAMERA -->
+    <div id="modal-camera-test" class="modal">
+        <div class="modal-content">
+            <h3><i class="fa-solid fa-video"></i> Pengujian Kamera Perangkat</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px;">
+                Memastikan 1 kamera berfungsi dengan tampilan garis pembatas zona kiri & kanan.
+            </p>
+
+            <div class="test-video-box">
+                <video id="test-video" autoplay playsinline muted></video>
+                <div class="camera-divider-line"></div>
+                <div class="camera-split-zones">
+                    <div class="zone-left"><span class="zone-badge badge-left">BENAR</span></div>
+                    <div class="zone-right"><span class="zone-badge badge-right">SALAH</span></div>
+                </div>
+            </div>
+
+            <div id="camera-test-status" style="font-weight: 700; margin-bottom: 12px; color: var(--warning); font-size: 0.9rem;">
+                Memeriksa Kamera...
+            </div>
+
+            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="closeCameraTest()">
+                Tutup Pengujian
+            </button>
+        </div>
+    </div>
+
+    <!-- LOGIKA JAVASCRIPT & AUDIO SYNTHESIZER -->
+    <script>
+        /* 1. EFEK SUARA BUATAN (WEB AUDIO API) */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.3); // A2
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'tick') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+
+        /* 2. SOAL DEEP LEARNING KURIKULUM MERDEKA 2026 (SD) */
+        const defaultQuestions = [
+            {
+                id: 1,
+                subject: "IPAS SD",
+                question: "Proses fotosintesis pada tumbuhan hijau menghasilkan oksigen dan glukosa.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 2,
+                subject: "Matematika",
+                question: "Hasil perhitungan dari 150 + 50 - 80 adalah 110.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "B",
+                timer: 10
+            },
+            {
+                id: 3,
+                subject: "Pancasila",
+                question: "Simbol Pohon Beringin melambangkan Sila Ketiga Pancasila.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 4,
+                subject: "Bahasa Indonesia",
+                question: "Kata 'Membaca' dalam kalimat efektif berkedudukan sebagai Objek.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "B",
+                timer: 10
+            },
+            {
+                id: 5,
+                subject: "IPAS SD",
+                question: "Planet Merkurius adalah planet yang paling dekat dengan Matahari.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 6,
+                subject: "Seni Budaya",
+                question: "Tari Kecak merupakan tarian daerah tradisional khas dari Bali.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 7,
+                subject: "Matematika",
+                question: "Luas persegi dengan panjang sisi 9 cm adalah 81 cm².",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 8,
+                subject: "IPAS SD",
+                question: "Perubahan wujud benda cair menjadi padat dinamakan mencair.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "B",
+                timer: 10
+            },
+            {
+                id: 9,
+                subject: "Bahasa Indonesia",
+                question: "Lawan kata (antonim) dari kata 'Hemat' adalah 'Boros'.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "A",
+                timer: 10
+            },
+            {
+                id: 10,
+                subject: "Pancasila",
+                question: "Sikap menghormati teman yang beribadah sesuai dengan Sila Kedua Pancasila.",
+                optionA: "BENAR",
+                optionB: "SALAH",
+                answer: "B",
+                timer: 10
+            }
+        ];
+
+        // State Aplikasi
+        let questions = JSON.parse(localStorage.getItem('game_questions')) || defaultQuestions;
+        let currentQuestionIndex = 0;
+        let gameMode = 'elimination';
+        let playerName = 'Siswa';
+        let userScore = 0;
+        let userCorrectCount = 0;
+        let isEliminated = false;
+        let timerInterval = null;
+        let timeLeft = 10;
+        let currentSelectedAnswer = null;
+        let mediaStream = null;
+
+        /* 3. STEAM KAMERA UTAMA */
+        async function startCamera(videoElementId) {
+            try {
+                if (mediaStream) { stopCamera(); }
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: false
+                });
+                const videoElement = document.getElementById(videoElementId);
+                if (videoElement) { videoElement.srcObject = mediaStream; }
+                return true;
+            } catch (err) {
+                console.warn("Kamera tidak aktif:", err);
+                return false;
+            }
+        }
+
+        function stopCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+        }
+
+        async function openCameraTest() {
+            document.getElementById('modal-camera-test').classList.add('active');
+            const statusEl = document.getElementById('camera-test-status');
+            statusEl.textContent = "Meminta Izin Kamera...";
+            statusEl.style.color = "var(--warning)";
+
+            const success = await startCamera('test-video');
+            if (success) {
+                statusEl.textContent = "Kamera Berfungsi Baik (Tergaris Terbelah 2)!";
+                statusEl.style.color = "var(--success)";
+            } else {
+                statusEl.textContent = "Kamera Ditolak / Tidak Ditemukan";
+                statusEl.style.color = "var(--danger)";
+            }
+        }
+
+        function closeCameraTest() {
+            stopCamera();
+            document.getElementById('modal-camera-test').classList.remove('active');
+        }
+
+        /* 4. NAVIGASI LAYAR */
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+
+            if (screenId === 'screen-teacher') {
+                renderTeacherQuestions();
+            }
+        }
+
+        /* 5. LOGIKA PERMAINAN */
+        async function startGame() {
+            const inputName = document.getElementById('input-player-name').value.trim();
+            if (!inputName) {
+                alert("Silakan masukkan nama Anda!");
+                return;
+            }
+
+            playerName = inputName;
+            gameMode = document.getElementById('select-game-mode').value;
+            currentQuestionIndex = 0;
+            userScore = 0;
+            userCorrectCount = 0;
+            isEliminated = false;
+
+            document.getElementById('label-player-name').textContent = playerName;
+
+            showScreen('screen-game');
+            await startCamera('game-video');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length || (isEliminated && gameMode === 'elimination')) {
+                finishGame();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            currentSelectedAnswer = null;
+
+            document.getElementById('badge-subject').innerHTML = `<i class="fa-solid fa-book"></i> ${q.subject}`;
+            document.getElementById('badge-progress').textContent = `Soal ${currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById('text-question').textContent = q.question;
+            document.getElementById('text-opt-a').textContent = q.optionA;
+            document.getElementById('text-opt-b').textContent = q.optionB;
+
+            const btnA = document.getElementById('btn-opt-a');
+            const btnB = document.getElementById('btn-opt-b');
+
+            btnA.className = "btn-answer btn-answer-a";
+            btnB.className = "btn-answer btn-answer-b";
+            btnA.disabled = false;
+            btnB.disabled = false;
+
+            document.getElementById('status-overlay').className = "status-overlay";
+
+            timeLeft = q.timer || 10;
+            document.getElementById('badge-timer').textContent = timeLeft;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('badge-timer').textContent = timeLeft;
+                playSound('tick');
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    evaluateAnswer();
+                }
+            }, 1000);
+        }
+
+        function submitAnswer(choice) {
+            if (currentSelectedAnswer !== null) return;
+            currentSelectedAnswer = choice;
+
+            const btnA = document.getElementById('btn-opt-a');
+            const btnB = document.getElementById('btn-opt-b');
+
+            if (choice === 'A') btnA.classList.add('selected');
+            if (choice === 'B') btnB.classList.add('selected');
+        }
+
+        function evaluateAnswer() {
+            document.getElementById('btn-opt-a').disabled = true;
+            document.getElementById('btn-opt-b').disabled = true;
+
+            const q = questions[currentQuestionIndex];
+            const btnA = document.getElementById('btn-opt-a');
+            const btnB = document.getElementById('btn-opt-b');
+            const overlay = document.getElementById('status-overlay');
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+
+            if (q.answer === 'A') {
+                btnA.classList.add('correct-reveal');
+                btnB.classList.add('wrong-reveal');
+            } else {
+                btnB.classList.add('correct-reveal');
+                btnA.classList.add('wrong-reveal');
+            }
+
+            const isCorrect = (currentSelectedAnswer === q.answer);
+
+            if (isCorrect) {
+                playSound('correct');
+                userCorrectCount++;
+                userScore += 10 + timeLeft;
+                overlay.classList.add('correct');
+                statusIcon.className = "fa-solid fa-circle-check";
+                statusText.textContent = "BENAR!";
+            } else {
+                playSound('wrong');
+                overlay.classList.add('wrong');
+                statusIcon.className = "fa-solid fa-circle-xmark";
+                statusText.textContent = currentSelectedAnswer === null ? "WAKTU HABIS!" : "SALAH!";
+
+                if (gameMode === 'elimination') {
+                    isEliminated = true;
+                    statusText.textContent = "TERELIMINASI!";
+                }
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 2400);
+        }
+
+        /* 6. HASIL PERMAINAN & PODIUM */
+        function finishGame() {
+            stopCamera();
+            showScreen('screen-result');
+
+            document.getElementById('user-final-score').textContent = userScore;
+            document.getElementById('user-final-correct').textContent = userCorrectCount;
+            
+            const statusEl = document.getElementById('user-final-status');
+            if (isEliminated && gameMode === 'elimination') {
+                statusEl.textContent = "Tereliminasi";
+                statusEl.style.color = "var(--danger)";
+            } else {
+                statusEl.textContent = "Berhasil Selesai / Bertahan";
+                statusEl.style.color = "var(--success)";
+            }
+
+            document.getElementById('podium-1-name').textContent = isEliminated ? "Siswa A (100 Pt)" : `${playerName} (${userScore} Pt)`;
+            document.getElementById('podium-2-name').textContent = isEliminated ? `${playerName} (${userScore} Pt)` : "Siswa B (85 Pt)";
+            document.getElementById('podium-3-name').textContent = "Siswa C (70 Pt)";
+        }
+
+        function resetToWelcome() {
+            showScreen('screen-welcome');
+        }
+
+        /* 7. KELOLA SOAL OLEH GURU */
+        function renderTeacherQuestions() {
+            const container = document.getElementById('questions-list-container');
+            document.getElementById('q-count').textContent = questions.length;
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>Soal ${index + 1} (${q.subject})</strong>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="deleteQuestion(${index})">
+                            <i class="fa-solid fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                    <p style="margin: 6px 0; font-weight:600; font-size:0.9rem;">${q.question}</p>
+                    <div style="font-size:0.8rem; color:#475569;">
+                        <span style="color:${q.answer === 'A' ? 'green' : 'black'};">A (Kiri): ${q.optionA}</span> | 
+                        <span style="color:${q.answer === 'B' ? 'green' : 'black'};">B (Kanan): ${q.optionB}</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addQuestion() {
+            const text = document.getElementById('input-q-text').value.trim();
+            const optA = document.getElementById('input-q-a').value.trim();
+            const optB = document.getElementById('input-q-b').value.trim();
+            const key = document.getElementById('select-q-key').value;
+            const timer = parseInt(document.getElementById('input-q-timer').value) || 10;
+
+            if (!text || !optA || !optB) {
+                alert("Mohon lengkapi semua isian!");
+                return;
+            }
+
+            const newQ = {
+                id: Date.now(),
+                subject: "Umum SD",
+                question: text,
+                optionA: optA,
+                optionB: optB,
+                answer: key,
+                timer: timer
+            };
+
+            questions.push(newQ);
+            localStorage.setItem('game_questions', JSON.stringify(questions));
+            renderTeacherQuestions();
+
+            document.getElementById('input-q-text').value = '';
+            document.getElementById('input-q-a').value = '';
+            document.getElementById('input-q-b').value = '';
+        }
+
+        function deleteQuestion(index) {
+            if (confirm("Hapus soal ini?")) {
+                questions.splice(index, 1);
+                localStorage.setItem('game_questions', JSON.stringify(questions));
+                renderTeacherQuestions();
+            }
+        }
+
+        function resetDefaultQuestions() {
+            if (confirm("Kembalikan ke 10 Soal Default Kurikulum Merdeka 2026?")) {
+                questions = [...defaultQuestions];
+                localStorage.setItem('game_questions', JSON.stringify(questions));
+                renderTeacherQuestions();
+            }
+        }
+    </script>
 </body>
 </html>
