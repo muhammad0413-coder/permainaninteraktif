@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dunia Matematika Seru - Game Edukasi Interaktif</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Permainan Seru Matematika - Math Play Zone</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts (Fredoka & Outfit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Canvas Confetti for Victories -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            pink: '#FF85A1',
-                            purple: '#9D4EDD',
-                            blue: '#4EA8DE',
-                            teal: '#52B788',
-                            yellow: '#FFD166',
-                            orange: '#F77F00',
-                            bg: '#F4F7FE'
+                        pastel: {
+                            pink: '#FFB7B2',
+                            yellow: '#FFDAC1',
+                            green: '#E2F0CB',
+                            mint: '#B5EAD7',
+                            purple: '#C7CEEA',
+                            blue: '#A8DADC',
+                            darkBlue: '#457B9D',
+                            coral: '#FF6B6B'
                         }
                     },
                     fontFamily: {
@@ -38,718 +40,856 @@
             }
         }
     </script>
+
     <style>
         body {
             font-family: 'Fredoka', sans-serif;
-            background-color: #F4F7FE;
+            background-color: #F8F9FA;
             user-select: none;
             -webkit-user-select: none;
         }
-        .font-num {
-            font-family: 'Outfit', sans-serif;
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
             border-radius: 10px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #9D4EDD;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
             border-radius: 10px;
         }
-        /* Card Lift Animation */
-        .card-hover {
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
-        .card-hover:hover {
-            transform: translateY(-6px) scale(1.02);
+
+        /* Card tactile depth button effect */
+        .btn-push {
+            transition: all 0.1s ease;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
         }
-        /* Tile Animations for 2048 */
-        .tile-pop {
-            animation: pop 0.2s ease-in-out;
+        .btn-push:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
         }
-        @keyframes pop {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+
+        /* Glassmorphism modal background */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.6);
         }
-        /* Shaking animation for wrong answers */
-        .animate-shake {
-            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+
+        /* 2048 Tile Color Schemes */
+        .tile-val-2 { background: #E2F0CB; color: #4B6B12; }
+        .tile-val-4 { background: #B5EAD7; color: #1B5E4B; }
+        .tile-val-8 { background: #FFDAC1; color: #8A4B10; }
+        .tile-val-16 { background: #FFB7B2; color: #8A1C14; }
+        .tile-val-32 { background: #FF9AA2; color: #7A0D15; }
+        .tile-val-64 { background: #E27D60; color: #FFFFFF; }
+        .tile-val-128 { background: #C7CEEA; color: #2D3A82; }
+        .tile-val-256 { background: #A8DADC; color: #1D4E89; }
+        .tile-val-512 { background: #F4A261; color: #FFFFFF; }
+        .tile-val-1024 { background: #E76F51; color: #FFFFFF; }
+        .tile-val-2048 { background: #2A9D8F; color: #FFFFFF; }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
         }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
-        }
-        /* Pulse attack animation for RPG */
-        .attack-effect {
-            animation: attackPulse 0.3s ease-out;
-        }
-        @keyframes attackPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3) rotate(-5deg); filter: brightness(1.5); }
-            100% { transform: scale(1); }
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <div id="app-wrapper" class="flex flex-col min-h-screen">
-        
-        <!-- HEADER NAVIGATION -->
-        <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-purple-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                
-                <!-- Logo -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="navTo('home')">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-purple-200">
-                        <i class="fa-solid fa-calculator text-2xl"></i>
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo & Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl shadow-md transform hover:rotate-6 transition-transform">
+                        <i class="fa-solid font-bold fa-calculator"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent leading-none">MathVerse</h1>
-                        <p class="text-xs text-slate-400 font-medium tracking-wide mt-0.5">Petualangan Matematika</p>
-                    </div>
-                </div>
-
-                <!-- Desktop Menu -->
-                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60">
-                    <button onclick="navTo('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center space-x-2 text-purple-700 bg-white shadow-sm">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Beranda</span>
-                    </button>
-                    <button onclick="navTo('speed-quiz')" id="nav-speed-quiz" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-purple-600 transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-bolt text-yellow-500"></i>
-                        <span>Kuis Cepat</span>
-                    </button>
-                    <button onclick="navTo('2048')" id="nav-2048" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-purple-600 transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-grip-nine text-indigo-500"></i>
-                        <span>Puzzle 2048</span>
-                    </button>
-                    <button onclick="navTo('sudoku')" id="nav-sudoku" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-purple-600 transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-border-all text-teal-500"></i>
-                        <span>Sudoku</span>
-                    </button>
-                    <button onclick="navTo('target-number')" id="nav-target-number" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-purple-600 transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-bullseye text-rose-500"></i>
-                        <span>Hitung Target</span>
-                    </button>
-                    <button onclick="navTo('rpg')" id="nav-rpg" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-purple-600 transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-dragon text-purple-600"></i>
-                        <span>Math RPG</span>
-                    </button>
-                </nav>
-
-                <!-- Profile Summary & Audio Toggle -->
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleAudio()" id="btn-sound" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all" title="Suara Efek">
-                        <i class="fa-solid fa-volume-high text-lg"></i>
-                    </button>
-                    
-                    <div class="flex items-center space-x-2 bg-gradient-to-r from-amber-100 to-yellow-100 px-3.5 py-1.5 rounded-full border border-amber-200 text-amber-800">
-                        <i class="fa-solid fa-coins text-yellow-500"></i>
-                        <span id="global-coins" class="font-bold font-num text-sm">0</span>
-                    </div>
-
-                    <!-- Mobile Menu Button -->
-                    <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Mobile Drawer Menu -->
-            <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-2">
-                <button onclick="navTo('home')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-house w-6 text-purple-600"></i><span>Beranda</span>
-                </button>
-                <button onclick="navTo('speed-quiz')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-bolt w-6 text-yellow-500"></i><span>Kuis Aritmatika Cepat</span>
-                </button>
-                <button onclick="navTo('2048')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-grip-nine w-6 text-indigo-500"></i><span>Game 2048</span>
-                </button>
-                <button onclick="navTo('sudoku')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-border-all w-6 text-teal-500"></i><span>Sudoku Pintar</span>
-                </button>
-                <button onclick="navTo('target-number')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-bullseye w-6 text-rose-500"></i><span>Target Number</span>
-                </button>
-                <button onclick="navTo('rpg')" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold hover:bg-purple-50 flex items-center space-x-3">
-                    <i class="fa-solid fa-dragon w-6 text-purple-600"></i><span>Prodigy Math RPG</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- MAIN CONTAINER WITH DYNAMIC PAGES -->
-        <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-
-            <!-- 1. HOME PAGE -->
-            <section id="page-home" class="page-content space-y-8">
-                <!-- Hero Banner -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-8 sm:p-12 text-white shadow-xl">
-                    <div class="absolute -right-10 -bottom-10 opacity-20 text-white pointer-events-none">
-                        <i class="fa-solid fa-shapes text-[260px]"></i>
-                    </div>
-                    <div class="relative z-10 max-w-2xl space-y-4">
-                        <span class="bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-white/30">
-                            ✨ Belajar Sambil Bermain
+                        <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500 font-outfit">
+                            MathPlay Zone
                         </span>
-                        <h2 class="text-3xl sm:text-5xl font-extrabold leading-tight">Asah Otak & Taklukkan Angka dengan Ceria!</h2>
-                        <p class="text-white/90 text-sm sm:text-base leading-relaxed">
-                            Pilih mode permainan favoritmu! Dari kuis kilat, puzzle 2048, Sudoku, target kalkulasi, hingga pertarungan RPG matematika melawan monster.
-                        </p>
-                        <div class="pt-2 flex flex-wrap gap-3">
-                            <button onclick="navTo('speed-quiz')" class="px-6 py-3 bg-white text-purple-700 hover:bg-amber-300 hover:text-slate-900 rounded-2xl font-bold shadow-lg transition-all flex items-center space-x-2">
-                                <i class="fa-solid fa-play"></i>
-                                <span>Main Kuis Sekarang</span>
-                            </button>
-                            <button onclick="navTo('rpg')" class="px-6 py-3 bg-purple-900/40 hover:bg-purple-900/60 border border-white/30 rounded-2xl font-bold text-white transition-all flex items-center space-x-2">
-                                <i class="fa-solid fa-shield-halved"></i>
-                                <span>Petualangan RPG</span>
-                            </button>
-                        </div>
+                        <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 ml-2 bg-purple-100 text-purple-700 rounded-full">
+                            EduFun
+                        </span>
                     </div>
                 </div>
 
-                <!-- Stats Overview -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl font-bold">
-                            <i class="fa-solid fa-trophy"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold uppercase">Skor Kuis Terbaik</p>
-                            <p id="stat-high-quiz" class="text-2xl font-bold font-num text-slate-800">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold">
-                            <i class="fa-solid fa-square-full"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold uppercase">Rekor 2048</p>
-                            <p id="stat-high-2048" class="text-2xl font-bold font-num text-slate-800">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl font-bold">
-                            <i class="fa-solid fa-check-double"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold uppercase">Sudoku Selesai</p>
-                            <p id="stat-sudoku-cleared" class="text-2xl font-bold font-num text-slate-800">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl font-bold">
-                            <i class="fa-solid fa-skull"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 font-semibold uppercase">Monster Kalah</p>
-                            <p id="stat-rpg-bosses" class="text-2xl font-bold font-num text-slate-800">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Selection Cards Grid -->
-                <h3 class="text-xl font-bold text-slate-800 flex items-center space-x-2">
-                    <i class="fa-solid fa-gamepad text-purple-600"></i>
-                    <span>Pilih Permainan</span>
-                </h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                    <!-- Game Card 1: Speed Quiz -->
-                    <div onclick="navTo('speed-quiz')" class="card-hover cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col justify-between space-y-4 group">
-                        <div class="space-y-3">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-white flex items-center justify-center text-2xl shadow-md shadow-yellow-200 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-bolt"></i>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Kuis Aritmatika Cepat</h4>
-                            <p class="text-sm text-slate-500 leading-relaxed">
-                                Jawab penjumlahan, pengurangan, dan perkalian angka 1-20 dalam waktu 10 detik. Kamu punya 3 nyawa!
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-yellow-50 text-yellow-700 rounded-lg">Anak-Anak & Pemula</span>
-                            <span class="text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform flex items-center">Main <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
+                <!-- Global Stats & Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- Total Star Counter -->
+                    <div class="flex items-center space-x-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full shadow-inner">
+                        <i class="fa-solid fa-star text-amber-500 text-base animate-bounce"></i>
+                        <span id="global-stars" class="font-bold text-amber-700 text-sm">0</span>
                     </div>
 
-                    <!-- Game Card 2: 2048 Puzzle -->
-                    <div onclick="navTo('2048')" class="card-hover cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col justify-between space-y-4 group">
-                        <div class="space-y-3">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center text-2xl shadow-md shadow-indigo-200 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-grip-nine"></i>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">2048 Math Puzzle</h4>
-                            <p class="text-sm text-slate-500 leading-relaxed">
-                                Geser ubin angka kelipatan 2! Gabungkan angka yang sama hingga mencapai ubin legendary 2048.
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg">Logika & Strategi</span>
-                            <span class="text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform flex items-center">Main <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Game Card 3: Sudoku -->
-                    <div onclick="navTo('sudoku')" class="card-hover cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col justify-between space-y-4 group">
-                        <div class="space-y-3">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-600 text-white flex items-center justify-center text-2xl shadow-md shadow-teal-200 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-border-all"></i>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Sudoku Pintar</h4>
-                            <p class="text-sm text-slate-500 leading-relaxed">
-                                Isi kotak 9x9 tanpa mengulang angka di baris, kolom, atau sub-kotak. Tersedia 3 tingkat kesulitan.
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-teal-50 text-teal-700 rounded-lg">Puzzle Otak</span>
-                            <span class="text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform flex items-center">Main <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Game Card 4: Target Number -->
-                    <div onclick="navTo('target-number')" class="card-hover cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col justify-between space-y-4 group">
-                        <div class="space-y-3">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-600 text-white flex items-center justify-center text-2xl shadow-md shadow-rose-200 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-bullseye"></i>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Target Number (24)</h4>
-                            <p class="text-sm text-slate-500 leading-relaxed">
-                                Rangkai 4 angka acak dengan operator (+, -, *, /) untuk membentuk angka target sasaran.
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg">Kombinatorika</span>
-                            <span class="text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform flex items-center">Main <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-
-                    <!-- Game Card 5: Prodigy RPG -->
-                    <div onclick="navTo('rpg')" class="card-hover cursor-pointer bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col justify-between space-y-4 group lg:col-span-2">
-                        <div class="space-y-3">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center text-2xl shadow-md shadow-purple-200 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-dragon"></i>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Petualangan Math RPG</h4>
-                            <p class="text-sm text-slate-500 leading-relaxed">
-                                Jalankan aksi sihir bertarung melawan monster Slime, Goblin, hingga Naga Api! Setiap jawaban matematika yang tepat melancarkan serangan combo berkekuatan tinggi.
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <span class="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg">RPG & Adventure</span>
-                            <span class="text-xs font-bold text-purple-600 group-hover:translate-x-1 transition-transform flex items-center">Main <i class="fa-solid fa-arrow-right ml-1"></i></span>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- 2. SPEED QUIZ PAGE -->
-            <section id="page-speed-quiz" class="page-content hidden max-w-2xl mx-auto space-y-6">
-                <!-- Top Card Bar -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Skor Kuis</span>
-                        <div id="quiz-score" class="text-3xl font-extrabold font-num text-purple-600">0</div>
-                    </div>
-                    <!-- Timer ring/bar -->
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs text-slate-400 font-semibold mb-1">Sisa Waktu</span>
-                        <div class="w-24 h-4 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
-                            <div id="quiz-timer-bar" class="h-full bg-amber-400 rounded-full transition-all duration-1000 w-full"></div>
-                        </div>
-                        <span id="quiz-timer-text" class="text-xs font-bold font-num text-amber-600 mt-1">10s</span>
-                    </div>
-                    <!-- Lives counter -->
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Nyawa</span>
-                        <div id="quiz-lives" class="flex space-x-1.5 text-xl text-rose-500 mt-1">
-                            <i class="fa-solid fa-heart"></i>
-                            <i class="fa-solid fa-heart"></i>
-                            <i class="fa-solid fa-heart"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quiz Main Question Card -->
-                <div id="quiz-card" class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-100 shadow-xl text-center space-y-8 relative overflow-hidden">
-                    <div class="text-sm font-semibold text-slate-400 tracking-wide uppercase">Hitung Cepat:</div>
-                    
-                    <div id="quiz-question" class="text-5xl sm:text-6xl font-black font-num text-slate-800 tracking-tight">
-                        12 + 7 = ?
-                    </div>
-
-                    <!-- Multiple Choice Options -->
-                    <div id="quiz-options" class="grid grid-cols-2 gap-4 pt-4">
-                        <!-- Rendered by JS -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. 2048 GAME PAGE -->
-            <section id="page-2048" class="page-content hidden max-w-md mx-auto space-y-6">
-                <!-- Header Controls -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold uppercase">Skor</span>
-                        <div id="2048-score" class="text-2xl font-black font-num text-indigo-600">0</div>
-                    </div>
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold uppercase">Terbaik</span>
-                        <div id="2048-best" class="text-2xl font-black font-num text-slate-700">0</div>
-                    </div>
-                    <button onclick="reset2048()" class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-2xl font-bold text-sm transition-all flex items-center space-x-2">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Ulangi</span>
+                    <!-- Sound FX Toggle Button -->
+                    <button id="sound-toggle-btn" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors" title="Beralih Suara">
+                        <i id="sound-icon" class="fa-solid fa-volume-high"></i>
                     </button>
-                </div>
 
-                <!-- 2048 Grid Board -->
-                <div class="bg-slate-300 p-3 sm:p-4 rounded-3xl shadow-inner aspect-square grid grid-cols-4 gap-3 relative" id="2048-board">
-                    <!-- Dynamic 16 cells injected by JS -->
-                </div>
-
-                <p class="text-center text-xs text-slate-400 font-medium">
-                    Gunakan **Tombol Panah Keyboard** atau **Geser (Swipe)** pada layar HP untuk menggeser ubin.
-                </p>
-            </section>
-
-            <!-- 4. SUDOKU PAGE -->
-            <section id="page-sudoku" class="page-content hidden max-w-xl mx-auto space-y-6">
-                <!-- Controls & Status -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <label class="text-xs text-slate-400 font-semibold block mb-1">Tingkat Kesulitan</label>
-                        <select id="sudoku-diff" onchange="initSudoku()" class="bg-slate-100 border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-400">
-                            <option value="easy">Mudah</option>
-                            <option value="medium" selected>Sedang</option>
-                            <option value="hard">Sulit</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <div class="text-center">
-                            <span class="text-xs text-slate-400 font-semibold block">Kesalahan</span>
-                            <span id="sudoku-errors" class="text-lg font-bold font-num text-rose-500">0 / 3</span>
-                        </div>
-                        <div class="text-center">
-                            <span class="text-xs text-slate-400 font-semibold block">Waktu</span>
-                            <span id="sudoku-timer" class="text-lg font-bold font-num text-slate-700">00:00</span>
-                        </div>
-                    </div>
-
-                    <button onclick="initSudoku()" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold text-sm shadow-md transition-all">
-                        Game Baru
-                    </button>
-                </div>
-
-                <!-- Sudoku 9x9 Grid -->
-                <div class="bg-white p-2 sm:p-4 rounded-3xl shadow-xl border border-slate-200">
-                    <div id="sudoku-grid" class="grid grid-cols-9 gap-0.5 bg-slate-300 border-2 border-slate-800 rounded-xl overflow-hidden aspect-square">
-                        <!-- 81 cells populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Numpad Input -->
-                <div class="grid grid-cols-9 gap-2 max-w-md mx-auto">
-                    <button onclick="inputSudokuNum(1)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">1</button>
-                    <button onclick="inputSudokuNum(2)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">2</button>
-                    <button onclick="inputSudokuNum(3)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">3</button>
-                    <button onclick="inputSudokuNum(4)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">4</button>
-                    <button onclick="inputSudokuNum(5)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">5</button>
-                    <button onclick="inputSudokuNum(6)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">6</button>
-                    <button onclick="inputSudokuNum(7)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">7</button>
-                    <button onclick="inputSudokuNum(8)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">8</button>
-                    <button onclick="inputSudokuNum(9)" class="py-3 bg-white hover:bg-teal-50 text-slate-800 font-black rounded-xl border border-slate-200 shadow-sm font-num text-lg">9</button>
-                </div>
-            </section>
-
-            <!-- 5. TARGET NUMBER PAGE -->
-            <section id="page-target-number" class="page-content hidden max-w-xl mx-auto space-y-6">
-                <!-- Header -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-md text-center space-y-2">
-                    <span class="text-xs font-bold text-rose-500 uppercase tracking-widest">Tantangan Target Angka</span>
-                    <h3 class="text-2xl font-bold text-slate-800">Bentuk Hasil Sama Dengan Target!</h3>
-                    <p class="text-xs text-slate-400">Gunakan keempat angka di bawah dan operator untuk mendapatkan hasil target.</p>
-                </div>
-
-                <!-- Target Showcase -->
-                <div class="bg-gradient-to-r from-rose-500 to-pink-500 rounded-3xl p-8 text-white text-center shadow-lg space-y-1">
-                    <span class="text-xs uppercase font-semibold text-rose-100">Angka Target</span>
-                    <div id="target-val" class="text-6xl font-black font-num tracking-tight">24</div>
-                </div>
-
-                <!-- Expression Builder Box -->
-                <div class="bg-white rounded-2xl p-4 border-2 border-dashed border-rose-200 min-h-[64px] flex items-center justify-center text-2xl font-black font-num text-slate-800 space-x-2" id="target-expr-display">
-                    <span class="text-slate-300 text-sm font-normal font-fredoka">Pilih angka dan operator di bawah...</span>
-                </div>
-
-                <!-- Numbers Row -->
-                <div class="space-y-2">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Angka yang Tersedia:</span>
-                    <div id="target-numbers-container" class="grid grid-cols-4 gap-3">
-                        <!-- 4 numbers rendered by JS -->
-                    </div>
-                </div>
-
-                <!-- Operators Row -->
-                <div class="space-y-2">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Operator Aritmatika:</span>
-                    <div class="grid grid-cols-4 gap-3">
-                        <button onclick="appendTargetOp('+')" class="py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 font-black rounded-2xl border border-purple-200 text-2xl shadow-sm">+</button>
-                        <button onclick="appendTargetOp('-')" class="py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 font-black rounded-2xl border border-purple-200 text-2xl shadow-sm">-</button>
-                        <button onclick="appendTargetOp('*')" class="py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 font-black rounded-2xl border border-purple-200 text-2xl shadow-sm">×</button>
-                        <button onclick="appendTargetOp('/')" class="py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 font-black rounded-2xl border border-purple-200 text-2xl shadow-sm">÷</button>
-                    </div>
-                </div>
-
-                <!-- Control Buttons -->
-                <div class="flex space-x-3 pt-2">
-                    <button onclick="clearTargetExpr()" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition-all">
-                        Reset Ekspresi
-                    </button>
-                    <button onclick="submitTargetExpr()" class="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-md transition-all">
-                        Cek Jawaban
-                    </button>
-                </div>
-            </section>
-
-            <!-- 6. PRODIGY MATH RPG PAGE -->
-            <section id="page-rpg" class="page-content hidden max-w-3xl mx-auto space-y-6">
-                <!-- Battle Arena Box -->
-                <div class="relative bg-slate-900 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl p-6 text-white min-h-[380px] flex flex-col justify-between">
-                    
-                    <!-- Top Status Bar: Hero HP vs Enemy HP -->
-                    <div class="flex items-center justify-between gap-4 z-10">
-                        <!-- Hero Info -->
-                        <div class="bg-slate-800/80 backdrop-blur-md p-3 rounded-2xl border border-slate-700 flex items-center space-x-3 w-1/2">
-                            <div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-xl">
-                                🧙‍♂️
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between text-xs font-bold mb-1">
-                                    <span class="text-purple-300">Pahlawan</span>
-                                    <span id="rpg-hero-hp-text">100/100</span>
-                                </div>
-                                <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
-                                    <div id="rpg-hero-hp-bar" class="bg-emerald-400 h-full w-full transition-all duration-300"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Enemy Info -->
-                        <div class="bg-slate-800/80 backdrop-blur-md p-3 rounded-2xl border border-slate-700 flex items-center space-x-3 w-1/2">
-                            <div class="flex-1 min-w-0 text-right">
-                                <div class="flex justify-between text-xs font-bold mb-1">
-                                    <span id="rpg-enemy-name" class="text-rose-400">Slime Matematika</span>
-                                    <span id="rpg-enemy-hp-text">50/50</span>
-                                </div>
-                                <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
-                                    <div id="rpg-enemy-hp-bar" class="bg-rose-500 h-full w-full transition-all duration-300"></div>
-                                </div>
-                            </div>
-                            <div id="rpg-enemy-avatar" class="w-10 h-10 rounded-xl bg-rose-900/60 flex items-center justify-center text-xl">
-                                👾
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Battle Canvas Field -->
-                    <div class="flex items-center justify-around py-8 z-10">
-                        <!-- Hero Sprite -->
-                        <div id="rpg-hero-sprite" class="text-6xl sm:text-7xl transition-transform duration-200">
-                            🧙‍♂️
-                        </div>
-                        <div class="text-xl font-bold text-slate-500 animate-pulse">VS</div>
-                        <!-- Enemy Sprite -->
-                        <div id="rpg-enemy-sprite" class="text-6xl sm:text-7xl transition-transform duration-200">
-                            👾
-                        </div>
-                    </div>
-
-                    <!-- Battle Log / Question Prompt Banner -->
-                    <div class="bg-purple-950/80 border border-purple-800 rounded-2xl p-4 text-center z-10">
-                        <span class="text-xs font-bold text-purple-300 uppercase tracking-widest">Mantra Sihir Soal:</span>
-                        <div id="rpg-question-text" class="text-2xl sm:text-3xl font-black font-num text-amber-300 mt-1">
-                            8 × 6 = ?
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Spell Options Numpad / Choices -->
-                <div id="rpg-answers-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <!-- 4 options generated by JS -->
-                </div>
-            </section>
-
-        </main>
-
-        <!-- MODAL OVERLAY (FOR GAME OVER & VICTORY) -->
-        <div id="modal-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center space-y-6 shadow-2xl animate-pop">
-                <div id="modal-icon" class="w-20 h-20 mx-auto rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-4xl shadow-inner">
-                    <i class="fa-solid fa-trophy"></i>
-                </div>
-                <div>
-                    <h3 id="modal-title" class="text-2xl font-black text-slate-800">Permainan Selesai!</h3>
-                    <p id="modal-subtitle" class="text-sm text-slate-500 mt-1">Kerja bagus, kamu menyelesaikan permainan dengan baik!</p>
-                </div>
-                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex justify-around">
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold block">Skor Akhir</span>
-                        <span id="modal-final-score" class="text-2xl font-black font-num text-purple-600">0</span>
-                    </div>
-                    <div>
-                        <span class="text-xs text-slate-400 font-semibold block">Koin Diperoleh</span>
-                        <span id="modal-coins-earned" class="text-2xl font-black font-num text-amber-500">+0</span>
-                    </div>
-                </div>
-                <div class="flex space-x-3">
-                    <button onclick="closeModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all">
-                        Tutup
-                    </button>
-                    <button id="modal-action-btn" onclick="restartCurrentGame()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md transition-all">
-                        Mulai Lagi
+                    <!-- Mobile Navigation Menu Toggle -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- FOOTER -->
-        <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
-            <div class="max-w-7xl mx-auto px-4">
-                <p>© 2026 Dunia Matematika Seru (MathVerse) — Media Pembelajaran Edukasi Interaktif</p>
-            </div>
-        </footer>
+        <!-- DESKTOP NAVIGATION BAR -->
+        <nav class="hidden md:flex justify-center bg-slate-100/70 border-t border-slate-200 px-4 py-2 space-x-2 overflow-x-auto">
+            <button onclick="navigateTo('home')" id="nav-btn-home" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-indigo-600 bg-white shadow-sm">
+                <i class="fa-solid fa-house"></i>
+                <span>Beranda</span>
+            </button>
+            <button onclick="navigateTo('quiz')" id="nav-btn-quiz" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-solid fa-bolt text-amber-500"></i>
+                <span>Kuis Cepat</span>
+            </button>
+            <button onclick="navigateTo('game2048')" id="nav-btn-game2048" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-solid fa-shapes text-emerald-500"></i>
+                <span>Puzzle 2048</span>
+            </button>
+            <button onclick="navigateTo('sudoku')" id="nav-btn-sudoku" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-solid fa-border-all text-blue-500"></i>
+                <span>Sudoku Logika</span>
+            </button>
+            <button onclick="navigateTo('target')" id="nav-btn-target" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-solid fa-bullseye text-rose-500"></i>
+                <span>Target Number</span>
+            </button>
+            <button onclick="navigateTo('rpg')" id="nav-btn-rpg" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
+                <span>Prodigy Quest</span>
+            </button>
+            <button onclick="navigateTo('python')" id="nav-btn-python" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
+                <i class="fa-brands fa-python text-sky-600"></i>
+                <span>Python CLI</span>
+            </button>
+        </nav>
 
+        <!-- MOBILE NAVIGATION MENU -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-2">
+            <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-indigo-50">
+                <i class="fa-solid fa-house text-indigo-500 w-5"></i>
+                <span>Beranda Menu Utama</span>
+            </button>
+            <button onclick="navigateTo('quiz'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-amber-50">
+                <i class="fa-solid fa-bolt text-amber-500 w-5"></i>
+                <span>Kuis Berhitung Cepat</span>
+            </button>
+            <button onclick="navigateTo('game2048'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-emerald-50">
+                <i class="fa-solid fa-shapes text-emerald-500 w-5"></i>
+                <span>Puzzle Matematika 2048</span>
+            </button>
+            <button onclick="navigateTo('sudoku'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-blue-50">
+                <i class="fa-solid fa-border-all text-blue-500 w-5"></i>
+                <span>Sudoku Tantangan</span>
+            </button>
+            <button onclick="navigateTo('target'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-rose-50">
+                <i class="fa-solid fa-bullseye text-rose-500 w-5"></i>
+                <span>Target Number Puzzle</span>
+            </button>
+            <button onclick="navigateTo('rpg'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-purple-50">
+                <i class="fa-solid fa-wand-magic-sparkles text-purple-500 w-5"></i>
+                <span>Prodigy RPG Quest</span>
+            </button>
+            <button onclick="navigateTo('python'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-sky-50">
+                <i class="fa-brands fa-python text-sky-600 w-5"></i>
+                <span>Python CLI Exporter</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT VIEW CONTAINERS -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+
+        <!-- ================= PAGE 1: HOME HUB ================= -->
+        <section id="page-home" class="view-page space-y-8">
+            <!-- Hero Banner -->
+            <div class="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-6 sm:p-10 text-white shadow-xl overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-15 text-9xl">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider text-white">
+                        🎮 Dunia Matematika Interaktif
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight font-outfit">
+                        Asah Otakmu Dengan Cara yang Penuh Warna & Seru!
+                    </h1>
+                    <p class="text-indigo-100 text-sm sm:text-base leading-relaxed">
+                        Pilih berbagai koleksi permainan logika & aritmatika seru yang dirancang khusus untuk meningkatkan keterampilan berhitung, strategi, dan kecepatan berpikirmu!
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="navigateTo('quiz')" class="btn-push bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-2xl shadow-md flex items-center space-x-2">
+                            <i class="fa-solid fa-play"></i>
+                            <span>Mulai Kuis Cepat</span>
+                        </button>
+                        <button onclick="navigateTo('rpg')" class="btn-push bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-2xl backdrop-blur-md flex items-center space-x-2">
+                            <i class="fa-solid fa-dragon"></i>
+                            <span>Petualangan RPG</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Selection Cards Grid -->
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center space-x-2">
+                    <i class="fa-solid fa-gamepad text-indigo-500"></i>
+                    <span>Pilihan Permainan Matematika</span>
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1: Math Quiz -->
+                    <div onclick="navigateTo('quiz')" class="bg-white rounded-3xl p-6 border-2 border-amber-100 hover:border-amber-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Kuis Berhitung Cepat</h3>
+                                <p class="text-slate-500 text-sm mt-1">Uji kecepatan hitung (+, -, ×) angka 1-20 dalam batas waktu 10 detik. Memiliki sistem skor & nyawa!</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                            <span>Sistem Skor & Timer</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: 2048 Puzzle -->
+                    <div onclick="navigateTo('game2048')" class="bg-white rounded-3xl p-6 border-2 border-emerald-100 hover:border-emerald-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-shapes"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Puzzle 2048 Math</h3>
+                                <p class="text-slate-500 text-sm mt-1">Gabungkan angka-angka kelipatan 2 hingga mencapai ubin 2048! Dilengkapi kontrol sentuh & undo.</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
+                            <span>Puzzle Logika Kelipatan</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Sudoku -->
+                    <div onclick="navigateTo('sudoku')" class="bg-white rounded-3xl p-6 border-2 border-blue-100 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-border-all"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Sudoku Logika</h3>
+                                <p class="text-slate-500 text-sm mt-1">Isi kisi 9x9 dengan angka 1-9 tanpa ada pengulangan di baris, kolom, atau area 3x3.</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
+                            <span>Tingkat Mudah - Sulit</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Target Number -->
+                    <div onclick="navigateTo('target')" class="bg-white rounded-3xl p-6 border-2 border-rose-100 hover:border-rose-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-bullseye"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Target Number Puzzle</h3>
+                                <p class="text-slate-500 text-sm mt-1">Gunakan 4 angka acak dan operator (+, -, ×, ÷) untuk mencapai angka target yang ditentukan!</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-rose-600">
+                            <span>Kombinasi Operasi Hitung</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Prodigy Quest RPG -->
+                    <div onclick="navigateTo('rpg')" class="bg-white rounded-3xl p-6 border-2 border-purple-100 hover:border-purple-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-dragon"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Prodigy Math RPG</h3>
+                                <p class="text-slate-500 text-sm mt-1">Kalahkan monster dengan kekuatan sihir matematika! Dapatkan koin emas dan naikkan level pahlawanmu.</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600">
+                            <span>RPG Adventure & Battle</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Python CLI Exporter -->
+                    <div onclick="navigateTo('python')" class="bg-white rounded-3xl p-6 border-2 border-sky-100 hover:border-sky-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
+                                <i class="fa-brands fa-python"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-sky-600 transition-colors">Python CLI Script Tool</h3>
+                                <p class="text-slate-500 text-sm mt-1">Jalankan simulasi game matematika CLI Python 3 atau ekspor kodenya langsung ke GitHub/file .py!</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-600">
+                            <span>Terminal Simulator & Generator</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: MATH QUIZ (KUIS BERHITUNG CEPAT) ================= -->
+        <section id="page-quiz" class="view-page hidden max-w-2xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-lg border border-amber-100 p-6 sm:p-8 relative">
+                <!-- Quiz Header Info -->
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <!-- Lives counter -->
+                    <div class="flex items-center space-x-1" id="quiz-lives-container">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Score display -->
+                    <div class="bg-amber-100 text-amber-800 px-4 py-1.5 rounded-full text-sm font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-trophy text-amber-600"></i>
+                        <span>Skor: <span id="quiz-score">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Timer Progress Bar -->
+                <div class="mb-6 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-500">
+                        <span>Waktu Tersisa</span>
+                        <span id="quiz-timer-text">10s</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="quiz-timer-bar" class="h-full bg-amber-400 transition-all duration-100 ease-linear rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Math Problem Card Display -->
+                <div class="bg-slate-50 rounded-2xl p-8 text-center border border-slate-200 mb-6 shadow-inner">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Soal Matematika</span>
+                    <div id="quiz-question" class="text-4xl sm:text-5xl font-extrabold text-slate-800 font-outfit tracking-wider">
+                        12 + 8 = ?
+                    </div>
+                </div>
+
+                <!-- Answer Choices Buttons (4 Options Grid) -->
+                <div id="quiz-options-container" class="grid grid-cols-2 gap-4">
+                    <!-- Option buttons dynamically generated -->
+                </div>
+
+                <!-- Game Over Overlay Modal for Quiz -->
+                <div id="quiz-gameover-modal" class="hidden absolute inset-0 glass-panel rounded-3xl z-20 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                    <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-3xl font-bold animate-bounce">
+                        <i class="fa-solid fa-heart-crack"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-800">Permainan Selesai!</h3>
+                    <p class="text-slate-600 text-sm">Skor Akhir Kamu: <span id="quiz-final-score" class="font-extrabold text-amber-600 text-xl">0</span></p>
+                    <button onclick="startQuiz()" class="btn-push bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-2xl text-base shadow-md">
+                        <i class="fa-solid fa-rotate-right mr-2"></i>Mulai Lagi
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: 2048 GAME ================= -->
+        <section id="page-game2048" class="view-page hidden max-w-xl mx-auto space-y-4">
+            <!-- 2048 Top Control Bar -->
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-800">Puzzle 2048</h2>
+                    <p class="text-xs text-slate-500">Gabungkan angka sama!</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-50 px-3 py-1.5 rounded-xl text-center border border-emerald-200">
+                        <span class="text-[10px] uppercase font-bold text-emerald-600 block">Skor</span>
+                        <span id="g2048-score" class="font-extrabold text-emerald-800 text-base">0</span>
+                    </div>
+                    <div class="bg-amber-50 px-3 py-1.5 rounded-xl text-center border border-amber-200">
+                        <span class="text-[10px] uppercase font-bold text-amber-600 block">Terbaik</span>
+                        <span id="g2048-best" class="font-extrabold text-amber-800 text-base">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex justify-between items-center px-1">
+                <button onclick="undoMove2048()" class="btn-push bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Undo</span>
+                </button>
+                <button onclick="init2048()" class="btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Ulang Lagi</span>
+                </button>
+            </div>
+
+            <!-- 2048 Board Container -->
+            <div class="bg-slate-300 p-3 rounded-3xl relative shadow-md select-none touch-none" id="2048-touch-area">
+                <div id="grid-2048-container" class="grid grid-cols-4 gap-3">
+                    <!-- 16 Cells rendered by JS -->
+                </div>
+
+                <!-- Game Over Overlay -->
+                <div id="2048-gameover" class="hidden absolute inset-0 glass-panel rounded-3xl z-20 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                    <h3 class="text-2xl font-extrabold text-slate-800">Tidak Ada Langkah Tersisa!</h3>
+                    <p class="text-slate-600 text-sm">Skor Kamu: <span id="2048-modal-score" class="font-bold text-emerald-600">0</span></p>
+                    <button onclick="init2048()" class="btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm">
+                        Coba Lagi
+                    </button>
+                </div>
+            </div>
+
+            <!-- On-Screen Direction Touch Controls for Mobile Users -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                <span class="text-xs font-bold text-slate-400 block mb-2">Gunakan Tombol PanahKeyboard atau Tombol Layar:</span>
+                <div class="inline-grid grid-cols-3 gap-2 w-48 mx-auto">
+                    <div></div>
+                    <button onclick="handle2048Move('up')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-up"></i></button>
+                    <div></div>
+                    <button onclick="handle2048Move('left')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="handle2048Move('down')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-down"></i></button>
+                    <button onclick="handle2048Move('right')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: SUDOKU GAME ================= -->
+        <section id="page-sudoku" class="view-page hidden max-w-xl mx-auto space-y-4">
+            <!-- Header controls -->
+            <div class="flex flex-wrap items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 gap-3 shadow-sm">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-800">Sudoku Logika</h2>
+                    <span id="sudoku-timer-display" class="text-xs font-semibold text-blue-600">Waktu: 00:00</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <select id="sudoku-difficulty" onchange="initSudoku()" class="bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none">
+                        <option value="easy">Mudah</option>
+                        <option value="medium">Sedang</option>
+                        <option value="hard">Sulit</option>
+                    </select>
+                    <button onclick="initSudoku()" class="btn-push bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs">
+                        Baru
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sudoku Board Container (9x9 Grid) -->
+            <div class="bg-slate-800 p-2 sm:p-3 rounded-3xl shadow-lg aspect-square">
+                <div id="sudoku-board-grid" class="grid grid-cols-9 gap-0.5 sm:gap-1 h-full w-full bg-slate-700 p-1 rounded-2xl">
+                    <!-- 81 cells populated by JS -->
+                </div>
+            </div>
+
+            <!-- Keypad (1-9 & Tools) -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="grid grid-cols-9 gap-1.5">
+                    <button onclick="inputSudokuNumber(1)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">1</button>
+                    <button onclick="inputSudokuNumber(2)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">2</button>
+                    <button onclick="inputSudokuNumber(3)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">3</button>
+                    <button onclick="inputSudokuNumber(4)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">4</button>
+                    <button onclick="inputSudokuNumber(5)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">5</button>
+                    <button onclick="inputSudokuNumber(6)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">6</button>
+                    <button onclick="inputSudokuNumber(7)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">7</button>
+                    <button onclick="inputSudokuNumber(8)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">8</button>
+                    <button onclick="inputSudokuNumber(9)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">9</button>
+                </div>
+                <div class="flex justify-between space-x-2 pt-2 border-t border-slate-100">
+                    <button onclick="eraseSudokuCell()" class="flex-1 btn-push bg-rose-50 hover:bg-rose-100 text-rose-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-eraser"></i>
+                        <span>Hapus</span>
+                    </button>
+                    <button onclick="checkSudokuSolution()" class="flex-1 btn-push bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Cek Jawaban</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: TARGET NUMBER GAME ================= -->
+        <section id="page-target" class="view-page hidden max-w-2xl mx-auto space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-md space-y-6">
+                <!-- Target Header -->
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-800">Target Number</h2>
+                        <p class="text-xs text-slate-500">Susun kombinasi matematika!</p>
+                    </div>
+                    <button onclick="initTargetGame()" class="btn-push bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>Soal Baru</span>
+                    </button>
+                </div>
+
+                <!-- Display Target Number Goal -->
+                <div class="bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-2xl p-6 text-center shadow-lg">
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-100 block mb-1">Capai Angka Target Ini:</span>
+                    <span id="target-goal-number" class="text-5xl font-black font-outfit">23</span>
+                </div>
+
+                <!-- Equation Builder Input Screen -->
+                <div class="bg-slate-100 rounded-2xl p-4 min-h-[70px] flex items-center justify-between border border-slate-200">
+                    <div id="target-expression-display" class="text-xl sm:text-2xl font-extrabold text-slate-800 font-outfit tracking-wide flex flex-wrap gap-2 items-center">
+                        <!-- User's build expression tags -->
+                    </div>
+                    <button onclick="clearTargetExpression()" class="text-rose-500 hover:text-rose-700 text-sm font-bold p-2">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+                <!-- Source Number Buttons Grid -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 block mb-2 uppercase tracking-wider">Angka yang Tersedia:</span>
+                    <div id="target-numbers-container" class="grid grid-cols-4 gap-3">
+                        <!-- 4 random source numbers generated here -->
+                    </div>
+                </div>
+
+                <!-- Operator Buttons -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 block mb-2 uppercase tracking-wider">Pilih Operator:</span>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button onclick="appendTargetOp('+')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">+</button>
+                        <button onclick="appendTargetOp('-')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">-</button>
+                        <button onclick="appendTargetOp('×')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">×</button>
+                        <button onclick="appendTargetOp('÷')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">÷</button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="evaluateTargetAnswer()" class="w-full btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl text-base shadow-md">
+                    <i class="fa-solid fa-calculator mr-2"></i>Hitung & Periksa Target
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 6: PRODIGY RPG QUEST ================= -->
+        <section id="page-rpg" class="view-page hidden max-w-3xl mx-auto space-y-6">
+            <div class="bg-slate-900 rounded-3xl p-6 text-white border-4 border-purple-500/30 shadow-2xl space-y-6">
+                <!-- Battle Stage Info Header -->
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-full text-xs font-bold">
+                            Tingkat <span id="rpg-stage-num">1</span>
+                        </span>
+                        <h2 class="text-xl font-bold font-outfit text-purple-200">Petualangan Matematika RPG</h2>
+                    </div>
+                    <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm bg-slate-800 px-3 py-1 rounded-xl">
+                        <i class="fa-solid fa-coins"></i>
+                        <span id="rpg-gold">0</span> Gold
+                    </div>
+                </div>
+
+                <!-- Arena Combat Display (Player VS Monster) -->
+                <div class="grid grid-cols-2 gap-4 bg-slate-800/80 p-6 rounded-2xl border border-slate-700 items-center">
+                    <!-- Player Unit -->
+                    <div class="text-center space-y-2">
+                        <div class="w-20 h-20 mx-auto rounded-full bg-indigo-600 flex items-center justify-center text-3xl text-indigo-200 border-4 border-indigo-400 shadow-lg pulse-glow">
+                            <i class="fa-solid fa-user-ninja"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-indigo-300">Pahlawan Mat</h4>
+                        <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden border border-slate-600">
+                            <div id="rpg-player-hp" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
+                        </div>
+                        <span id="rpg-player-hp-text" class="text-[10px] text-slate-400 font-bold">100 / 100 HP</span>
+                    </div>
+
+                    <!-- Monster Unit -->
+                    <div class="text-center space-y-2">
+                        <div id="rpg-monster-avatar" class="w-20 h-20 mx-auto rounded-full bg-rose-700 flex items-center justify-center text-3xl text-rose-200 border-4 border-rose-500 shadow-lg">
+                            <i class="fa-solid fa-dragon"></i>
+                        </div>
+                        <h4 id="rpg-monster-name" class="font-bold text-sm text-rose-300">Naga Slime</h4>
+                        <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden border border-slate-600">
+                            <div id="rpg-monster-hp" class="bg-rose-500 h-full w-full transition-all duration-300"></div>
+                        </div>
+                        <span id="rpg-monster-hp-text" class="text-[10px] text-slate-400 font-bold">50 / 50 HP</span>
+                    </div>
+                </div>
+
+                <!-- RPG Spell Question Box -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-purple-500/30 text-center space-y-4">
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider block">Mantra Serangan Sihir Matematika</span>
+                    <div id="rpg-question" class="text-3xl font-extrabold text-white font-outfit">
+                        7 × 6 = ?
+                    </div>
+                    <div id="rpg-options" class="grid grid-cols-2 gap-3 pt-2">
+                        <!-- Spell Choice Buttons rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 7: PYTHON CLI GENERATOR & SIMULATOR ================= -->
+        <section id="page-python" class="view-page hidden max-w-4xl mx-auto space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-sky-100 shadow-md space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl">
+                            <i class="fa-brands fa-python"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-slate-800">Python CLI Game Script Tool</h2>
+                            <p class="text-xs text-slate-500">Generator & Terminal Simulator Python 3</p>
+                        </div>
+                    </div>
+                    <button onclick="downloadPythonScript()" class="btn-push bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-2">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Unduh Script .py</span>
+                    </button>
+                </div>
+
+                <!-- Browser Terminal Simulator -->
+                <div class="bg-slate-900 rounded-2xl p-5 font-mono text-xs text-emerald-400 shadow-inner border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2 text-slate-400">
+                        <span><i class="fa-solid fa-terminal mr-2"></i>Terminal Python Simulator</span>
+                        <span class="text-[10px]">Python 3.10 CLI</span>
+                    </div>
+
+                    <div id="cli-terminal-output" class="min-h-[160px] max-h-[220px] overflow-y-auto space-y-1 custom-scrollbar leading-relaxed">
+                        <p class="text-slate-400">=== GAME MATEMATIKA PYTHON CLI ===</p>
+                        <p class="text-slate-400">Pilih Tingkat Kesulitan:</p>
+                        <p class="text-slate-400">1. Mudah (1-10)</p>
+                        <p class="text-slate-400">2. Sedang (1-50)</p>
+                        <p class="text-slate-400">3. Sulit (1-100)</p>
+                    </div>
+
+                    <!-- Input controls for web terminal simulator -->
+                    <div class="flex space-x-2 pt-2 border-t border-slate-800">
+                        <input type="text" id="cli-user-input" placeholder="Ketik jawaban / pilihan..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500">
+                        <button onclick="sendCliInput()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg font-bold">
+                            Kirim
+                        </button>
+                        <button onclick="resetCliSimulator()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-lg font-bold">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Python Source Code Display box for copying/pushing to GitHub -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Kode Python 3 Modular (Siap Push Ke GitHub):</span>
+                        <button onclick="copyPythonCode()" class="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center space-x-1">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Salin Kode</span>
+                        </button>
+                    </div>
+                    <pre class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs font-mono overflow-x-auto max-h-[280px] custom-scrollbar border border-slate-700"><code id="python-code-block">
+import random
+
+def get_difficulty_range(choice):
+    if choice == '1':
+        return 1, 10
+    elif choice == '2':
+        return 1, 50
+    elif choice == '3':
+        return 1, 100
+    return 1, 10
+
+def generate_question(min_val, max_val):
+    num1 = random.randint(min_val, max_val)
+    num2 = random.randint(min_val, max_val)
+    op = random.choice(['+', '-', '*'])
+    if op == '+':
+        ans = num1 + num2
+    elif op == '-':
+        ans = num1 - num2
+    else:
+        ans = num1 * num2
+    return num1, op, num2, ans
+
+def run_game():
+    print("=== GAME MATEMATIKA CLI PYTHON ===")
+    print("1. Mudah (1-10)\n2. Sedang (1-50)\n3. Sulit (1-100)")
+    choice = input("Pilih tingkat kesulitan (1/2/3): ")
+    min_v, max_v = get_difficulty_range(choice)
+    
+    score = 0
+    total_q = 10
+    
+    for i in range(1, total_q + 1):
+        n1, op, n2, correct_ans = generate_question(min_v, max_v)
+        try:
+            user_ans = int(input(f"Soal {i}/{total_q}: {n1} {op} {n2} = "))
+            if user_ans == correct_ans:
+                print(" Correct! (+10 pts)\n")
+                score += 10
+            else:
+                print(f" Wrong! Jawaban benar: {correct_ans}\n")
+        except ValueError:
+            print(" Input tidak valid!\n")
+            
+    accuracy = (score / (total_q * 10)) * 100
+    print("="*30)
+    print(f"HASIL AKHIR - Total Skor: {score} / 100")
+    print(f"Akurasi Jawaban: {accuracy:.1f}%")
+    print("="*30)
+
+if __name__ == "__main__":
+    run_game()
+                    </code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-indigo-600 font-outfit">MathPlay Zone</span>
+                <span>&copy; 2026 Permainan Seru Matematika</span>
+            </div>
+            <div class="flex space-x-4">
+                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('quiz')">Kuis Cepat</span>
+                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('game2048')">2048</span>
+                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('sudoku')">Sudoku</span>
+                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('target')">Target Number</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Toast Modal Container -->
+    <div id="toast-message" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-text" class="text-sm font-semibold">Pesan Notifikasi</span>
     </div>
 
     <script>
-        /* GLOBAL APP STATE */
-        const state = {
-            coins: parseInt(localStorage.getItem('math_coins') || '0'),
-            currentPage: 'home',
-            soundEnabled: true,
-            highScores: {
-                quiz: parseInt(localStorage.getItem('hs_quiz') || '0'),
-                2048: parseInt(localStorage.getItem('hs_2048') || '0'),
-                sudoku: parseInt(localStorage.getItem('hs_sudoku') || '0'),
-                rpg: parseInt(localStorage.getItem('hs_rpg') || '0')
-            }
-        };
+        // ================= GLOBAL STATE =================
+        let isAudioMuted = false;
+        let globalStars = parseInt(localStorage.getItem('math_stars') || '0');
 
-        /* WEB AUDIO SYNTHESIZER FOR SOUND EFFECTS */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
+        // Web Audio API Sound Effects Generator (No external MP3 files needed)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
         function playSound(type) {
-            if (!state.soundEnabled) return;
+            if (isAudioMuted) return;
             try {
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
 
-                const now = audioCtx.currentTime;
-
                 if (type === 'correct') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
                 } else if (type === 'wrong') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now); // A3
-                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2); // A2
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
                 } else if (type === 'click') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(400, now);
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                    osc.start(now);
-                    osc.stop(now + 0.05);
-                } else if (type === 'win') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
-                    gain.gain.setValueAtTime(0.3, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
                 }
             } catch (e) {
-                console.warn("Audio playback issue:", e);
+                console.log('Audio error:', e);
             }
         }
 
         function toggleAudio() {
-            state.soundEnabled = !state.soundEnabled;
-            const btn = document.getElementById('btn-sound');
-            if (state.soundEnabled) {
-                btn.innerHTML = '<i class="fa-solid fa-volume-high text-lg"></i>';
-                btn.classList.replace('text-slate-400', 'text-slate-600');
+            isAudioMuted = !isAudioMuted;
+            const icon = document.getElementById('sound-icon');
+            if (isAudioMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                showToast('Suara Dimatikan', 'fa-volume-xmark');
             } else {
-                btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-lg text-rose-500"></i>';
+                icon.className = 'fa-solid fa-volume-high text-slate-700';
+                showToast('Suara Dinyalakan', 'fa-volume-high');
+                playSound('click');
             }
         }
 
-        function addCoins(amount) {
-            state.coins += amount;
-            localStorage.setItem('math_coins', state.coins.toString());
-            document.getElementById('global-coins').innerText = state.coins;
+        function addStars(count) {
+            globalStars += count;
+            localStorage.setItem('math_stars', globalStars.toString());
+            document.getElementById('global-stars').textContent = globalStars;
         }
 
-        /* NAVIGATION ROUTER */
-        function navTo(pageId) {
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast-message');
+            document.getElementById('toast-text').textContent = msg;
+            document.getElementById('toast-icon').className = `fa-solid ${icon} text-amber-400`;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        function triggerConfetti() {
+            if (window.confetti) {
+                confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
+            }
+        }
+
+        // ================= NAVIGATION ROUTER =================
+        function navigateTo(pageId) {
             playSound('click');
-            state.currentPage = pageId;
-
-            // Hide all pages
-            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-
-            // Show selected page
-            const targetPage = document.getElementById(`page-${pageId}`);
-            if (targetPage) {
-                targetPage.classList.remove('hidden');
+            // Hide all views
+            document.querySelectorAll('.view-page').forEach(page => page.classList.add('hidden'));
+            
+            // Show requested view
+            const target = document.getElementById(`page-${pageId}`);
+            if (target) {
+                target.classList.remove('hidden');
             }
 
-            // Update active state in nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-purple-700', 'shadow-sm');
-                btn.classList.add('text-slate-600');
+            // Update Desktop Nav UI styling
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.className = "nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600";
             });
-            const activeNav = document.getElementById(`nav-${pageId}`);
+            const activeNav = document.getElementById(`nav-btn-${pageId}`);
             if (activeNav) {
-                activeNav.classList.add('bg-white', 'text-purple-700', 'shadow-sm');
-                activeNav.classList.remove('text-slate-600');
+                activeNav.className = "nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-indigo-600 bg-white shadow-sm";
             }
 
-            // Close mobile menu if open
-            document.getElementById('mobile-menu').classList.add('hidden');
-
-            // Initialize game instances on demand
-            if (pageId === 'speed-quiz') startSpeedQuiz();
-            if (pageId === '2048') init2048();
+            // Trigger initialization for selected mini-game
+            if (pageId === 'quiz') startQuiz();
+            if (pageId === 'game2048') init2048();
             if (pageId === 'sudoku') initSudoku();
-            if (pageId === 'target-number') initTargetNumber();
-            if (pageId === 'rpg') initRPG();
+            if (pageId === 'target') initTargetGame();
+            if (pageId === 'rpg') initRpgQuest();
+            if (pageId === 'python') resetCliSimulator();
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -759,207 +899,169 @@
             menu.classList.toggle('hidden');
         }
 
-        function updateStatsUI() {
-            document.getElementById('global-coins').innerText = state.coins;
-            document.getElementById('stat-high-quiz').innerText = state.highScores.quiz;
-            document.getElementById('stat-high-2048').innerText = state.highScores.2048;
-            document.getElementById('stat-sudoku-cleared').innerText = state.highScores.sudoku;
-            document.getElementById('stat-rpg-bosses').innerText = state.highScores.rpg;
-        }
+        // ================= GAME 1: MATH SPEED QUIZ ENGINE =================
+        let quizScore = 0;
+        let quizLives = 3;
+        let quizTimer = null;
+        let quizTimeLeft = 10;
+        let currentQuizAnswer = 0;
 
-        /* MODAL POPUP SYSTEM */
-        function showModal(title, subtitle, finalScore, coinsEarned, actionFnName) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-subtitle').innerText = subtitle;
-            document.getElementById('modal-final-score').innerText = finalScore;
-            document.getElementById('modal-coins-earned').innerText = `+${coinsEarned}`;
-            
-            const overlay = document.getElementById('modal-overlay');
-            overlay.classList.remove('hidden');
-
-            if (actionFnName) {
-                document.getElementById('modal-action-btn').onclick = () => {
-                    closeModal();
-                    window[actionFnName]();
-                };
-            }
-            if (coinsEarned > 0) confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-        }
-
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-        }
-
-        function restartCurrentGame() {
-            navTo(state.currentPage);
-        }
-
-
-        /* ==========================================================================
-           1. KUIS ARITMATIKA CEPAT (SPEED QUIZ ENGINE)
-           ========================================================================== */
-        let quizState = {
-            score: 0,
-            lives: 3,
-            timer: 10,
-            interval: null,
-            currentAns: 0
-        };
-
-        function startSpeedQuiz() {
-            clearInterval(quizState.interval);
-            quizState.score = 0;
-            quizState.lives = 3;
-            updateQuizHeader();
+        function startQuiz() {
+            quizScore = 0;
+            quizLives = 3;
+            document.getElementById('quiz-score').textContent = '0';
+            document.getElementById('quiz-gameover-modal').classList.add('hidden');
+            renderQuizLives();
             nextQuizQuestion();
         }
 
-        function updateQuizHeader() {
-            document.getElementById('quiz-score').innerText = quizState.score;
-            
-            // Lives hearts
-            let hearts = '';
+        function renderQuizLives() {
+            const container = document.getElementById('quiz-lives-container');
+            container.innerHTML = '';
             for (let i = 0; i < 3; i++) {
-                if (i < quizState.lives) hearts += '<i class="fa-solid fa-heart"></i>';
-                else hearts += '<i class="fa-regular fa-heart text-slate-300"></i>';
+                if (i < quizLives) {
+                    container.innerHTML += `<i class="fa-solid fa-heart text-rose-500 text-lg"></i>`;
+                } else {
+                    container.innerHTML += `<i class="fa-regular fa-heart text-slate-300 text-lg"></i>`;
+                }
             }
-            document.getElementById('quiz-lives').innerHTML = hearts;
         }
 
         function nextQuizQuestion() {
-            if (quizState.lives <= 0) {
+            if (quizLives <= 0) {
                 endQuizGame();
                 return;
             }
 
-            // Generate Random math operation with numbers 1 - 20
-            const ops = ['+', '-', '*'];
-            const op = ops[Math.floor(Math.random() * ops.length)];
+            // Generate question numbers 1-20
+            const opChoice = ['+', '-', '×'][Math.floor(Math.random() * 3)];
             let n1 = Math.floor(Math.random() * 20) + 1;
             let n2 = Math.floor(Math.random() * 20) + 1;
 
-            if (op === '-') {
-                if (n1 < n2) [n1, n2] = [n2, n1]; // Avoid negative results for kids
-            }
-            if (op === '*') {
+            if (opChoice === '-') {
+                if (n1 < n2) [n1, n2] = [n2, n1]; // Avoid negative answers
+                currentQuizAnswer = n1 - n2;
+            } else if (opChoice === '+') {
+                currentQuizAnswer = n1 + n2;
+            } else {
                 n1 = Math.floor(Math.random() * 10) + 1;
                 n2 = Math.floor(Math.random() * 10) + 1;
+                currentQuizAnswer = n1 * n2;
             }
 
-            let ans = 0;
-            let symbol = '+';
-            if (op === '+') { ans = n1 + n2; symbol = '+'; }
-            if (op === '-') { ans = n1 - n2; symbol = '-'; }
-            if (op === '*') { ans = n1 * n2; symbol = '×'; }
+            document.getElementById('quiz-question').textContent = `${n1} ${opChoice} ${n2} = ?`;
 
-            quizState.currentAns = ans;
-            document.getElementById('quiz-question').innerText = `${n1} ${symbol} ${n2} = ?`;
-
-            // Options generation (1 correct, 3 wrong distractors)
-            let choices = [ans];
-            while (choices.length < 4) {
-                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() > 0.5 ? 1 : -1);
-                let wrong = ans + offset;
-                if (wrong >= 0 && !choices.includes(wrong)) {
-                    choices.push(wrong);
+            // Options generator
+            const options = [currentQuizAnswer];
+            while (options.length < 4) {
+                const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                const wrongVal = currentQuizAnswer + offset;
+                if (wrongVal >= 0 && !options.includes(wrongVal)) {
+                    options.push(wrongVal);
                 }
             }
-            // Shuffle
-            choices.sort(() => Math.random() - 0.5);
+            options.sort(() => Math.random() - 0.5);
 
-            const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = '';
-            choices.forEach(val => {
-                const btn = document.createElement('button');
-                btn.className = "py-4 bg-slate-50 hover:bg-purple-50 text-slate-800 hover:text-purple-700 font-extrabold text-2xl rounded-2xl border-2 border-slate-200 hover:border-purple-300 transition-all shadow-sm font-num";
-                btn.innerText = val;
-                btn.onclick = () => checkQuizAnswer(val, btn);
-                optionsContainer.appendChild(btn);
+            // Render options
+            const optsContainer = document.getElementById('quiz-options-container');
+            optsContainer.innerHTML = '';
+            options.forEach(opt => {
+                optsContainer.innerHTML += `
+                    <button onclick="checkQuizAnswer(${opt})" class="btn-push bg-slate-100 hover:bg-amber-200 hover:border-amber-400 border-2 border-slate-200 text-slate-800 font-extrabold text-2xl py-4 rounded-2xl shadow-sm transition-all font-outfit">
+                        ${opt}
+                    </button>
+                `;
             });
 
-            // Start 10s Timer
-            quizState.timer = 10;
-            resetQuizTimerBar();
-            clearInterval(quizState.interval);
-            quizState.interval = setInterval(() => {
-                quizState.timer--;
-                document.getElementById('quiz-timer-text').innerText = `${quizState.timer}s`;
-                document.getElementById('quiz-timer-bar').style.width = `${(quizState.timer / 10) * 100}%`;
+            // Start 10 second countdown timer
+            resetQuizTimer();
+        }
 
-                if (quizState.timer <= 0) {
-                    clearInterval(quizState.interval);
+        function resetQuizTimer() {
+            clearInterval(quizTimer);
+            quizTimeLeft = 10;
+            updateTimerDisplay();
+
+            quizTimer = setInterval(() => {
+                quizTimeLeft -= 0.1;
+                if (quizTimeLeft <= 0) {
+                    clearInterval(quizTimer);
                     playSound('wrong');
-                    quizState.lives--;
-                    updateQuizHeader();
-                    shakeCard('quiz-card');
+                    quizLives--;
+                    renderQuizLives();
+                    showToast('Waktu Habis! (-1 Nyawa)', 'fa-triangle-exclamation');
                     nextQuizQuestion();
+                } else {
+                    updateTimerDisplay();
                 }
-            }, 1000);
+            }, 100);
         }
 
-        function resetQuizTimerBar() {
-            document.getElementById('quiz-timer-bar').style.width = '100%';
-            document.getElementById('quiz-timer-text').innerText = '10s';
+        function updateTimerDisplay() {
+            document.getElementById('quiz-timer-text').textContent = `${Math.max(0, quizTimeLeft).toFixed(1)}s`;
+            const percent = (quizTimeLeft / 10) * 100;
+            document.getElementById('quiz-timer-bar').style.width = `${percent}%`;
         }
 
-        function checkQuizAnswer(selectedVal, btnElem) {
-            clearInterval(quizState.interval);
-            if (selectedVal === quizState.currentAns) {
+        function checkQuizAnswer(selectedVal) {
+            clearInterval(quizTimer);
+            if (selectedVal === currentQuizAnswer) {
                 playSound('correct');
-                btnElem.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
-                quizState.score += 10;
-                addCoins(2);
-                updateQuizHeader();
-                setTimeout(nextQuizQuestion, 400);
+                quizScore += 10;
+                addStars(1);
+                document.getElementById('quiz-score').textContent = quizScore;
+                showToast('Benar! +10 Skor', 'fa-circle-check');
             } else {
                 playSound('wrong');
-                btnElem.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
-                quizState.lives--;
-                updateQuizHeader();
-                shakeCard('quiz-card');
-                setTimeout(nextQuizQuestion, 500);
+                quizLives--;
+                renderQuizLives();
+                showToast(`Salah! Jawaban: ${currentQuizAnswer}`, 'fa-circle-xmark');
             }
-        }
-
-        function shakeCard(id) {
-            const el = document.getElementById(id);
-            el.classList.add('animate-shake');
-            setTimeout(() => el.classList.remove('animate-shake'), 400);
+            nextQuizQuestion();
         }
 
         function endQuizGame() {
-            clearInterval(quizState.interval);
-            if (quizState.score > state.highScores.quiz) {
-                state.highScores.quiz = quizState.score;
-                localStorage.setItem('hs_quiz', quizState.score);
-            }
-            updateStatsUI();
-            showModal("Game Over!", "Kehabisan nyawa pada kuis aritmatika.", quizState.score, Math.floor(quizState.score / 5), 'startSpeedQuiz');
+            clearInterval(quizTimer);
+            document.getElementById('quiz-final-score').textContent = quizScore;
+            document.getElementById('quiz-gameover-modal').classList.remove('hidden');
+            if (quizScore > 0) triggerConfetti();
         }
 
-
-        /* ==========================================================================
-           2. 2048 PUZZLE GAME ENGINE
-           ========================================================================== */
+        // ================= GAME 2: 2048 MATH PUZZLE ENGINE =================
         let board2048 = [];
         let score2048 = 0;
+        let best2048 = parseInt(localStorage.getItem('2048_best') || '0');
+        let prevBoard2048 = null;
+        let prevScore2048 = 0;
 
         function init2048() {
-            board2048 = Array(4).fill(null).map(() => Array(4).fill(0));
+            board2048 = Array(4).fill().map(() => Array(4).fill(0));
             score2048 = 0;
-            document.getElementById('2048-score').innerText = '0';
-            document.getElementById('2048-best').innerText = state.highScores[2048];
-            
-            spawnRandomTile2048();
-            spawnRandomTile2048();
+            document.getElementById('g2048-score').textContent = '0';
+            document.getElementById('g2048-best').textContent = best2048;
+            document.getElementById('2048-gameover').classList.add('hidden');
+            addNewTile2048();
+            addNewTile2048();
             renderBoard2048();
         }
 
-        function reset2048() {
-            init2048();
+        function renderBoard2048() {
+            const container = document.getElementById('grid-2048-container');
+            container.innerHTML = '';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const val = board2048[r][c];
+                    const valClass = val > 0 ? `tile-val-${Math.min(val, 2048)}` : 'bg-slate-200/60';
+                    container.innerHTML += `
+                        <div class="aspect-square rounded-2xl ${valClass} flex items-center justify-center font-extrabold text-xl sm:text-2xl shadow-inner transition-all transform duration-150">
+                            ${val > 0 ? val : ''}
+                        </div>
+                    `;
+                }
+            }
         }
 
-        function spawnRandomTile2048() {
+        function addNewTile2048() {
             let emptyCells = [];
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
@@ -967,504 +1069,537 @@
                 }
             }
             if (emptyCells.length > 0) {
-                let spot = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                board2048[spot.r][spot.c] = Math.random() < 0.9 ? 2 : 4;
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board2048[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
             }
         }
 
-        function getTileColorClass(val) {
-            const colors = {
-                2: 'bg-slate-100 text-slate-800',
-                4: 'bg-amber-100 text-amber-900',
-                8: 'bg-orange-300 text-white',
-                16: 'bg-orange-500 text-white',
-                32: 'bg-rose-500 text-white',
-                64: 'bg-red-600 text-white',
-                128: 'bg-yellow-300 text-slate-900',
-                256: 'bg-yellow-400 text-slate-900',
-                512: 'bg-yellow-500 text-white',
-                1024: 'bg-purple-600 text-white',
-                2048: 'bg-purple-800 text-white shadow-lg shadow-purple-500/50'
-            };
-            return colors[val] || 'bg-slate-900 text-white';
+        function save2048State() {
+            prevBoard2048 = JSON.parse(JSON.stringify(board2048));
+            prevScore2048 = score2048;
         }
 
-        function renderBoard2048() {
-            const container = document.getElementById('2048-board');
-            container.innerHTML = '';
-
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 4; c++) {
-                    const val = board2048[r][c];
-                    const tile = document.createElement('div');
-                    tile.className = `rounded-2xl flex items-center justify-center font-black font-num text-2xl sm:text-3xl transition-all duration-100 ${val > 0 ? getTileColorClass(val) + ' tile-pop' : 'bg-slate-200/60'}`;
-                    tile.innerText = val > 0 ? val : '';
-                    container.appendChild(tile);
-                }
-            }
-            document.getElementById('2048-score').innerText = score2048;
-
-            if (score2048 > state.highScores[2048]) {
-                state.highScores[2048] = score2048;
-                localStorage.setItem('hs_2048', score2048);
-                document.getElementById('2048-best').innerText = score2048;
-                updateStatsUI();
+        function undoMove2048() {
+            if (prevBoard2048) {
+                board2048 = JSON.parse(JSON.stringify(prevBoard2048));
+                score2048 = prevScore2048;
+                document.getElementById('g2048-score').textContent = score2048;
+                renderBoard2048();
+                showToast('Langkah Dibatalkan', 'fa-rotate-left');
             }
         }
 
-        function move2048(direction) {
+        function handle2048Move(dir) {
+            save2048State();
             let moved = false;
 
-            function slide(row) {
-                let arr = row.filter(val => val !== 0);
-                for (let i = 0; i < arr.length - 1; i++) {
-                    if (arr[i] === arr[i + 1]) {
-                        arr[i] *= 2;
-                        score2048 += arr[i];
-                        addCoins(1);
-                        arr[i + 1] = 0;
-                        moved = true;
-                    }
-                }
-                arr = arr.filter(val => val !== 0);
-                while (arr.length < 4) arr.push(0);
-                return arr;
-            }
-
-            let newBoard = Array(4).fill(null).map(() => Array(4).fill(0));
-
-            if (direction === 'LEFT' || direction === 'RIGHT') {
+            if (dir === 'left' || dir === 'right') {
                 for (let r = 0; r < 4; r++) {
-                    let row = board2048[r];
-                    if (direction === 'RIGHT') row = row.reverse();
-                    let res = slide(row);
-                    if (direction === 'RIGHT') res = res.reverse();
-                    newBoard[r] = res;
-                }
-            } else if (direction === 'UP' || direction === 'DOWN') {
-                for (let c = 0; c < 4; c++) {
-                    let col = [board2048[0][c], board2048[1][c], board2048[2][c], board2048[3][c]];
-                    if (direction === 'DOWN') col = col.reverse();
-                    let res = slide(col);
-                    if (direction === 'DOWN') res = res.reverse();
-                    for (let r = 0; r < 4; r++) newBoard[r][c] = res[r];
-                }
-            }
+                    let row = board2048[r].filter(val => val !== 0);
+                    if (dir === 'right') row.reverse();
 
-            // Check if board changed
-            for (let r = 0; r < 4; r++) {
+                    let mergedRow = [];
+                    for (let i = 0; i < row.length; i++) {
+                        if (i < row.length - 1 && row[i] === row[i + 1]) {
+                            const mergedVal = row[i] * 2;
+                            mergedRow.push(mergedVal);
+                            score2048 += mergedVal;
+                            i++;
+                            moved = true;
+                        } else {
+                            mergedRow.push(row[i]);
+                        }
+                    }
+
+                    while (mergedRow.length < 4) mergedRow.push(0);
+                    if (dir === 'right') mergedRow.reverse();
+
+                    if (JSON.stringify(board2048[r]) !== JSON.stringify(mergedRow)) moved = true;
+                    board2048[r] = mergedRow;
+                }
+            } else if (dir === 'up' || dir === 'down') {
                 for (let c = 0; c < 4; c++) {
-                    if (board2048[r][c] !== newBoard[r][c]) moved = true;
+                    let col = [];
+                    for (let r = 0; r < 4; r++) if (board2048[r][c] !== 0) col.push(board2048[r][c]);
+                    if (dir === 'down') col.reverse();
+
+                    let mergedCol = [];
+                    for (let i = 0; i < col.length; i++) {
+                        if (i < col.length - 1 && col[i] === col[i + 1]) {
+                            const mergedVal = col[i] * 2;
+                            mergedCol.push(mergedVal);
+                            score2048 += mergedVal;
+                            i++;
+                            moved = true;
+                        } else {
+                            mergedCol.push(col[i]);
+                        }
+                    }
+
+                    while (mergedCol.length < 4) mergedCol.push(0);
+                    if (dir === 'down') mergedCol.reverse();
+
+                    for (let r = 0; r < 4; r++) {
+                        if (board2048[r][c] !== mergedCol[r]) moved = true;
+                        board2048[r][c] = mergedCol[r];
+                    }
                 }
             }
 
             if (moved) {
                 playSound('click');
-                board2048 = newBoard;
-                spawnRandomTile2048();
+                addNewTile2048();
                 renderBoard2048();
+
+                if (score2048 > best2048) {
+                    best2048 = score2048;
+                    localStorage.setItem('2048_best', best2048.toString());
+                }
+                document.getElementById('g2048-score').textContent = score2048;
+                document.getElementById('g2048-best').textContent = best2048;
+
+                check2048GameOver();
             }
         }
 
-        // Global Keydown Handler for 2048
+        function check2048GameOver() {
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (board2048[r][c] === 0) return;
+                    if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return;
+                    if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return;
+                }
+            }
+            document.getElementById('2048-modal-score').textContent = score2048;
+            document.getElementById('2048-gameover').classList.remove('hidden');
+        }
+
+        // Keyboard navigation bindings
         window.addEventListener('keydown', (e) => {
-            if (state.currentPage !== '2048') return;
-            if (e.key === 'ArrowLeft') { e.preventDefault(); move2048('LEFT'); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); move2048('RIGHT'); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); move2048('UP'); }
-            if (e.key === 'ArrowDown') { e.preventDefault(); move2048('DOWN'); }
+            if (document.getElementById('page-game2048').classList.contains('hidden')) return;
+            if (e.key === 'ArrowUp' || e.key === 'w') handle2048Move('up');
+            if (e.key === 'ArrowDown' || e.key === 's') handle2048Move('down');
+            if (e.key === 'ArrowLeft' || e.key === 'a') handle2048Move('left');
+            if (e.key === 'ArrowRight' || e.key === 'd') handle2048Move('right');
         });
 
-        // Touch Swipe Gesture Controls
-        let touchStartX = 0, touchStartY = 0;
-        document.addEventListener('touchstart', e => {
-            if (state.currentPage !== '2048') return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+        // ================= GAME 3: SUDOKU ENGINE =================
+        let sudokuGrid = Array(81).fill(0);
+        let sudokuSolution = Array(81).fill(0);
+        let selectedSudokuIndex = null;
 
-        document.addEventListener('touchend', e => {
-            if (state.currentPage !== '2048') return;
-            let touchEndX = e.changedTouches[0].clientX;
-            let touchEndY = e.changedTouches[0].clientY;
-            let dx = touchEndX - touchStartX;
-            let dy = touchEndY - touchStartY;
-
-            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-                if (dx > 0) move2048('RIGHT');
-                else move2048('LEFT');
-            } else if (Math.abs(dy) > 30) {
-                if (dy > 0) move2048('DOWN');
-                else move2048('UP');
-            }
-        }, { passive: true });
-
-
-        /* ==========================================================================
-           3. SUDOKU PUZZLE ENGINE
-           ========================================================================== */
-        let sudokuBoard = [];
-        let sudokuSolution = [];
-        let selectedCell = null;
-        let sudokuErrors = 0;
-        let sudokuTimerVal = 0;
-        let sudokuTimerInterval = null;
-
-        const baseSudokuSample = [
-            [5,3,4,6,7,8,9,1,2],
-            [6,7,2,1,9,5,3,4,8],
-            [1,9,8,3,4,2,5,6,7],
-            [8,5,9,7,6,1,4,2,3],
-            [4,2,6,8,5,3,7,9,1],
-            [7,1,3,9,2,4,8,5,6],
-            [9,6,1,5,3,7,2,8,4],
-            [2,8,7,4,1,9,6,3,5],
-            [3,4,5,2,8,6,1,7,9]
-        ];
-
-        function initSudoku() {
-            clearInterval(sudokuTimerInterval);
-            sudokuErrors = 0;
-            document.getElementById('sudoku-errors').innerText = '0 / 3';
-
-            // Generate simple board derived from valid solution matrix
-            sudokuSolution = JSON.parse(JSON.stringify(baseSudokuSample));
-            sudokuBoard = JSON.parse(JSON.stringify(baseSudokuSample));
-
-            const diff = document.getElementById('sudoku-diff').value;
-            let removeCount = diff === 'easy' ? 30 : (diff === 'medium' ? 45 : 55);
-
-            while (removeCount > 0) {
-                let r = Math.floor(Math.random() * 9);
-                let c = Math.floor(Math.random() * 9);
-                if (sudokuBoard[r][c] !== 0) {
-                    sudokuBoard[r][c] = 0;
-                    removeCount--;
-                }
-            }
-
-            renderSudokuGrid();
-
-            // Timer
-            sudokuTimerVal = 0;
-            sudokuTimerInterval = setInterval(() => {
-                sudokuTimerVal++;
-                let m = String(Math.floor(sudokuTimerVal / 60)).padStart(2, '0');
-                let s = String(sudokuTimerVal % 60).padStart(2, '0');
-                document.getElementById('sudoku-timer').innerText = `${m}:${s}`;
-            }, 1000);
-        }
-
-        function renderSudokuGrid() {
-            const container = document.getElementById('sudoku-grid');
-            container.innerHTML = '';
-
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    const val = sudokuBoard[r][c];
-                    const cell = document.createElement('div');
-                    
-                    // Border subgrid styling for 3x3 blocks
-                    let borderClasses = '';
-                    if (c === 2 || c === 5) borderClasses += ' border-r-2 border-r-slate-800';
-                    if (r === 2 || r === 5) borderClasses += ' border-b-2 border-b-slate-800';
-
-                    cell.className = `flex items-center justify-center font-num text-xl font-bold cursor-pointer transition-colors ${borderClasses} ${val !== 0 ? 'bg-slate-100 text-slate-800' : 'bg-white hover:bg-teal-50 text-teal-600'}`;
-                    if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
-                        cell.classList.add('bg-teal-200');
-                    }
-
-                    cell.innerText = val !== 0 ? val : '';
-                    cell.onclick = () => {
-                        selectedCell = { r, c };
-                        renderSudokuGrid();
-                    };
-                    container.appendChild(cell);
-                }
-            }
-        }
-
-        function inputSudokuNum(num) {
-            if (!selectedCell) return;
-            const { r, c } = selectedCell;
-
-            // If already filled permanently, ignore
-            if (baseSudokuSample[r][c] === sudokuBoard[r][c] && sudokuBoard[r][c] !== 0) return;
-
-            if (num === sudokuSolution[r][c]) {
-                playSound('correct');
-                sudokuBoard[r][c] = num;
-                renderSudokuGrid();
-                checkSudokuWin();
-            } else {
-                playSound('wrong');
-                sudokuErrors++;
-                document.getElementById('sudoku-errors').innerText = `${sudokuErrors} / 3`;
-                if (sudokuErrors >= 3) {
-                    clearInterval(sudokuTimerInterval);
-                    showModal("Game Over", "3 kali kesalahan pada Sudoku.", 0, 0, 'initSudoku');
-                }
-            }
-        }
-
-        function checkSudokuWin() {
-            let cleared = true;
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (sudokuBoard[r][c] !== sudokuSolution[r][c]) cleared = false;
-                }
-            }
-            if (cleared) {
-                clearInterval(sudokuTimerInterval);
-                playSound('win');
-                state.highScores.sudoku++;
-                localStorage.setItem('hs_sudoku', state.highScores.sudoku);
-                addCoins(20);
-                updateStatsUI();
-                showModal("Selamat!", "Kamu berhasil menyelesaikan Sudoku!", 100, 20, 'initSudoku');
-            }
-        }
-
-
-        /* ==========================================================================
-           4. TARGET NUMBER GAME ENGINE (24-GAME STYLE)
-           ========================================================================== */
-        let targetState = {
-            targetVal: 24,
-            numbers: [],
-            usedIndices: [],
-            expressionTokens: []
+        const presetSudokus = {
+            easy: [
+                "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+                "534678912672195348198342567859761423426853791713924856961537284287419635345286179"
+            ],
+            medium: [
+                "000260701680070090190004500820100040004602900050003028009300074040050036703018000",
+                "435269781682571493197834562826195347374682915951423628519326874248759136763918254"
+            ]
         };
 
-        function initTargetNumber() {
-            // Pick a preset or generated valid target combo
-            const presets = [
-                { target: 24, nums: [3, 8, 2, 1] },
-                { target: 24, nums: [4, 6, 2, 8] },
-                { target: 30, nums: [5, 5, 2, 4] },
-                { target: 20, nums: [10, 2, 4, 2] },
-                { target: 15, nums: [7, 8, 1, 2] }
-            ];
-            const p = presets[Math.floor(Math.random() * presets.length)];
-            targetState.targetVal = p.target;
-            targetState.numbers = [...p.nums];
-            targetState.usedIndices = [];
-            targetState.expressionTokens = [];
+        function initSudoku() {
+            const diff = document.getElementById('sudoku-difficulty').value;
+            const puzzleStr = presetSudokus[diff] ? presetSudokus[diff][0] : presetSudokus['easy'][0];
+            const solStr = presetSudokus[diff] ? presetSudokus[diff][1] : presetSudokus['easy'][1];
 
-            document.getElementById('target-val').innerText = p.target;
-            renderTargetControls();
+            sudokuGrid = puzzleStr.split('').map(v => parseInt(v));
+            sudokuSolution = solStr.split('').map(v => parseInt(v));
+            selectedSudokuIndex = null;
+
+            renderSudokuBoard();
         }
 
-        function renderTargetControls() {
-            // Render numbers
-            const numContainer = document.getElementById('target-numbers-container');
-            numContainer.innerHTML = '';
-            targetState.numbers.forEach((val, idx) => {
-                const btn = document.createElement('button');
-                const isUsed = targetState.usedIndices.includes(idx);
-                btn.className = `py-4 font-black rounded-2xl border-2 text-2xl font-num transition-all shadow-sm ${isUsed ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed' : 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200 hover:scale-105'}`;
-                btn.innerText = val;
-                btn.disabled = isUsed;
-                btn.onclick = () => appendTargetNum(val, idx);
-                numContainer.appendChild(btn);
-            });
+        function renderSudokuBoard() {
+            const board = document.getElementById('sudoku-board-grid');
+            board.innerHTML = '';
 
-            // Display current expression
-            const display = document.getElementById('target-expr-display');
-            if (targetState.expressionTokens.length === 0) {
-                display.innerHTML = '<span class="text-slate-300 text-sm font-normal font-fredoka">Pilih angka dan operator di bawah...</span>';
-            } else {
-                display.innerText = targetState.expressionTokens.join(' ');
+            for (let i = 0; i < 81; i++) {
+                const row = Math.floor(i / 9);
+                const col = i % 9;
+                const val = sudokuGrid[i];
+                const isSelected = selectedSudokuIndex === i;
+
+                // Add thicker border logic for 3x3 sub-grids
+                let borderClasses = "border border-slate-700 ";
+                if (col % 3 === 2 && col !== 8) borderClasses += "border-r-2 border-r-slate-400 ";
+                if (row % 3 === 2 && row !== 8) borderClasses += "border-b-2 border-b-slate-400 ";
+
+                const bgClass = isSelected ? 'bg-amber-300 text-slate-900' : (val > 0 ? 'bg-slate-100 text-slate-900 font-bold' : 'bg-slate-800 text-blue-400 hover:bg-slate-700');
+
+                board.innerHTML += `
+                    <button onclick="selectSudokuCell(${i})" class="${borderClasses} ${bgClass} rounded-md text-base sm:text-lg flex items-center justify-center font-outfit transition-colors">
+                        ${val > 0 ? val : ''}
+                    </button>
+                `;
             }
         }
 
-        function appendTargetNum(val, idx) {
+        function selectSudokuCell(idx) {
             playSound('click');
-            targetState.expressionTokens.push(val);
-            targetState.usedIndices.push(idx);
-            renderTargetControls();
+            selectedSudokuIndex = idx;
+            renderSudokuBoard();
+        }
+
+        function inputSudokuNumber(num) {
+            if (selectedSudokuIndex !== null) {
+                playSound('click');
+                sudokuGrid[selectedSudokuIndex] = num;
+                renderSudokuBoard();
+            } else {
+                showToast('Pilih Kotak Terlebih Dahulu', 'fa-hand-pointer');
+            }
+        }
+
+        function eraseSudokuCell() {
+            if (selectedSudokuIndex !== null) {
+                playSound('click');
+                sudokuGrid[selectedSudokuIndex] = 0;
+                renderSudokuBoard();
+            }
+        }
+
+        function checkSudokuSolution() {
+            let isCorrect = true;
+            for (let i = 0; i < 81; i++) {
+                if (sudokuGrid[i] !== sudokuSolution[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            if (isCorrect) {
+                playSound('correct');
+                addStars(10);
+                triggerConfetti();
+                showToast('Selamat! Sudoku Selesai Sempurna! +10 Bintang', 'fa-award');
+            } else {
+                playSound('wrong');
+                showToast('Masih Ada Angka yang Belum Sesuai', 'fa-circle-xmark');
+            }
+        }
+
+        // ================= GAME 4: TARGET NUMBER GAME ENGINE =================
+        let targetGoal = 23;
+        let targetNumbers = [2, 4, 5, 9];
+        let targetUsedIndices = [];
+        let targetExpression = [];
+
+        function initTargetGame() {
+            // Generate 4 numbers and achievable target
+            targetNumbers = [
+                Math.floor(Math.random() * 9) + 1,
+                Math.floor(Math.random() * 9) + 1,
+                Math.floor(Math.random() * 9) + 1,
+                Math.floor(Math.random() * 9) + 1
+            ];
+            // Simple target calculation guarantee
+            targetGoal = (targetNumbers[0] * targetNumbers[1]) + targetNumbers[2] + targetNumbers[3];
+            
+            targetUsedIndices = [];
+            targetExpression = [];
+
+            document.getElementById('target-goal-number').textContent = targetGoal;
+            renderTargetNumbers();
+            renderTargetExpression();
+        }
+
+        function renderTargetNumbers() {
+            const container = document.getElementById('target-numbers-container');
+            container.innerHTML = '';
+            targetNumbers.forEach((num, idx) => {
+                const isUsed = targetUsedIndices.includes(idx);
+                container.innerHTML += `
+                    <button onclick="appendTargetNumber(${num}, ${idx})" ${isUsed ? 'disabled' : ''} 
+                        class="btn-push ${isUsed ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-rose-100 hover:bg-rose-200 text-rose-800'} py-4 rounded-2xl font-extrabold text-2xl shadow-sm transition-all">
+                        ${num}
+                    </button>
+                `;
+            });
+        }
+
+        function renderTargetExpression() {
+            const display = document.getElementById('target-expression-display');
+            if (targetExpression.length === 0) {
+                display.innerHTML = `<span class="text-slate-400 text-sm font-normal">Klik angka & operator...</span>`;
+                return;
+            }
+            display.innerHTML = targetExpression.map(item => `
+                <span class="px-3 py-1 ${typeof item === 'number' ? 'bg-rose-500 text-white' : 'bg-amber-400 text-slate-900'} rounded-xl shadow-sm font-bold">
+                    ${item}
+                </span>
+            `).join('');
+        }
+
+        function appendTargetNumber(num, idx) {
+            if (targetUsedIndices.includes(idx)) return;
+            playSound('click');
+            targetUsedIndices.push(idx);
+            targetExpression.push(num);
+            renderTargetNumbers();
+            renderTargetExpression();
         }
 
         function appendTargetOp(op) {
-            if (targetState.expressionTokens.length === 0) return;
+            if (targetExpression.length === 0) return;
+            const last = targetExpression[targetExpression.length - 1];
+            if (typeof last === 'string') return; // Avoid double operators
             playSound('click');
-            let symbol = op;
-            if (op === '*') symbol = '×';
-            if (op === '/') symbol = '÷';
-            targetState.expressionTokens.push(symbol);
-            renderTargetControls();
+            targetExpression.push(op);
+            renderTargetExpression();
         }
 
-        function clearTargetExpr() {
+        function clearTargetExpression() {
             playSound('click');
-            targetState.usedIndices = [];
-            targetState.expressionTokens = [];
-            renderTargetControls();
+            targetUsedIndices = [];
+            targetExpression = [];
+            renderTargetNumbers();
+            renderTargetExpression();
         }
 
-        function submitTargetExpr() {
-            if (targetState.usedIndices.length < 4) {
-                shakeCard('target-expr-display');
-                playSound('wrong');
-                return;
-            }
-
+        function evaluateTargetAnswer() {
+            if (targetExpression.length === 0) return;
             try {
-                let rawExpr = targetState.expressionTokens.join('')
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/');
+                // Convert expression to js readable format
+                let exprStr = targetExpression.map(item => {
+                    if (item === '×') return '*';
+                    if (item === '÷') return '/';
+                    return item;
+                }).join('');
 
-                let result = eval(rawExpr);
+                const result = eval(exprStr);
 
-                if (Math.abs(result - targetState.targetVal) < 0.0001) {
-                    playSound('win');
-                    addCoins(15);
-                    showModal("Berhasil!", `Ekspresi kamu menghasilkan ${targetState.targetVal}!`, 100, 15, 'initTargetNumber');
+                if (Math.abs(result - targetGoal) < 0.001) {
+                    playSound('correct');
+                    addStars(5);
+                    triggerConfetti();
+                    showToast('Luar Biasa! Target Tercapai (+5 Bintang)', 'fa-bullseye');
                 } else {
                     playSound('wrong');
-                    shakeCard('target-expr-display');
+                    showToast(`Hasil Kamu: ${result}. Belum Mencapai ${targetGoal}`, 'fa-circle-xmark');
                 }
-            } catch (err) {
+            } catch (e) {
                 playSound('wrong');
-                shakeCard('target-expr-display');
+                showToast('Format Ekspresi Tidak Valid!', 'fa-triangle-exclamation');
             }
         }
 
+        // ================= GAME 5: PRODIGY RPG QUEST ENGINE =================
+        let rpgPlayerHp = 100;
+        let rpgMonsterHp = 50;
+        let rpgMonsterMaxHp = 50;
+        let rpgStage = 1;
+        let rpgGold = 0;
+        let rpgCorrectAns = 0;
 
-        /* ==========================================================================
-           5. PRODIGY MATH RPG ENGINE
-           ========================================================================== */
-        let rpgState = {
-            heroHp: 100,
-            enemyHp: 50,
-            enemyMaxHp: 50,
-            enemyStage: 1,
-            currentAns: 0
-        };
-
-        const monsters = [
-            { name: "Slime Matematika", avatar: "👾", maxHp: 50 },
-            { name: "Goblin Angka", avatar: "👺", maxHp: 80 },
-            { name: "Naga Api Aritmatika", avatar: "🐲", maxHp: 120 }
-        ];
-
-        function initRPG() {
-            rpgState.heroHp = 100;
-            rpgState.enemyStage = 1;
-            loadRPGMonster(0);
+        function initRpgQuest() {
+            rpgPlayerHp = 100;
+            rpgStage = 1;
+            rpgGold = 0;
+            spawnRpgMonster();
+            updateRpgUi();
         }
 
-        function loadRPGMonster(index) {
-            const m = monsters[index % monsters.length];
-            rpgState.enemyHp = m.maxHp;
-            rpgState.enemyMaxHp = m.maxHp;
-            document.getElementById('rpg-enemy-name').innerText = m.name;
-            document.getElementById('rpg-enemy-avatar').innerText = m.avatar;
-            document.getElementById('rpg-enemy-sprite').innerText = m.avatar;
+        function spawnRpgMonster() {
+            rpgMonsterMaxHp = 40 + (rpgStage * 15);
+            rpgMonsterHp = rpgMonsterMaxHp;
 
-            updateRPGStatusUI();
-            nextRPGQuestion();
+            const monsters = [
+                { name: "Slime Hitung", icon: "fa-ghost" },
+                { name: "Goblin Kurang", icon: "fa-hat-wizard" },
+                { name: "Naga Perkalian", icon: "fa-dragon" },
+                { name: "Raja Aljabar", icon: "fa-crown" }
+            ];
+            const m = monsters[(rpgStage - 1) % monsters.length];
+            document.getElementById('rpg-monster-name').textContent = m.name;
+            document.getElementById('rpg-monster-avatar').innerHTML = `<i class="fa-solid ${m.icon}"></i>`;
+
+            generateRpgQuestion();
         }
 
-        function updateRPGStatusUI() {
-            // Hero
-            document.getElementById('rpg-hero-hp-text').innerText = `${rpgState.heroHp}/100`;
-            document.getElementById('rpg-hero-hp-bar').style.width = `${(rpgState.heroHp / 100) * 100}%`;
+        function generateRpgQuestion() {
+            const n1 = Math.floor(Math.random() * (10 * rpgStage)) + 1;
+            const n2 = Math.floor(Math.random() * 10) + 1;
+            rpgCorrectAns = n1 + n2;
 
-            // Enemy
-            document.getElementById('rpg-enemy-hp-text').innerText = `${rpgState.enemyHp}/${rpgState.enemyMaxHp}`;
-            document.getElementById('rpg-enemy-hp-bar').style.width = `${Math.max(0, (rpgState.enemyHp / rpgState.enemyMaxHp) * 100)}%`;
-        }
+            document.getElementById('rpg-question').textContent = `${n1} + ${n2} = ?`;
 
-        function nextRPGQuestion() {
-            const ops = ['+', '-', '*'];
-            const op = ops[Math.floor(Math.random() * ops.length)];
-            let n1 = Math.floor(Math.random() * 12) + 1;
-            let n2 = Math.floor(Math.random() * 12) + 1;
-
-            if (op === '-') if (n1 < n2) [n1, n2] = [n2, n1];
-            
-            let ans = 0;
-            let sym = '+';
-            if (op === '+') { ans = n1 + n2; sym = '+'; }
-            if (op === '-') { ans = n1 - n2; sym = '-'; }
-            if (op === '*') { ans = n1 * n2; sym = '×'; }
-
-            rpgState.currentAns = ans;
-            document.getElementById('rpg-question-text').innerText = `${n1} ${sym} ${n2} = ?`;
-
-            // Generate options
-            let choices = [ans];
+            const choices = [rpgCorrectAns];
             while (choices.length < 4) {
-                let wrong = ans + (Math.floor(Math.random() * 6) + 1) * (Math.random() > 0.5 ? 1 : -1);
+                const wrong = rpgCorrectAns + (Math.floor(Math.random() * 6) + 1) * (Math.random() < 0.5 ? 1 : -1);
                 if (wrong >= 0 && !choices.includes(wrong)) choices.push(wrong);
             }
             choices.sort(() => Math.random() - 0.5);
 
-            const container = document.getElementById('rpg-answers-container');
+            const container = document.getElementById('rpg-options');
             container.innerHTML = '';
-            choices.forEach(val => {
-                const btn = document.createElement('button');
-                btn.className = "py-4 bg-white hover:bg-purple-600 hover:text-white text-slate-800 font-black rounded-2xl border-2 border-slate-200 shadow-md font-num text-xl transition-all";
-                btn.innerText = val;
-                btn.onclick = () => castRPGSpell(val);
-                container.appendChild(btn);
+            choices.forEach(choice => {
+                container.innerHTML += `
+                    <button onclick="attackRpgMonster(${choice})" class="btn-push bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xl py-3 rounded-xl shadow-md border border-purple-400">
+                        ✨ ${choice}
+                    </button>
+                `;
             });
         }
 
-        function castRPGSpell(val) {
-            const heroSprite = document.getElementById('rpg-hero-sprite');
-            const enemySprite = document.getElementById('rpg-enemy-sprite');
-
-            if (val === rpgState.currentAns) {
+        function attackRpgMonster(choice) {
+            if (choice === rpgCorrectAns) {
                 playSound('correct');
-                heroSprite.classList.add('attack-effect');
-                setTimeout(() => heroSprite.classList.remove('attack-effect'), 300);
+                const damage = 25;
+                rpgMonsterHp = Math.max(0, rpgMonsterHp - damage);
+                rpgGold += 10;
+                addStars(2);
+                showToast(`Mantra Sukses! Monster -${damage} HP`, 'fa-wand-magic-sparkles');
 
-                rpgState.enemyHp -= 25;
-                if (rpgState.enemyHp <= 0) rpgState.enemyHp = 0;
-                updateRPGStatusUI();
-
-                if (rpgState.enemyHp === 0) {
-                    playSound('win');
-                    state.highScores.rpg++;
-                    localStorage.setItem('hs_rpg', state.highScores.rpg);
-                    addCoins(10);
-                    updateStatsUI();
-
-                    setTimeout(() => {
-                        showModal("Kemenangan RPG!", "Kamu berhasil mengalahkan monster matematika!", 100, 10, 'nextRPGMonster');
-                    }, 500);
-                    return;
+                if (rpgMonsterHp <= 0) {
+                    triggerConfetti();
+                    rpgStage++;
+                    showToast(`Monster Kalahkan! Naik Ke Tingkat ${rpgStage}`, 'fa-trophy');
+                    setTimeout(spawnRpgMonster, 1000);
+                } else {
+                    generateRpgQuestion();
                 }
             } else {
                 playSound('wrong');
-                enemySprite.classList.add('attack-effect');
-                setTimeout(() => enemySprite.classList.remove('attack-effect'), 300);
+                const monsterDmg = 15;
+                rpgPlayerHp = Math.max(0, rpgPlayerHp - monsterDmg);
+                showToast(`Mantra Meleset! Pahlawan -${monsterDmg} HP`, 'fa-heart-crack');
 
-                rpgState.heroHp -= 20;
-                if (rpgState.heroHp <= 0) rpgState.heroHp = 0;
-                updateRPGStatusUI();
-
-                if (rpgState.heroHp === 0) {
-                    showModal("Kalah Bertarung!", "Pahlawan kehabisan HP. Coba lagi!", 0, 0, 'initRPG');
-                    return;
+                if (rpgPlayerHp <= 0) {
+                    showToast('Pahlawan Gugur! Mengulang Petualangan...', 'fa-skull');
+                    setTimeout(initRpgQuest, 1500);
+                } else {
+                    generateRpgQuestion();
                 }
             }
-            nextRPGQuestion();
+            updateRpgUi();
         }
 
-        function nextRPGMonster() {
-            rpgState.enemyStage++;
-            loadRPGMonster(rpgState.enemyStage - 1);
+        function updateRpgUi() {
+            document.getElementById('rpg-stage-num').textContent = rpgStage;
+            document.getElementById('rpg-gold').textContent = rpgGold;
+            document.getElementById('rpg-player-hp-text').textContent = `${rpgPlayerHp} / 100 HP`;
+            document.getElementById('rpg-monster-hp-text').textContent = `${rpgMonsterHp} / ${rpgMonsterMaxHp} HP`;
+
+            document.getElementById('rpg-player-hp').style.width = `${rpgPlayerHp}%`;
+            document.getElementById('rpg-monster-hp').style.width = `${(rpgMonsterHp / rpgMonsterMaxHp) * 100}%`;
         }
 
+        // ================= PYTHON CLI SIMULATOR ENGINE =================
+        let cliState = 'MENU'; // MENU, PLAYING, FINISHED
+        let cliMin = 1, cliMax = 10;
+        let cliCurrentQ = 0;
+        let cliScore = 0;
+        let cliTargetAns = 0;
 
-        /* INITIALIZATION ON PAGE LOAD */
-        window.addEventListener('DOMContentLoaded', () => {
-            updateStatsUI();
-            navTo('home');
-        });
+        function resetCliSimulator() {
+            cliState = 'MENU';
+            cliCurrentQ = 0;
+            cliScore = 0;
+            const term = document.getElementById('cli-terminal-output');
+            term.innerHTML = `
+                <p class="text-slate-400">=== GAME MATEMATIKA PYTHON CLI ===</p>
+                <p class="text-slate-400">Pilih Tingkat Kesulitan:</p>
+                <p class="text-slate-400">1. Mudah (1-10)</p>
+                <p class="text-slate-400">2. Sedang (1-50)</p>
+                <p class="text-slate-400">3. Sulit (1-100)</p>
+            `;
+        }
+
+        function sendCliInput() {
+            const inputEl = document.getElementById('cli-user-input');
+            const val = inputEl.value.trim();
+            if (!val) return;
+            inputEl.value = '';
+
+            const term = document.getElementById('cli-terminal-output');
+            term.innerHTML += `<p class="text-sky-300">&gt; ${val}</p>`;
+
+            if (cliState === 'MENU') {
+                if (val === '1') { cliMin = 1; cliMax = 10; }
+                else if (val === '2') { cliMin = 1; cliMax = 50; }
+                else if (val === '3') { cliMin = 1; cliMax = 100; }
+                else { cliMin = 1; cliMax = 10; }
+
+                cliState = 'PLAYING';
+                cliCurrentQ = 1;
+                cliScore = 0;
+                askNextCliQuestion();
+            } else if (cliState === 'PLAYING') {
+                const userAns = parseInt(val);
+                if (userAns === cliTargetAns) {
+                    cliScore += 10;
+                    term.innerHTML += `<p class="text-emerald-400"> Correct! (+10 pts)</p>`;
+                } else {
+                    term.innerHTML += `<p class="text-rose-400"> Wrong! Jawaban benar: ${cliTargetAns}</p>`;
+                }
+
+                cliCurrentQ++;
+                if (cliCurrentQ > 10) {
+                    cliState = 'FINISHED';
+                    const accuracy = (cliScore / 100) * 100;
+                    term.innerHTML += `
+                        <p class="text-amber-300">==============================</p>
+                        <p class="text-amber-300">HASIL AKHIR - Total Skor: ${cliScore} / 100</p>
+                        <p class="text-amber-300">Akurasi Jawaban: ${accuracy.toFixed(1)}%</p>
+                        <p class="text-amber-300">==============================</p>
+                        <p class="text-slate-400">Ketik apapun lalu tekan Kirim untuk reset.</p>
+                    `;
+                } else {
+                    askNextCliQuestion();
+                }
+            } else if (cliState === 'FINISHED') {
+                resetCliSimulator();
+            }
+
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function askNextCliQuestion() {
+            const n1 = Math.floor(Math.random() * (cliMax - cliMin + 1)) + cliMin;
+            const n2 = Math.floor(Math.random() * (cliMax - cliMin + 1)) + cliMin;
+            const ops = ['+', '-', '*'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+
+            if (op === '+') cliTargetAns = n1 + n2;
+            if (op === '-') cliTargetAns = n1 - n2;
+            if (op === '*') cliTargetAns = n1 * n2;
+
+            const term = document.getElementById('cli-terminal-output');
+            term.innerHTML += `<p class="text-slate-200">Soal ${cliCurrentQ}/10: ${n1} ${op} ${n2} = ?</p>`;
+        }
+
+        function copyPythonCode() {
+            const code = document.getElementById('python-code-block').innerText;
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = code;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            showToast('Kode Python Berhasil Disalin!', 'fa-copy');
+        }
+
+        function downloadPythonScript() {
+            const code = document.getElementById('python-code-block').innerText;
+            const blob = new Blob([code], { type: 'text/x-python' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'math_game_cli.py';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Mengunduh math_game_cli.py', 'fa-download');
+        }
+
+        // ================= APP INITIALIZATION =================
+        window.onload = function() {
+            document.getElementById('global-stars').textContent = globalStars;
+            // Launch Home Hub by default
+            navigateTo('home');
+        };
     </script>
 </body>
 </html>
