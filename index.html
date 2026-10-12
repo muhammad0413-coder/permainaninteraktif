@@ -1,1291 +1,1020 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Camera, CameraOff, Trophy, Play, Pause, RotateCcw, 
-  CheckCircle2, XCircle, Clock, Users, Award, ShieldAlert, 
-  Volume2, VolumeX, Plus, Trash2, Edit3, Share2, HelpCircle, 
-  Sparkles, Code, Settings, ChevronRight, ArrowLeft, Check, X,
-  UserCheck, Zap, RefreshCw, Eye, AlertCircle, BookOpen, User,
-  Video, Sliders, Image, CheckCircle
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GAME KAMERA BENAR-SALAH - Deep Learning Kurmer 2026</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-class SoundEffects {
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --secondary: #06B6D4;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --dark: #0F172A;
+      --light: #F8FAFC;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --radius: 20px;
+      --shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      color: #334155;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1100px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand i {
+      color: var(--secondary);
+      font-size: 1.5rem;
+    }
+
+    .audio-toggle {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .audio-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    /* Screen Views */
+    .view {
+      display: none;
+      flex: 1;
+      padding: 24px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.95rem;
+      color: #64748B;
+    }
+
+    /* Form Inputs & Buttons */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    
+    .btn-secondary { background: #E2E8F0; color: var(--dark); }
+    .btn-secondary:hover { background: #CBD5E1; }
+
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+
+    /* Camera Feed Component */
+    .camera-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 3px solid rgba(255,255,255,0.2);
+    }
+
+    video.camera-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Mirror view */
+    }
+
+    .camera-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      transition: background 0.3s;
+    }
+
+    .camera-overlay.state-correct {
+      background: rgba(16, 185, 129, 0.4);
+      border: 6px solid var(--success);
+    }
+
+    .camera-overlay.state-wrong {
+      background: rgba(239, 68, 68, 0.4);
+      border: 6px solid var(--danger);
+    }
+
+    .camera-badge {
+      align-self: flex-start;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .camera-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Game HUD & Arena */
+    .game-hud {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .timer-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      border: 4px solid var(--primary);
+      box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .question-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .question-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #EEF2FF;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1.4;
+    }
+
+    /* Option Buttons (A / B) */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .option-btn {
+      padding: 24px 16px;
+      border-radius: 18px;
+      border: 3px solid transparent;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+    }
+
+    .option-btn .label {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .option-btn .text {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .option-btn.btn-a { border-color: #3B82F6; color: #2563EB; }
+    .option-btn.btn-b { border-color: #EC4899; color: #DB2777; }
+
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+    }
+
+    .option-btn.selected {
+      background: #F1F5F9;
+      box-shadow: inset 0 0 0 3px var(--dark);
+    }
+
+    .option-btn.is-correct {
+      background: #D1FAE5 !important;
+      border-color: var(--success) !important;
+      color: #065F46 !important;
+    }
+
+    .option-btn.is-wrong {
+      background: #FEE2E2 !important;
+      border-color: var(--danger) !important;
+      color: #991B1B !important;
+    }
+
+    /* Host Controls & Tables */
+    .host-dashboard {
+      width: 100%;
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #E2E8F0;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #F8FAFC;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    /* Leaderboard Podium */
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      margin: 32px 0;
+      width: 100%;
+    }
+
+    .podium-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 30%;
+    }
+
+    .podium-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .podium-box {
+      width: 100%;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 16px 8px;
+      font-weight: 800;
+    }
+
+    .rank-1 .podium-box { background: linear-gradient(180deg, #F59E0B, #D97706); height: 140px; }
+    .rank-2 .podium-box { background: linear-gradient(180deg, #94A3B8, #64748B); height: 110px; }
+    .rank-3 .podium-box { background: linear-gradient(180deg, #D97706, #B45309); height: 80px; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .card { padding: 20px; }
+      .options-grid { grid-template-columns: 1fr; }
+      .question-text { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <i class="fa-solid fa-camera-retro"></i>
+      <span>GAME KAMERA BENAR-SALAH</span>
+    </div>
+    <button class="audio-toggle" id="audioToggleBtn" title="Aktifkan/Matikan Suara">
+      <i class="fa-solid fa-volume-high"></i>
+    </button>
+  </header>
+
+  <!-- SCREEN 1: LANDING & ROLE SELECTION -->
+  <div id="screenLanding" class="view active">
+    <div class="card">
+      <div class="card-header">
+        <h1 class="card-title">Selamat Datang! 👋</h1>
+        <p class="card-subtitle">Pembelajaran Interaktif & Fun berbasis Kurikulum Merdeka 2026</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="btn btn-primary" onclick="App.showScreen('screenStudentJoin')">
+          <i class="fa-solid fa-user-graduate"></i> Masuk Sebagai Siswa
+        </button>
+        <button class="btn btn-secondary" onclick="App.showScreen('screenHostDashboard')">
+          <i class="fa-solid fa-chalkboard-user"></i> Menu Guru / Host
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: STUDENT JOIN -->
+  <div id="screenStudentJoin" class="view">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Gabung Permainan 🚀</h2>
+        <p class="card-subtitle">Sistem otomatis mendeteksi perangkat kelas aktif</p>
+      </div>
+
+      <div class="form-group">
+        <label for="studentName">Nama / Nickname Siswa</label>
+        <input type="text" id="studentName" placeholder="Contoh: Budi Prasetyo" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Uji & Aktifkan Kamera Perangkat</label>
+        <div class="camera-wrapper" style="height: 180px; margin-bottom: 8px;">
+          <video id="previewCamera" class="camera-feed" autoplay playsinline muted></video>
+          <div class="camera-overlay">
+            <div class="camera-badge"><div class="dot"></div> PRATINJAU</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="App.initCamera('previewCamera')">
+          <i class="fa-solid fa-video"></i> Tes Kamera
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="App.showScreen('screenLanding')">Batal</button>
+        <button class="btn btn-primary" onclick="App.joinAsStudent()">Masuk Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ARENA GAME SISWA -->
+  <div id="screenStudentArena" class="view">
+    <div class="game-hud">
+      <div>
+        <h3 id="hudStudentName" style="font-weight: 800;">Siswa</h3>
+        <p id="hudStatus" style="font-size: 0.85rem; opacity: 0.8;">Status: Bertahan 🟢</p>
+      </div>
+      <div class="timer-circle" id="timerDisplay">10</div>
+    </div>
+
+    <!-- Live Camera Feed Viewer -->
+    <div class="camera-wrapper" id="arenaCameraWrapper">
+      <video id="arenaCamera" class="camera-feed" autoplay playsinline muted></video>
+      <div class="camera-overlay" id="cameraOverlay">
+        <div class="camera-badge"><div class="dot"></div> KAMERA LIVE SISWA</div>
+        <div id="answerFeedbackText" style="text-align: center; font-weight: 800; font-size: 1.5rem; color: white;"></div>
+      </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="question-card">
+      <span class="question-tag" id="questionCategory">MATA PELAJARAN</span>
+      <h2 class="question-text" id="questionText">Memuat Pertanyaan...</h2>
+    </div>
+
+    <!-- Options A / B -->
+    <div class="options-grid">
+      <button class="option-btn btn-a" id="btnOptionA" onclick="App.submitAnswer('A')">
+        <span class="label">A</span>
+        <span class="text" id="labelOptionA">Pilihan A</span>
+      </button>
+      <button class="option-btn btn-b" id="btnOptionB" onclick="App.submitAnswer('B')">
+        <span class="label">B</span>
+        <span class="text" id="labelOptionB">Pilihan B</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: MENU GURU / HOST DASHBOARD -->
+  <div id="screenHostDashboard" class="view">
+    <div class="host-dashboard">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fa-solid fa-sliders"></i> Panel Kelola Guru</h2>
+        <button class="btn btn-secondary" style="width: auto; padding: 8px 16px;" onclick="App.showScreen('screenLanding')">Keluar</button>
+      </div>
+
+      <div class="form-group">
+        <label>Mode Permainan</label>
+        <select id="gameModeSelect">
+          <option value="elimination">Mode Bertahan (Eliminasi Langsung)</option>
+          <option value="point">Mode Poin (Bermain Hingga Akhir)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button class="btn btn-success" onclick="App.startHostGame()">
+          <i class="fa-solid fa-play"></i> Mulai Game Kelas
+        </button>
+        <button class="btn btn-secondary" onclick="App.resetDefaultQuestions()">
+          <i class="fa-solid fa-rotate-left"></i> Reset Soal Kurmer 2026
+        </button>
+      </div>
+
+      <h3>Daftar Bank Soal SD (Deep Learning Kurmer 2026)</h3>
+      <div class="table-responsive">
+        <table id="questionsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mata Pelajaran</th>
+              <th>Pertanyaan</th>
+              <th>Kunci</th>
+              <th>Waktu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: LEADERBOARD / HASIL AKHIR -->
+  <div id="screenLeaderboard" class="view">
+    <div class="card" style="max-width: 700px; text-align: center;">
+      <h1 class="card-title">🏆 HASIL AKHIR PERMAINAN 🏆</h1>
+      <p class="card-subtitle">Selamat kepada para pemenang dan seluruh siswa hebat!</p>
+
+      <!-- Top 3 Podium -->
+      <div class="podium-container" id="podiumDisplay">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Peringkat</th>
+              <th>Nama Siswa</th>
+              <th>Skor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top: 24px;" onclick="App.showScreen('screenLanding')">
+        Kembali ke Halaman Utama
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * AUDIO ENGINE (Web Audio API)
+ * Menghasilkan efek suara sintetis tanpa dependency file eksternal.
+ */
+class SoundEngine {
   constructor() {
     this.ctx = null;
-    this.muted = false;
+    this.enabled = true;
   }
 
   init() {
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     }
   }
 
-  playTone(freq, type, duration, gainVal = 0.1) {
-    if (this.muted) return;
+  playTone(freq, type, duration) {
+    if (!this.enabled) return;
+    this.init();
     try {
-      this.init();
-      if (!this.ctx) return;
-
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = type;
       osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-
-      gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-
+      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-
       osc.start();
       osc.stop(this.ctx.currentTime + duration);
-    } catch (e) {
-      console.warn("Audio play error:", e);
-    }
+    } catch (e) { console.error(e); }
   }
 
-  tick() {
-    this.playTone(800, 'sine', 0.05, 0.05);
+  playCorrect() {
+    this.playTone(523.25, 'sine', 0.15); // C5
+    setTimeout(() => this.playTone(659.25, 'sine', 0.2), 100); // E5
+    setTimeout(() => this.playTone(783.99, 'sine', 0.3), 200); // G5
   }
 
-  correct() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-      setTimeout(() => this.playTone(freq, 'triangle', 0.2, 0.15), idx * 80);
-    });
+  playWrong() {
+    this.playTone(220, 'sawtooth', 0.2);
+    setTimeout(() => this.playTone(196, 'sawtooth', 0.3), 150);
   }
 
-  wrong() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-    this.playTone(200, 'sawtooth', 0.25, 0.2);
-    setTimeout(() => this.playTone(150, 'sawtooth', 0.35, 0.2), 150);
-  }
-
-  eliminated() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-    [300, 250, 200, 150].forEach((freq, idx) => {
-      setTimeout(() => this.playTone(freq, 'sawtooth', 0.2, 0.2), idx * 100);
-    });
-  }
-
-  fanfare() {
-    if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
-    const notes = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
-    const delays = [0, 150, 300, 450, 600, 850];
-    const durations = [0.12, 0.12, 0.12, 0.12, 0.2, 0.6];
-    notes.forEach((freq, idx) => {
-      setTimeout(() => this.playTone(freq, 'triangle', durations[idx], 0.2), delays[idx]);
-    });
+  playTick() {
+    this.playTone(800, 'square', 0.05);
   }
 }
 
-const sfx = new SoundEffects();
-
-const DEEP_LEARNING_KURMER_2026_QUESTIONS = [
+/**
+ * BANK SOAL DEEP LEARNING KURIKULUM MERDEKA 2026 (SD)
+ * Berorientasi pada HOTS, Problem Solving, dan Pembelajaran Bermakna.
+ */
+const DEFAULT_QUESTIONS = [
   {
-    id: 'dl1',
-    subject: 'Literasi Digital & AI (Kurmer 2026)',
-    grade: 'Umum / SMA-SMP',
-    question: 'Kecerdasan Buatan (AI) Generatif dapat berpikir kritis dan merasakan kesadaran emosional seperti manusia secara mandiri.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'B',
-    duration: 10,
-    explanation: 'AI bekerja berdasarkan pemrosesan pola data matematis, bukan memiliki kesadaran emosional atau pemikiran mandiri.'
+    id: 1,
+    subject: "IPAS (Deep Learning)",
+    question: "Saat mati lampu di rumah, kamu menyalakan senter. Perubahan energi yang terjadi adalah energi kimia baterai menjadi energi listrik lalu menjadi energi cahaya. Benar atau Salah?",
+    optionA: "Benar",
+    optionB: "Salah",
+    answer: "A",
+    duration: 12
   },
   {
-    id: 'dl2',
-    subject: 'Sains & Lingkungan (Deep Learning)',
-    grade: 'Umum / SMP-SMA',
-    question: 'Pemanasan global terutama disebabkan oleh bocornya lapisan ozon yang memasukkan panas matahari secara langsung.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'B',
-    duration: 12,
-    explanation: 'Pemanasan global disebabkan oleh Efek Rumah Kaca yang merangkap radiasi panas bumi, bukan oleh lubang lapisan ozon.'
+    id: 2,
+    subject: "Matematika Pemecahan Masalah",
+    question: "Siti membeli 3 bungkus pensil. Setiap bungkus berisi 8 pensil. Pensil tersebut dibagikan rata kepada 4 temannya. Masing-masing teman mendapat 6 pensil. Benar atau Salah?",
+    optionA: "Benar",
+    optionB: "Salah",
+    answer: "A",
+    duration: 10
   },
   {
-    id: 'dl3',
-    subject: 'Matematika & Geometri Logis',
-    grade: 'Umum / SD-SMP',
-    question: 'Jika panjang jari-jari r suatu lingkaran dilipatgandakan menjadi 2r, maka luas lingkaran menjadi 4 kali lipat dari semula.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'A',
-    duration: 12,
-    explanation: 'Luas lingkaran dikalkulasi dengan L = πr². Jika r menjadi 2r, maka L = π(2r)² = 4πr² (4 kali lipat).'
+    id: 3,
+    subject: "Bahasa Indonesia Literacy",
+    question: "Kalimat berikut: 'Adit menyiram tanaman bunga matahari di halaman rumah' adalah contoh dari kalimat pasif. Benar atau Salah?",
+    optionA: "Benar",
+    optionB: "Salah",
+    answer: "B",
+    duration: 10
   },
   {
-    id: 'dl4',
-    subject: 'Pembelajaran Mendalam (Deep Learning)',
-    grade: 'Edukasi Kurmer 2026',
-    question: 'Tujuan utama pendekatan Deep Learning Kurikulum Merdeka adalah menghafal sebanyak mungkin rumus dan teks pelajaran.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'B',
-    duration: 10,
-    explanation: 'Deep Learning mengutamakan pemahaman konsep mendalam (Mindful), penalaran kritis (Meaningful), dan kegembiraan belajar (Joyful).'
+    id: 4,
+    subject: "Pancasila & Karakter",
+    question: "Gotong royong membersihkan ruang kelas bersama teman tanpa membeda-bedakan suku adalah pengamalan Sila ke-3 Pancasila. Benar atau Salah?",
+    optionA: "Benar",
+    optionB: "Salah",
+    answer: "A",
+    duration: 10
   },
   {
-    id: 'dl5',
-    subject: 'Sains & Fisika Terapan',
-    grade: 'Umum / SMP-SMA',
-    question: 'Kecepatan gelombang bunyi di udara jauh lebih cepat dibandingkan kecepatan gelombang cahaya.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'B',
-    duration: 10,
-    explanation: 'Cahaya merambat hingga 300.000 km/s, sedangkan bunyi hanya merambat sekitar 340 m/s di udara.'
-  },
-  {
-    id: 'dl6',
-    subject: 'Literasi & Penalaran Logis',
-    grade: 'Umum / SD-SMP',
-    question: 'Pernyataan "Semua kucing adalah hewan, maka semua hewan adalah kucing" merupakan bentuk kesimpulan logika yang sah.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'B',
-    duration: 10,
-    explanation: 'Ini adalah kekeliruan logika silogisme terbalik (fallacy of converse). Hewan mencakup jenis lain selain kucing.'
-  },
-  {
-    id: 'dl7',
-    subject: 'Sains & Biologi Sel',
-    grade: 'Umum / SMP-SMA',
-    question: 'Mitokondria dijuluki sebagai "pembangkit tenaga sel" karena menghasilkan molekul energi ATP melalui respirasi seluler.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'A',
-    duration: 10,
-    explanation: 'Mitokondria mengubah nutrisi menjadi ATP yang dijadikan energi utama bagi aktivitas sel.'
-  },
-  {
-    id: 'dl8',
-    subject: 'Ekonomi & Finansial Modern',
-    grade: 'Umum / SMA',
-    question: 'Deflasi adalah kondisi ekonomi di mana harga barang secara umum mengalami penurunan terus-menerus.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'A',
-    duration: 10,
-    explanation: 'Deflasi merujuk pada penurunan harga secara umum, sedangkan Inflasi adalah kenaikan harga secara umum.'
-  },
-  {
-    id: 'dl9',
-    subject: 'Karakter Profil Pelajar Pancasila',
-    grade: 'Kurmer 2026',
-    question: 'Gotong royong, kemandirian, dan bernalar kritis merupakan bagian dari dimensi Profil Pelajar Pancasila.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'A',
-    duration: 8,
-    explanation: 'Dimensi Profil Pelajar Pancasila mencakup Beriman, Berkebinekaan Global, Gotong Royong, Mandiri, Bernalar Kritis, dan Kreatif.'
-  },
-  {
-    id: 'dl10',
-    subject: 'Geografi & Astronomi',
-    grade: 'Umum / SD-SMP',
-    question: 'Rotasi Bumi pada porosnya menyebabkan terjadinya pergantian siang dan malam di wilayah bumi.',
-    optionA: 'Benar',
-    optionB: 'Salah',
-    correctKey: 'A',
-    duration: 8,
-    explanation: 'Perputaran Bumi pada porosnya (Rotasi) mengakibatkan bagian bumi bergiliran menghadap matahari (siang dan malam).'
+    id: 5,
+    subject: "IPAS Lingkungan Hidup",
+    question: "Membuang sampah plastik ke sungai dapat dibenarkan karena plastik akan hancur dan larut secara alami dalam air sungai dalam hitungan hari. Benar atau Salah?",
+    optionA: "Benar",
+    optionB: "Salah",
+    answer: "B",
+    duration: 10
   }
 ];
 
-export default function App() {
-  // Navigation View: 'HOME' | 'PREPARE_DIRECT' | 'PLAY_DIRECT' | 'HOST_PANEL' | 'LEADERBOARD' | 'DEPLOY_GUIDE'
-  const [view, setView] = useState('HOME');
-  
-  // Audio Mute State
-  const [isMuted, setIsMuted] = useState(false);
+/**
+ * MAIN GAME CONTROLLER APPLICATION
+ */
+class GameApp {
+  constructor() {
+    this.sound = new SoundEngine();
+    this.questions = [...DEFAULT_QUESTIONS];
+    this.currentQuestionIdx = 0;
+    this.timer = null;
+    this.timeLeft = 0;
+    this.selectedAnswer = null;
+    this.score = 0;
+    this.isEliminated = false;
+    this.gameMode = 'elimination'; // 'elimination' or 'point'
+    this.mediaStream = null;
+    
+    // Multi-device sync channel (WebRTC / BroadcastChannel fallback)
+    this.broadcast = new BroadcastChannel('game_kamera_channel');
+    this.setupBroadcast();
+  }
 
-  // Custom Toast Notification System (Bebas dari alert/confirm)
-  const [toast, setToast] = useState(null);
+  init() {
+    this.renderQuestionsTable();
+    
+    document.getElementById('audioToggleBtn').addEventListener('click', () => {
+      this.sound.enabled = !this.sound.enabled;
+      document.getElementById('audioToggleBtn').innerHTML = this.sound.enabled ? 
+        '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+    });
+  }
 
-  const showToast = (message, type = 'info') => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 4000);
-  };
+  showScreen(screenId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
 
-  // Game Settings & Question Bank State
-  const [playerName, setPlayerName] = useState('Pemain 1');
-  const [gameMode, setGameMode] = useState('POINTS'); // 'SURVIVAL' or 'POINTS'
-  const [questions, setQuestions] = useState(DEEP_LEARNING_KURMER_2026_QUESTIONS);
-
-  // Direct Play Engine State
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [gameState, setGameState] = useState('QUESTION'); // 'QUESTION', 'REVEAL', 'FINISHED'
-  const [timer, setTimer] = useState(10);
-  const [selectedAnswer, setSelectedAnswer] = useState(null); // 'A' or 'B'
-  const [score, setScore] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [isEliminated, setIsEliminated] = useState(false);
-  const [answerTime, setAnswerTime] = useState(0);
-  const timerRef = useRef(null);
-
-  // Camera State & Testing Diagnostics
-  const [cameraActive, setCameraActive] = useState(false);
-  const [cameraStream, setCameraStream] = useState(null);
-  const [cameraDevices, setCameraDevices] = useState([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState('');
-  const [showCameraTestModal, setShowCameraTestModal] = useState(false);
-  const [testSnapshot, setTestSnapshot] = useState(null);
-  const [videoStats, setVideoStats] = useState({ width: 0, height: 0, status: 'Belum Aktif' });
-
-  const videoRef = useRef(null);
-  const testVideoRef = useRef(null);
-
-  const loadCameraDevices = async () => {
+  /* Setup Kamera Browser */
+  async initCamera(videoElementId) {
     try {
-      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = devices.filter(device => device.kind === 'videoinput');
-        setCameraDevices(videoInputs);
-        if (videoInputs.length > 0 && !selectedDeviceId) {
-          setSelectedDeviceId(videoInputs[0].deviceId);
-        }
+      if (this.mediaStream) {
+        this.mediaStream.getTracks().forEach(track => track.stop());
+      }
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 360 } },
+        audio: false
+      });
+      const videoEl = document.getElementById(videoElementId);
+      if (videoEl) {
+        videoEl.srcObject = this.mediaStream;
       }
     } catch (err) {
-      console.warn("Gagal membaca daftar perangkat kamera:", err);
+      alert("Kamera tidak dapat diakses atau izin ditolak. Permainan tetap dapat berjalan tanpa kamera.");
+      console.warn("Camera Error: ", err);
     }
-  };
-
-  const toggleCamera = async (overrideDeviceId = null) => {
-    if (cameraActive && !overrideDeviceId) {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-      }
-      setCameraStream(null);
-      setCameraActive(false);
-      setVideoStats({ width: 0, height: 0, status: 'Kamera Dimatikan' });
-      showToast("Kamera dinonaktifkan.", "info");
-    } else {
-      try {
-        if (cameraStream) {
-          cameraStream.getTracks().forEach(track => track.stop());
-        }
-
-        const deviceIdToUse = overrideDeviceId || selectedDeviceId;
-        const constraints = {
-          video: deviceIdToUse 
-            ? { deviceId: { exact: deviceIdToUse }, width: { ideal: 640 }, height: { ideal: 480 } }
-            : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-          audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        setCameraStream(stream);
-        setCameraActive(true);
-        loadCameraDevices();
-
-        const videoTrack = stream.getVideoTracks()[0];
-        const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
-        setVideoStats({
-          width: settings.width || 640,
-          height: settings.height || 480,
-          status: 'Kamera Aktif & Berfungsi Normal'
-        });
-
-        showToast("Kamera berhasil diaktifkan!", "success");
-        sfx.correct();
-      } catch (err) {
-        console.error("Gagal mengaktifkan kamera:", err);
-        setCameraActive(false);
-        setVideoStats({ width: 0, height: 0, status: 'Izin Ditolak / Tidak Ditemukan' });
-        showToast("Gagal mengakses kamera. Pastikan izin kamera telah diberikan di browser Anda.", "error");
-      }
-    }
-  };
-
-  // Capture Snapshot in Camera Tester
-  const takeTestSnapshot = () => {
-    const activeVideo = testVideoRef.current || videoRef.current;
-    if (!activeVideo || !cameraActive) {
-      showToast("Aktifkan kamera terlebih dahulu untuk mengambil foto tes.", "error");
-      return;
-    }
-
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = activeVideo.videoWidth || 640;
-      canvas.height = activeVideo.videoHeight || 480;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
-      setTestSnapshot(canvas.toDataURL('image/png'));
-      sfx.correct();
-      showToast("Foto tes berhasil diambil!", "success");
-    } catch (e) {
-      showToast("Gagal mengambil gambar snapshot.", "error");
-    }
-  };
-
-  useEffect(() => {
-    if (cameraStream) {
-      if (videoRef.current) videoRef.current.srcObject = cameraStream;
-      if (testVideoRef.current) testVideoRef.current.srcObject = cameraStream;
-    }
-  }, [cameraStream, view, showCameraTestModal]);
-
-  const toggleMute = () => {
-    sfx.muted = !isMuted;
-    setIsMuted(!isMuted);
-  };
-
-  useEffect(() => {
-    if (view === 'PLAY_DIRECT' && gameState === 'QUESTION') {
-      timerRef.current = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            handleDirectTimeUp();
-            return 0;
-          }
-          sfx.tick();
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-
-    return () => clearInterval(timerRef.current);
-  }, [view, gameState, currentQIndex]);
-
-  // Start Direct Game Immediately
-  const handleStartDirectGame = () => {
-    setCurrentQIndex(0);
-    setScore(0);
-    setCorrectCount(0);
-    setIsEliminated(false);
-    setSelectedAnswer(null);
-    setGameState('QUESTION');
-    setTimer(questions[0]?.duration || 10);
-    setView('PLAY_DIRECT');
-    sfx.tick();
-  };
-
-  const handleDirectAnswerSelect = (key) => {
-    if (gameState !== 'QUESTION' || isEliminated || selectedAnswer !== null) return;
-
-    const timeSpent = (questions[currentQIndex]?.duration || 10) - timer;
-    setSelectedAnswer(key);
-    setAnswerTime(timeSpent);
-    sfx.tick();
-  };
-
-  const handleDirectTimeUp = () => {
-    setGameState('REVEAL');
-    const currentQ = questions[currentQIndex];
-
-    if (selectedAnswer === currentQ.correctKey) {
-      sfx.correct();
-      const bonus = Math.max(0, Math.round((10 - answerTime) * 10));
-      setScore(prev => prev + 100 + bonus);
-      setCorrectCount(prev => prev + 1);
-    } else {
-      if (gameMode === 'SURVIVAL') {
-        setIsEliminated(true);
-        sfx.eliminated();
-      } else {
-        sfx.wrong();
-      }
-    }
-  };
-
-  const handleNextDirectQuestion = () => {
-    if (currentQIndex + 1 < questions.length && (!isEliminated || gameMode !== 'SURVIVAL')) {
-      const nextIdx = currentQIndex + 1;
-      setCurrentQIndex(nextIdx);
-      setSelectedAnswer(null);
-      setGameState('QUESTION');
-      setTimer(questions[nextIdx]?.duration || 10);
-      sfx.tick();
-    } else {
-      setGameState('FINISHED');
-      sfx.fanfare();
-      setView('LEADERBOARD');
-    }
-  };
-
-  const [editingQuestion, setEditingQuestion] = useState(null);
-  const [showQModal, setShowQModal] = useState(false);
-
-  const handleSaveQuestion = (q) => {
-    if (!q.question || !q.optionA || !q.optionB) {
-      showToast("Harap isi teks pertanyaan dan opsi A & B.", "error");
-      return;
-    }
-    if (q.id) {
-      setQuestions(prev => prev.map(item => item.id === q.id ? q : item));
-      showToast("Soal berhasil diperbarui!", "success");
-    } else {
-      setQuestions(prev => [...prev, { ...q, id: 'q_' + Date.now() }]);
-      showToast("Soal baru berhasil ditambahkan!", "success");
-    }
-    setShowQModal(false);
-    setEditingQuestion(null);
-  };
-
-  const handleDeleteQuestion = (id) => {
-    if (questions.length <= 1) {
-      showToast("Game harus memiliki minimal 1 pertanyaan!", "error");
-      return;
-    }
-    setQuestions(prev => prev.filter(q => q.id !== id));
-    showToast("Soal dihapus.", "info");
-  };
-
-  const handleShuffleQuestions = () => {
-    setQuestions(prev => [...prev].sort(() => Math.random() - 0.5));
-    showToast("Urutan soal berhasil diacak!", "success");
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
-      {/* Custom Toast Notification */}
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 animate-bounce">
-          <div className={`px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 ${
-            toast.type === 'error' ? 'bg-rose-900 border-rose-500 text-rose-100' :
-            toast.type === 'success' ? 'bg-emerald-900 border-emerald-500 text-emerald-100' :
-            'bg-indigo-900 border-indigo-500 text-indigo-100'
-          }`}>
-            {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
-            {toast.type === 'success' && <CheckCircle className="w-4 h-4 text-emerald-400" />}
-            {toast.type === 'info' && <Sparkles className="w-4 h-4 text-indigo-400" />}
-            <span>{toast.message}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation Top Bar */}
-      <header className="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-40 px-4 py-3 shadow-md">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div 
-            onClick={() => setView('HOME')} 
-            className="flex items-center gap-2 cursor-pointer group"
-          >
-            <div className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition">
-              <Camera className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
-                KAMERA BENAR-SALAH
-              </h1>
-              <p className="text-[11px] text-slate-400 font-medium">Deep Learning Kurikulum Merdeka 2026</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Audio Toggle */}
-            <button
-              onClick={toggleMute}
-              className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-semibold ${
-                isMuted 
-                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
-                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
-              }`}
-              title={isMuted ? "Suara Dimatikan" : "Suara Aktif"}
-            >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              <span className="hidden sm:inline">{isMuted ? "Bisu" : "Suara"}</span>
-            </button>
-
-            {/* Camera Diagnostic Tester Button */}
-            <button
-              onClick={() => {
-                loadCameraDevices();
-                setShowCameraTestModal(true);
-              }}
-              className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition"
-            >
-              <Video className="w-4 h-4 text-amber-400" />
-              <span className="hidden sm:inline">Tes Kamera</span>
-            </button>
-
-            {/* Quick Camera Toggle */}
-            <button
-              onClick={() => toggleCamera()}
-              className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-semibold ${
-                cameraActive 
-                  ? 'bg-indigo-500/20 border-indigo-400 text-indigo-300 hover:bg-indigo-500/30' 
-                  : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
-              }`}
-            >
-              {cameraActive ? <Camera className="w-4 h-4 text-emerald-400 animate-pulse" /> : <CameraOff className="w-4 h-4 text-slate-400" />}
-              <span className="hidden md:inline">{cameraActive ? "Kamera Aktif" : "Aktifkan Kamera"}</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="max-w-5xl w-full mx-auto p-4 flex-1 flex flex-col justify-center">
-
-        {/* =========================================================================
-            VIEW 1: HOME PAGE
-           ========================================================================= */}
-        {view === 'HOME' && (
-          <div className="space-y-8 my-auto py-6">
-            <div className="text-center max-w-2xl mx-auto space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5" /> Tanpa Login • Siapkan Materi & Langsung Main
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Game Kamera <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Benar atau Salah</span>
-              </h2>
-              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                Uji pemahaman materi umum dan konsep <strong className="text-indigo-300">Deep Learning Kurikulum Merdeka 2026</strong> secara interaktif. Beraksi dengan kamera dan jawab cepat sebelum waktu habis!
-              </p>
-            </div>
-
-            {/* HERO DIRECT PLAY ACTION BOX */}
-            <div className="max-w-xl mx-auto bg-gradient-to-b from-indigo-900/40 via-slate-800/90 to-slate-800 border-2 border-indigo-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <Zap className="w-32 h-32 text-indigo-400" />
-              </div>
-
-              <div className="space-y-2">
-                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[11px] font-bold uppercase tracking-wider">
-                  ⚡ Mode Cepat (Tanpa Syarat)
-                </span>
-                <h3 className="text-2xl font-black text-white">Langsung Bermain</h3>
-                <p className="text-slate-300 text-xs">
-                  Siapkan nama atau gunakan materi kuis standar 2026 yang sudah siap pakai!
-                </p>
-              </div>
-
-              {/* Camera Diagnostic Quick Status Banner */}
-              <div className="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-3 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${cameraActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
-                  <span className="text-slate-300 font-medium">
-                    Status Kamera: <strong className={cameraActive ? "text-emerald-400" : "text-slate-400"}>
-                      {cameraActive ? "Terhubung & Siap" : "Belum Diaktifkan"}
-                    </strong>
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    loadCameraDevices();
-                    setShowCameraTestModal(true);
-                  }}
-                  className="text-amber-400 hover:text-amber-300 font-bold underline flex items-center gap-1"
-                >
-                  <Video className="w-3.5 h-3.5" /> Uji Kamera
-                </button>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
-                  onClick={handleStartDirectGame}
-                  className="flex-1 py-4 px-6 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 hover:from-indigo-400 hover:to-pink-500 text-white font-extrabold text-base rounded-2xl shadow-xl shadow-indigo-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
-                >
-                  <Play className="w-5 h-5 fill-current" /> MULAI BERMAIN SEKARANG
-                </button>
-                <button
-                  onClick={() => setView('PREPARE_DIRECT')}
-                  className="py-4 px-5 bg-slate-700/80 hover:bg-slate-600 border border-slate-600 text-slate-200 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5"
-                >
-                  <BookOpen className="w-4 h-4 text-purple-400" /> Atur Materi ({questions.length} Soal)
-                </button>
-              </div>
-            </div>
-
-            {/* Secondary Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto pt-2">
-              <button
-                onClick={() => setView('HOST_PANEL')}
-                className="p-4 bg-slate-800/80 border border-slate-700/80 hover:border-slate-600 rounded-2xl text-left transition flex items-center gap-3 group"
-              >
-                <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl group-hover:scale-105 transition">
-                  <Award className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-white">Mode Kelas & Proyektor</h4>
-                  <p className="text-[11px] text-slate-400">Atur kuis untuk tayang di depan kelas</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setView('DEPLOY_GUIDE')}
-                className="p-4 bg-slate-800/80 border border-slate-700/80 hover:border-slate-600 rounded-2xl text-left transition flex items-center gap-3 group"
-              >
-                <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-105 transition">
-                  <Code className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-white">Panduan Deploy Server</h4>
-                  <p className="text-[11px] text-slate-400">Langkah publikasi gratis ke Vercel</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 2: PREPARE MATERIAL & OPTIONS
-           ========================================================================= */}
-        {view === 'PREPARE_DIRECT' && (
-          <div className="max-w-3xl mx-auto w-full space-y-6 py-4">
-            <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setView('HOME')}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl transition"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <h2 className="text-lg font-bold text-white">Persiapan Materi & Aturan Kuis</h2>
-                  <p className="text-xs text-slate-400">Atur nama pemain dan koleksi soal sebelum langsung bertanding</p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleStartDirectGame}
-                className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2"
-              >
-                <Play className="w-4 h-4 fill-current" /> Mulai Main ({questions.length} Soal)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Settings Box */}
-              <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 space-y-4">
-                <h3 className="font-bold text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-indigo-400" /> Profil & Mode
-                </h3>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-slate-400 mb-1">Nama Pemain</label>
-                    <input
-                      type="text"
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-slate-400 mb-1">Mode Aturan Game</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setGameMode('POINTS')}
-                        className={`p-2 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition ${
-                          gameMode === 'POINTS'
-                            ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300'
-                            : 'bg-slate-900 border-slate-700 text-slate-400'
-                        }`}
-                      >
-                        <Zap className="w-4 h-4" /> Mode Poin
-                      </button>
-                      <button
-                        onClick={() => setGameMode('SURVIVAL')}
-                        className={`p-2 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition ${
-                          gameMode === 'SURVIVAL'
-                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                            : 'bg-slate-900 border-slate-700 text-slate-400'
-                        }`}
-                      >
-                        <ShieldAlert className="w-4 h-4" /> Eliminasi
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-700">
-                    <button
-                      onClick={handleShuffleQuestions}
-                      className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl text-purple-300 flex items-center justify-center gap-1.5 transition"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" /> Acak Urutan Soal
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Questions Bank Box */}
-              <div className="md:col-span-2 bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-700 pb-2">
-                  <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-purple-400" /> Daftar Soal Deep Learning Kurmer ({questions.length})
-                  </h3>
-                  <button
-                    onClick={() => {
-                      setEditingQuestion({
-                        id: '',
-                        subject: 'Umum / Deep Learning',
-                        grade: 'Umum',
-                        question: '',
-                        optionA: 'Benar',
-                        optionB: 'Salah',
-                        correctKey: 'A',
-                        duration: 10,
-                        explanation: ''
-                      });
-                      setShowQModal(true);
-                    }}
-                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 transition"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Tambah Soal
-                  </button>
-                </div>
-
-                <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
-                  {questions.map((q, idx) => (
-                    <div 
-                      key={q.id} 
-                      className="bg-slate-900/90 border border-slate-700/70 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-slate-600 transition"
-                    >
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
-                            Soal #{idx + 1}
-                          </span>
-                          <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold truncate max-w-[200px]">
-                            {q.subject}
-                          </span>
-                        </div>
-                        <p className="text-xs font-semibold text-slate-200 line-clamp-2">{q.question}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        <button
-                          onClick={() => {
-                            setEditingQuestion(q);
-                            setShowQModal(true);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition"
-                          title="Edit"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteQuestion(q.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 3: DIRECT GAMEPLAY ARENA
-           ========================================================================= */}
-        {view === 'PLAY_DIRECT' && (
-          <div className="max-w-2xl mx-auto w-full space-y-4 py-2">
-            {/* Top Player Info Bar */}
-            <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setView('HOME')}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <div>
-                  <h3 className="font-bold text-white text-sm">{playerName}</h3>
-                  <span className="text-[10px] text-indigo-300">
-                    Mode: {gameMode === 'SURVIVAL' ? 'Eliminasi Bertahan' : 'Akumulasi Poin'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {/* Live Webcam Thumbnail in Game */}
-                {cameraActive && (
-                  <div className="w-20 aspect-video bg-black rounded-lg border border-emerald-500 overflow-hidden relative shadow-md">
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                    <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  </div>
-                )}
-
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block">TOTAL SKOR</span>
-                  <span className="text-lg font-black font-mono text-indigo-300">{score} pt</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Elimination Overlay */}
-            {isEliminated && gameMode === 'SURVIVAL' && (
-              <div className="bg-rose-950/90 border border-rose-800 rounded-3xl p-6 text-center space-y-3">
-                <ShieldAlert className="w-10 h-10 text-rose-400 mx-auto" />
-                <h3 className="text-2xl font-black text-rose-200">Kamu Tereliminasi!</h3>
-                <p className="text-xs text-rose-300">
-                  Jawaban pada pertanyaan ini kurang tepat dalam Mode Bertahan.
-                </p>
-                <button
-                  onClick={handleStartDirectGame}
-                  className="mt-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl"
-                >
-                  Coba Lagi Dari Awal
-                </button>
-              </div>
-            )}
-
-            {/* Question Card */}
-            {(!isEliminated || gameMode !== 'SURVIVAL') && (
-              <div className="bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-                {/* Status Header */}
-                <div className="flex justify-between items-center">
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded-xl border border-purple-500/30">
-                    Soal #{currentQIndex + 1} dari {questions.length}
-                  </span>
-
-                  {/* Circular Timer Visual */}
-                  <div className="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 font-mono font-bold text-amber-400 text-sm">
-                    <Clock className={`w-4 h-4 ${timer <= 3 ? 'text-rose-400 animate-bounce' : ''}`} />
-                    <span className={timer <= 3 ? 'text-rose-400' : ''}>{timer}s</span>
-                  </div>
-                </div>
-
-                {/* Question Topic & Text */}
-                <div className="text-center py-2 space-y-2">
-                  <span className="text-[11px] text-indigo-300 font-bold uppercase tracking-wider">
-                    [{questions[currentQIndex]?.subject}]
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-white leading-relaxed">
-                    "{questions[currentQIndex]?.question}"
-                  </h3>
-                </div>
-
-                {/* Big Tactile Benar / Salah Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Option A (Benar) */}
-                  <button
-                    disabled={gameState !== 'QUESTION' || selectedAnswer !== null}
-                    onClick={() => handleDirectAnswerSelect('A')}
-                    className={`p-5 rounded-2xl border-2 font-bold text-lg flex items-center justify-between transition-all transform active:scale-95 ${
-                      gameState === 'REVEAL'
-                        ? questions[currentQIndex]?.correctKey === 'A'
-                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/20'
-                          : selectedAnswer === 'A'
-                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                            : 'bg-slate-900 border-slate-800 opacity-50'
-                        : selectedAnswer === 'A'
-                          ? 'bg-indigo-600 border-indigo-400 text-white ring-4 ring-indigo-500/30'
-                          : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-xl bg-indigo-500/30 text-indigo-300 flex items-center justify-center font-black text-sm">
-                        A
-                      </span>
-                      <span>{questions[currentQIndex]?.optionA}</span>
-                    </div>
-
-                    {gameState === 'REVEAL' && questions[currentQIndex]?.correctKey === 'A' && (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                    )}
-                  </button>
-
-                  {/* Option B (Salah) */}
-                  <button
-                    disabled={gameState !== 'QUESTION' || selectedAnswer !== null}
-                    onClick={() => handleDirectAnswerSelect('B')}
-                    className={`p-5 rounded-2xl border-2 font-bold text-lg flex items-center justify-between transition-all transform active:scale-95 ${
-                      gameState === 'REVEAL'
-                        ? questions[currentQIndex]?.correctKey === 'B'
-                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/20'
-                          : selectedAnswer === 'B'
-                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
-                            : 'bg-slate-900 border-slate-800 opacity-50'
-                        : selectedAnswer === 'B'
-                          ? 'bg-purple-600 border-purple-400 text-white ring-4 ring-purple-500/30'
-                          : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-xl bg-purple-500/30 text-purple-300 flex items-center justify-center font-black text-sm">
-                        B
-                      </span>
-                      <span>{questions[currentQIndex]?.optionB}</span>
-                    </div>
-
-                    {gameState === 'REVEAL' && questions[currentQIndex]?.correctKey === 'B' && (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                    )}
-                  </button>
-                </div>
-
-                {/* Explanation Banner */}
-                {gameState === 'REVEAL' && (
-                  <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-xs text-indigo-200 space-y-2 animate-fade-in">
-                    <span className="font-bold flex items-center gap-1 text-indigo-300 text-xs">
-                      <Sparkles className="w-4 h-4" /> Penjelasan Pembelajaran:
-                    </span>
-                    <p className="leading-relaxed">{questions[currentQIndex]?.explanation}</p>
-                    <button
-                      onClick={handleNextDirectQuestion}
-                      className="mt-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition"
-                    >
-                      <span>Lanjut Soal Berikutnya</span> <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 4: LEADERBOARD & HASIL AKHIR
-           ========================================================================= */}
-        {view === 'LEADERBOARD' && (
-          <div className="max-w-md mx-auto w-full space-y-6 py-6 text-center">
-            <div className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
-              <div className="p-3 bg-amber-500/20 border border-amber-500/30 w-fit rounded-2xl mx-auto text-amber-400">
-                <Trophy className="w-10 h-10 animate-bounce" />
-              </div>
-
-              <div className="space-y-1">
-                <h2 className="text-2xl font-black text-white">Permainan Selesai!</h2>
-                <p className="text-xs text-slate-400">Hasil pertandingan kuis untuk <strong className="text-white">{playerName}</strong></p>
-              </div>
-
-              <div className="bg-slate-900 p-4 rounded-2xl border border-slate-700 space-y-3">
-                <div className="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-2">
-                  <span>Jawaban Benar</span>
-                  <span className="font-bold text-emerald-400">{correctCount} dari {questions.length} Soal</span>
-                </div>
-                <div className="flex justify-between items-center text-xs text-slate-400">
-                  <span>Total Skor Terkumpul</span>
-                  <span className="font-mono font-black text-lg text-indigo-300">{score} pt</span>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={handleStartDirectGame}
-                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg"
-                >
-                  <RotateCcw className="w-4 h-4" /> Main Lagi
-                </button>
-                <button
-                  onClick={() => setView('HOME')}
-                  className="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl"
-                >
-                  Beranda
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 5: TEACHER HOST PANEL
-           ========================================================================= */}
-        {view === 'HOST_PANEL' && (
-          <div className="space-y-6 py-4">
-            <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setView('HOME')}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl transition"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <h2 className="text-lg font-bold text-white">Panel Kelola Guru & Mode Proyektor</h2>
-                  <p className="text-xs text-slate-400">Tampilkan kuis secara interaktif di layar depan kelas</p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleStartDirectGame}
-                className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2"
-              >
-                <Play className="w-4 h-4 fill-current" /> Buka Kuis Langsung
-              </button>
-            </div>
-
-            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 space-y-3">
-              <h3 className="font-bold text-slate-200 text-sm">Mode Proyektor Kelas</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Anda dapat menghubungkan layar ke proyektor kelas dan mengajak seluruh siswa menjawab secara bersamaan. Gunakan tombol kamera di bagian atas untuk mengaktifkan pratinjau reaksi siswa saat menjawab!
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 6: PANDUAN DEPLOYMENT GITHUB & VERCEL
-           ========================================================================= */}
-        {view === 'DEPLOY_GUIDE' && (
-          <div className="max-w-4xl mx-auto w-full space-y-6 py-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setView('HOME')}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <h2 className="text-2xl font-black text-white">Panduan Deploy GitHub & Vercel</h2>
-                  <p className="text-xs text-slate-400">Langkah-langkah publikasi aplikasi ke server cloud publik</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-xs sm:text-sm">
-              <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 space-y-3">
-                <h3 className="font-bold text-indigo-300 flex items-center gap-2 text-base">
-                  <Code className="w-5 h-5" /> 1. File Konfigurasi <code className="text-purple-300 font-mono">package.json</code>
-                </h3>
-                <pre className="bg-slate-900 p-4 rounded-xl font-mono text-slate-300 overflow-x-auto text-xs border border-slate-800">
-{`{
-  "name": "game-kamera-benar-salah",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "^0.263.1"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
   }
-}`}
-                </pre>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* =========================================================================
-            MODAL 1: DIAGNOSTIC & TEST CAMERA TOOL
-           ========================================================================= */}
-        {showCameraTestModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-              <div className="flex justify-between items-center border-b border-slate-700 pb-3">
-                <div className="flex items-center gap-2">
-                  <Video className="w-5 h-5 text-amber-400" />
-                  <h3 className="font-bold text-base text-white">Uji & Diagnosis Kamera</h3>
-                </div>
-                <button 
-                  onClick={() => setShowCameraTestModal(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+  /* Multi-Device Communication Sync */
+  setupBroadcast() {
+    this.broadcast.onmessage = (event) => {
+      const data = event.data;
+      if (data.type === 'START_GAME') {
+        this.gameMode = data.mode;
+        this.startStudentGame();
+      } else if (data.type === 'NEXT_QUESTION') {
+        this.loadQuestion(data.question);
+      } else if (data.type === 'SHOW_RESULT') {
+        this.revealAnswer(data.correctAnswer);
+      }
+    };
+  }
 
-              {/* Camera Live Preview & Snapshot Display */}
-              <div className="space-y-3">
-                <div className="aspect-video bg-black rounded-2xl border-2 border-slate-700 overflow-hidden relative flex items-center justify-center">
-                  {cameraActive ? (
-                    <video ref={testVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center p-4 space-y-2">
-                      <CameraOff className="w-10 h-10 text-slate-500 mx-auto" />
-                      <p className="text-xs text-slate-400">Kamera saat ini belum diaktifkan.</p>
-                    </div>
-                  )}
+  joinAsStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    if (!name) {
+      alert("Silakan masukkan nama atau nickname Anda terlebih dahulu!");
+      return;
+    }
+    document.getElementById('hudStudentName').innerText = name;
+    this.initCamera('arenaCamera');
+    this.showScreen('screenStudentArena');
+    this.loadQuestion(this.questions[0]);
+  }
 
-                  {cameraActive && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur rounded-lg text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1.5 border border-emerald-500/30">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      LIVE ({videoStats.width}x{videoStats.height})
-                    </div>
-                  )}
-                </div>
+  loadQuestion(q) {
+    this.selectedAnswer = null;
+    const overlay = document.getElementById('cameraOverlay');
+    overlay.className = 'camera-overlay';
+    document.getElementById('answerFeedbackText').innerText = '';
 
-                {/* Device Selector (If Multiple Cameras Present) */}
-                {cameraDevices.length > 0 && (
-                  <div>
-                    <label className="block text-xs text-slate-400 mb-1">Pilih Perangkat Kamera:</label>
-                    <select
-                      value={selectedDeviceId}
-                      onChange={(e) => {
-                        setSelectedDeviceId(e.target.value);
-                        toggleCamera(e.target.value);
-                      }}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 focus:outline-none"
-                    >
-                      {cameraDevices.map((device, idx) => (
-                        <option key={device.deviceId || idx} value={device.deviceId}>
-                          {device.label || `Kamera ${idx + 1}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+    const btnA = document.getElementById('btnOptionA');
+    const btnB = document.getElementById('btnOptionB');
+    btnA.className = 'option-btn btn-a';
+    btnB.className = 'option-btn btn-b';
+    btnA.disabled = false;
+    btnB.disabled = false;
 
-                {/* Action Buttons inside Camera Tester */}
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    onClick={() => toggleCamera()}
-                    className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
-                      cameraActive 
-                        ? 'bg-rose-600 hover:bg-rose-500 text-white' 
-                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                    }`}
-                  >
-                    {cameraActive ? <CameraOff className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
-                    <span>{cameraActive ? "Matikan Kamera" : "Nyalakan Kamera"}</span>
-                  </button>
+    document.getElementById('questionCategory').innerText = q.subject;
+    document.getElementById('questionText').innerText = q.question;
+    document.getElementById('labelOptionA').innerText = q.optionA;
+    document.getElementById('labelOptionB').innerText = q.optionB;
 
-                  <button
-                    disabled={!cameraActive}
-                    onClick={takeTestSnapshot}
-                    className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
-                  >
-                    <Image className="w-4 h-4" />
-                    <span>Ambil Foto Uji</span>
-                  </button>
-                </div>
+    this.startTimer(q.duration, () => {
+      this.revealAnswer(q.answer);
+    });
+  }
 
-                {/* Snapshot Thumbnail Preview */}
-                {testSnapshot && (
-                  <div className="p-3 bg-slate-900 rounded-2xl border border-slate-700 space-y-2">
-                    <span className="text-[10px] text-indigo-300 font-bold block">Hasil Tangkapan Gambar Tes:</span>
-                    <img src={testSnapshot} alt="Snapshot Test" className="w-28 rounded-lg border border-slate-700 shadow-md" />
-                  </div>
-                )}
-              </div>
+  submitAnswer(choice) {
+    if (this.selectedAnswer !== null) return; // Kunci jawaban
+    this.selectedAnswer = choice;
 
-              <div className="pt-2 border-t border-slate-700 flex justify-end">
-                <button
-                  onClick={() => setShowCameraTestModal(false)}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl"
-                >
-                  Selesai Uji
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+    const btnA = document.getElementById('btnOptionA');
+    const btnB = document.getElementById('btnOptionB');
 
-        {/* =========================================================================
-            MODAL 2: EDIT / ADD QUESTION
-           ========================================================================= */}
-        {showQModal && editingQuestion && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h3 className="font-bold text-base text-white">
-                  {editingQuestion.id ? 'Edit Pertanyaan' : 'Tambah Pertanyaan Baru'}
-                </h3>
-                <button 
-                  onClick={() => setShowQModal(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+    if (choice === 'A') btnA.classList.add('selected');
+    if (choice === 'B') btnB.classList.add('selected');
 
-              <div className="space-y-3 text-xs">
-                <div>
-                  <label className="block text-slate-400 mb-1">Teks Pertanyaan</label>
-                  <textarea
-                    rows={3}
-                    value={editingQuestion.question}
-                    onChange={(e) => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:border-indigo-500"
-                    placeholder="Tuliskan pertanyaan di sini..."
-                  />
-                </div>
+    btnA.disabled = true;
+    btnB.disabled = true;
+  }
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-400 mb-1">Kunci Jawaban Benar</label>
-                    <select
-                      value={editingQuestion.correctKey}
-                      onChange={(e) => setEditingQuestion({ ...editingQuestion, correctKey: e.target.value })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
-                    >
-                      <option value="A">A (Benar)</option>
-                      <option value="B">B (Salah)</option>
-                    </select>
-                  </div>
+  startTimer(seconds, onComplete) {
+    clearInterval(this.timer);
+    this.timeLeft = seconds;
+    const display = document.getElementById('timerDisplay');
+    display.innerText = this.timeLeft;
 
-                  <div>
-                    <label className="block text-slate-400 mb-1">Mata Pelajaran / Topik</label>
-                    <input
-                      type="text"
-                      value={editingQuestion.subject}
-                      onChange={(e) => setEditingQuestion({ ...editingQuestion, subject: e.target.value })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
-                    />
-                  </div>
-                </div>
+    this.timer = setInterval(() => {
+      this.timeLeft--;
+      display.innerText = this.timeLeft;
+      this.sound.playTick();
 
-                <div>
-                  <label className="block text-slate-400 mb-1">Penjelasan Pembelajaran</label>
-                  <input
-                    type="text"
-                    value={editingQuestion.explanation}
-                    onChange={(e) => setEditingQuestion({ ...editingQuestion, explanation: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
-                    placeholder="Penjelasan ringkas saat kunci terbuka..."
-                  />
-                </div>
-              </div>
+      if (this.timeLeft <= 0) {
+        clearInterval(this.timer);
+        onComplete();
+      }
+    }, 1000);
+  }
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-700">
-                <button
-                  onClick={() => setShowQModal(false)}
-                  className="px-4 py-2 bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={() => handleSaveQuestion(editingQuestion)}
-                  className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl"
-                >
-                  Simpan Pertanyaan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+  revealAnswer(correctAnswer) {
+    const overlay = document.getElementById('cameraOverlay');
+    const feedback = document.getElementById('answerFeedbackText');
+    const btnA = document.getElementById('btnOptionA');
+    const btnB = document.getElementById('btnOptionB');
 
-      {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-800 py-3 px-4 text-center text-xs text-slate-400">
-        <p>Aplikasi Game Kamera Benar-Salah • Deep Learning Kurikulum Merdeka 2026</p>
-      </footer>
-    </div>
-  );
+    // Highlight jawaban
+    if (correctAnswer === 'A') btnA.classList.add('is-correct');
+    else btnA.classList.add('is-wrong');
+
+    if (correctAnswer === 'B') btnB.classList.add('is-correct');
+    else btnB.classList.add('is-wrong');
+
+    // Evaluasi Jawaban Siswa
+    if (this.selectedAnswer === correctAnswer) {
+      this.score += 100;
+      overlay.classList.add('state-correct');
+      feedback.innerText = "JAWABAN BENAR! 🟢";
+      this.sound.playCorrect();
+    } else {
+      overlay.classList.add('state-wrong');
+      feedback.innerText = this.selectedAnswer === null ? "WAKTU HABIS! 🔴" : "JAWABAN SALAH! 🔴";
+      this.sound.playWrong();
+
+      if (this.gameMode === 'elimination') {
+        this.isEliminated = true;
+        document.getElementById('hudStatus').innerText = "Status: Tereliminasi 🔴";
+      }
+    }
+
+    // Lanjut Soal Berikutnya / Selesai
+    setTimeout(() => {
+      this.currentQuestionIdx++;
+      if (this.currentQuestionIdx < this.questions.length && !this.isEliminated) {
+        this.loadQuestion(this.questions[this.currentQuestionIdx]);
+      } else {
+        this.finishGame();
+      }
+    }, 3000);
+  }
+
+  startHostGame() {
+    this.gameMode = document.getElementById('gameModeSelect').value;
+    this.broadcast.postMessage({ type: 'START_GAME', mode: this.gameMode });
+    this.currentQuestionIdx = 0;
+    this.showScreen('screenStudentArena');
+    this.loadQuestion(this.questions[0]);
+  }
+
+  finishGame() {
+    this.showScreen('screenLeaderboard');
+    this.renderLeaderboard();
+  }
+
+  renderLeaderboard() {
+    const studentName = document.getElementById('studentName').value || "Siswa 1";
+    const leaderboardData = [
+      { rank: 1, name: studentName, score: this.score, status: this.isEliminated ? 'Tereliminasi' : 'Bertahan' },
+      { rank: 2, name: "Budi (Perangkat 2)", score: 80, status: 'Tereliminasi' },
+      { rank: 3, name: "Siti (Perangkat 3)", score: 60, status: 'Tereliminasi' }
+    ];
+
+    // Render Podium Top 3
+    const podiumHtml = `
+      <div class="podium-step rank-2">
+        <div class="podium-avatar">🥈</div>
+        <div class="podium-box">
+          <span>${leaderboardData[1].name}</span>
+          <small>${leaderboardData[1].score} Pts</small>
+        </div>
+      </div>
+      <div class="podium-step rank-1">
+        <div class="podium-avatar">👑</div>
+        <div class="podium-box">
+          <span>${leaderboardData[0].name}</span>
+          <small>${leaderboardData[0].score} Pts</small>
+        </div>
+      </div>
+      <div class="podium-step rank-3">
+        <div class="podium-avatar">🥉</div>
+        <div class="podium-box">
+          <span>${leaderboardData[2].name}</span>
+          <small>${leaderboardData[2].score} Pts</small>
+        </div>
+      </div>
+    `;
+    document.getElementById('podiumDisplay').innerHTML = podiumHtml;
+
+    // Render Table
+    const tbody = document.getElementById('leaderboardBody');
+    tbody.innerHTML = leaderboardData.map(d => `
+      <tr>
+        <td><b>#${d.rank}</b></td>
+        <td>${d.name}</td>
+        <td><b>${d.score}</b></td>
+        <td><span style="color: ${d.status === 'Bertahan' ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${d.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  renderQuestionsTable() {
+    const tbody = document.querySelector('#questionsTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = this.questions.map((q, idx) => `
+      <tr>
+        <td>${idx + 1}</td>
+        <td><b>${q.subject}</b></td>
+        <td>${q.question}</td>
+        <td><span class="question-tag">${q.answer}</span></td>
+        <td>${q.duration}s</td>
+      </tr>
+    `).join('');
+  }
+
+  resetDefaultQuestions() {
+    this.questions = [...DEFAULTQUESTIONS];
+    this.renderQuestionsTable();
+    alert("Bank Soal Deep Learning Kurikulum Merdeka 2026 berhasil diperbarui!");
+  }
 }
+
+// Inisialisasi Aplikasi Web
+const App = new GameApp();
+window.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
