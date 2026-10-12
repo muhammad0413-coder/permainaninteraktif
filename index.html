@@ -134,11 +134,11 @@
             gap: 12px;
         }
 
-        /* KAMERA UTAMA */
+        /* CONTAINER KAMERA UTAMA */
         .camera-container {
             position: relative;
             width: 100%;
-            height: 440px;
+            height: 480px;
             background: #000;
             border-radius: 24px;
             overflow: hidden;
@@ -156,14 +156,14 @@
         /* SOAL TERINTEGRASI DI DALAM KAMERA (BAGIAN ATAS) */
         .camera-question-overlay {
             position: absolute;
-            top: 50px;
+            top: 52px;
             left: 15px;
             right: 15px;
             background: rgba(15, 23, 42, 0.88);
             color: white;
             padding: 14px 20px;
             border-radius: 16px;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 700;
             text-align: center;
             z-index: 8;
@@ -213,7 +213,7 @@
             z-index: 5;
         }
 
-        /* ZONA KIRI & KANAN (TANPA WARNA SAAT TIMER BERJALAN) */
+        /* ZONA KIRI & KANAN */
         .camera-split-zones {
             position: absolute;
             inset: 0;
@@ -224,8 +224,8 @@
 
         .zone-left, .zone-right {
             flex: 1;
-            background: rgba(255, 255, 255, 0.03); /* Netral Netral Transparan */
-            transition: background 0.4s ease;
+            background: transparent;
+            transition: all 0.3s ease;
             display: flex;
             align-items: flex-end;
             padding: 20px;
@@ -240,26 +240,49 @@
             justify-content: flex-end;
         }
 
-        /* REVEAL WARNA SETELAH SOAL SELESAI */
-        .zone-left.reveal-correct, .zone-right.reveal-correct {
-            background: rgba(34, 197, 94, 0.78) !important; /* HIJAU BENAR */
+        /* BINGKAI PINGGIRAN (BORDER ONLY) SETELAH SOAL SELESAI */
+        .zone-left.reveal-correct {
+            box-shadow: inset 0 0 0 12px #22c55e; /* PINGGIRAN HIJAU TEBAL */
+            background: rgba(34, 197, 94, 0.12); /* TINT TRANSPARAN KECIL AGAR KAMERA JELAS */
         }
 
-        .zone-left.reveal-wrong, .zone-right.reveal-wrong {
-            background: rgba(239, 68, 68, 0.78) !important; /* MERAH SALAH */
+        .zone-right.reveal-correct {
+            box-shadow: inset 0 0 0 12px #22c55e;
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .zone-left.reveal-wrong {
+            box-shadow: inset 0 0 0 12px #ef4444; /* PINGGIRAN MERAH TEBAL */
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .zone-right.reveal-wrong {
+            box-shadow: inset 0 0 0 12px #ef4444;
+            background: rgba(239, 68, 68, 0.12);
         }
 
         .zone-badge {
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 12px;
             font-weight: 800;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: white;
             text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .zone-badge.badge-correct {
+            background: rgba(34, 197, 94, 0.95) !important;
+            border-color: white !important;
+        }
+
+        .zone-badge.badge-wrong {
+            background: rgba(239, 68, 68, 0.95) !important;
+            border-color: white !important;
         }
 
         .timer-badge {
@@ -269,13 +292,13 @@
             transform: translateX(-50%);
             background: var(--warning);
             color: white;
-            width: 52px;
-            height: 52px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             font-weight: 800;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             z-index: 7;
@@ -287,7 +310,7 @@
             100% { transform: translateX(-50%) scale(1.08); }
         }
 
-        /* OVERLAY JEDA & STATUS HASIL */
+        /* OVERLAY NOTIFIKASI HASIL RINGKAS */
         .status-overlay {
             position: absolute;
             inset: 0;
@@ -301,50 +324,22 @@
             z-index: 10;
             text-transform: uppercase;
             letter-spacing: 2px;
-            backdrop-filter: blur(4px);
-            background: rgba(15, 23, 42, 0.5);
+            pointer-events: none;
         }
 
         .status-overlay.active { display: flex; }
 
-        /* JAWABAN DI BAWAH KAMERA */
-        .answers-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .btn-answer {
-            padding: 16px 12px;
-            font-size: 1.05rem;
-            font-weight: 800;
-            border-radius: 16px;
-            border: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer;
-            color: white;
-            transition: all 0.2s;
+        .status-box {
+            background: rgba(15, 23, 42, 0.85);
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-            background: #334155; /* Warna Netral Awal */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
         }
-
-        .btn-answer-a { background: linear-gradient(135deg, #475569, #334155); }
-        .btn-answer-b { background: linear-gradient(135deg, #475569, #334155); }
-
-        .btn-answer:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.2); }
-        .btn-answer:disabled { cursor: not-allowed; opacity: 0.9; }
-
-        .btn-answer.selected {
-            border: 4px solid #fff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
-        }
-
-        .btn-answer.correct-reveal { background: #22c55e !important; border: 4px solid white; }
-        .btn-answer.wrong-reveal { background: #ef4444 !important; border: 4px solid white; }
 
         /* PODIUM & RESULT */
         .podium {
@@ -416,10 +411,9 @@
         }
 
         @media (max-width: 600px) {
-            .camera-container { height: 380px; }
+            .camera-container { height: 420px; }
             .camera-question-overlay { font-size: 0.95rem; top: 45px; padding: 10px; }
-            .btn-answer { font-size: 0.9rem; padding: 12px 6px; }
-            .zone-badge { font-size: 0.75rem; padding: 5px 10px; }
+            .zone-badge { font-size: 0.8rem; padding: 6px 12px; }
         }
     </style>
 </head>
@@ -467,11 +461,11 @@
             </div>
         </div>
 
-        <!-- 2. GAMEPLAY (SOAL DI DALAM KAMERA & WARNA HIJAU/MERAH MUNCUL SETELAH SELESAI) -->
+        <!-- 2. GAMEPLAY FULL KAMERA (SOAL DI DALAM KAMERA, PINGGIRAN BORDER HIJAU/MERAH, TANPA TOMBOL BAWAH) -->
         <div id="screen-game" class="screen">
             <div class="game-layout">
                 
-                <!-- Kamera Utama -->
+                <!-- Layar Kamera Utama -->
                 <div class="camera-container">
                     <video id="game-video" autoplay playsinline muted></video>
 
@@ -482,18 +476,18 @@
                         <span class="info-pill" id="badge-progress">Soal 1 / 10</span>
                     </div>
 
-                    <!-- SOAL DI DALAM KAMERA (OVERLAY ATAS) -->
+                    <!-- SOAL TERINTEGRASI DI DALAM KAMERA -->
                     <div class="camera-question-overlay" id="text-question">
                         Memuat pertanyaan...
                     </div>
 
-                    <!-- Layer Terbelah 2: Kiri (A) & Kanan (B) - Tanpa Warna Awal -->
+                    <!-- Layer Terbelah 2: Kiri (A) & Kanan (B) -->
                     <div class="camera-split-zones">
                         <div class="zone-left" id="zone-left">
-                            <span class="zone-badge"><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
+                            <span class="zone-badge" id="badge-left"><i class="fa-solid fa-circle-check"></i> BENAR (A)</span>
                         </div>
                         <div class="zone-right" id="zone-right">
-                            <span class="zone-badge"><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
+                            <span class="zone-badge" id="badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH (B)</span>
                         </div>
                     </div>
 
@@ -503,26 +497,16 @@
                     <!-- Timer Countdown -->
                     <div class="timer-badge" id="badge-timer">10</div>
 
-                    <!-- Overlay Notifikasi & Countdown Jeda 5 Detik -->
+                    <!-- Overlay Notifikasi Ringkas & Countdown Jeda 5 Detik -->
                     <div id="status-overlay" class="status-overlay">
-                        <i id="status-icon" class="fa-solid"></i>
-                        <span id="status-text" style="font-size: 1.6rem; margin-top: 8px;"></span>
-                        <span id="next-timer-text" style="font-size: 0.95rem; margin-top: 10px; font-weight: 600; text-transform: none;">
-                            Soal berikutnya dalam 5 detik...
-                        </span>
+                        <div class="status-box">
+                            <i id="status-icon" class="fa-solid" style="font-size: 3rem; margin-bottom: 5px;"></i>
+                            <span id="status-text" style="font-size: 1.6rem;"></span>
+                            <span id="next-timer-text" style="font-size: 0.9rem; margin-top: 8px; font-weight: 600; text-transform: none; color: #cbd5e1;">
+                                Soal berikutnya dalam 5 detik...
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Tombol Jawaban di Bawah Kamera -->
-                <div class="answers-grid">
-                    <button id="btn-opt-a" class="btn-answer btn-answer-a" onclick="submitAnswer('A')">
-                        <span><i class="fa-solid fa-circle-check"></i> PILIHAN A</span>
-                        <small id="text-opt-a" style="font-weight: 400; font-size: 0.85rem;">Pilihan A</small>
-                    </button>
-                    <button id="btn-opt-b" class="btn-answer btn-answer-b" onclick="submitAnswer('B')">
-                        <span><i class="fa-solid fa-circle-xmark"></i> PILIHAN B</span>
-                        <small id="text-opt-b" style="font-weight: 400; font-size: 0.85rem;">Pilihan B</small>
-                    </button>
                 </div>
 
             </div>
@@ -717,7 +701,6 @@
         let timerInterval = null;
         let pauseInterval = null;
         let timeLeft = 10;
-        let currentSelectedAnswer = null;
         let mediaStream = null;
 
         /* 3. KAMERA STREAM */
@@ -803,15 +786,22 @@
             }
 
             const q = questions[currentQuestionIndex];
-            currentSelectedAnswer = null;
 
-            // Reset Tampilan Zona Kamera Tanpa Warna Awal
+            // Reset Tampilan Zona Kamera (Hapus Efek Border Warna)
             const zoneLeft = document.getElementById('zone-left');
             const zoneRight = document.getElementById('zone-right');
+            const badgeLeft = document.getElementById('badge-left');
+            const badgeRight = document.getElementById('badge-right');
+
             zoneLeft.className = "zone-left";
             zoneRight.className = "zone-right";
+            badgeLeft.className = "zone-badge";
+            badgeRight.className = "zone-badge";
 
-            // Hide Overlay
+            badgeLeft.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${q.optionA} (A)`;
+            badgeRight.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${q.optionB} (B)`;
+
+            // Hide Overlay Status
             const overlay = document.getElementById('status-overlay');
             overlay.className = "status-overlay";
 
@@ -819,16 +809,6 @@
             document.getElementById('badge-subject').innerHTML = `<i class="fa-solid fa-book"></i> ${q.subject}`;
             document.getElementById('badge-progress').textContent = `Soal ${currentQuestionIndex + 1} / ${questions.length}`;
             document.getElementById('text-question').textContent = q.question;
-            document.getElementById('text-opt-a').textContent = q.optionA;
-            document.getElementById('text-opt-b').textContent = q.optionB;
-
-            const btnA = document.getElementById('btn-opt-a');
-            const btnB = document.getElementById('btn-opt-b');
-
-            btnA.className = "btn-answer btn-answer-a";
-            btnB.className = "btn-answer btn-answer-b";
-            btnA.disabled = false;
-            btnB.disabled = false;
 
             timeLeft = q.timer || 10;
             document.getElementById('badge-timer').textContent = timeLeft;
@@ -848,66 +828,37 @@
             }, 1000);
         }
 
-        function submitAnswer(choice) {
-            if (currentSelectedAnswer !== null) return;
-            currentSelectedAnswer = choice;
-
-            const btnA = document.getElementById('btn-opt-a');
-            const btnB = document.getElementById('btn-opt-b');
-
-            if (choice === 'A') btnA.classList.add('selected');
-            if (choice === 'B') btnB.classList.add('selected');
-        }
-
         function evaluateAnswer() {
-            document.getElementById('btn-opt-a').disabled = true;
-            document.getElementById('btn-opt-b').disabled = true;
-
             const q = questions[currentQuestionIndex];
             const zoneLeft = document.getElementById('zone-left');
             const zoneRight = document.getElementById('zone-right');
-            const btnA = document.getElementById('btn-opt-a');
-            const btnB = document.getElementById('btn-opt-b');
+            const badgeLeft = document.getElementById('badge-left');
+            const badgeRight = document.getElementById('badge-right');
             const overlay = document.getElementById('status-overlay');
             const statusIcon = document.getElementById('status-icon');
             const statusText = document.getElementById('status-text');
             const nextTimerText = document.getElementById('next-timer-text');
 
-            // REVEAL WARNA SETELAH SELESAI (Satu Sisi Hijau, Satu Sisi Merah)
+            // REVEAL PINGGIRAN KAMERA (BORDER HIJAU DAN MERAH) - KAMERA TETAP JELAS TERLIHAT
             if (q.answer === 'A') {
                 zoneLeft.classList.add('reveal-correct');
                 zoneRight.classList.add('reveal-wrong');
-                btnA.classList.add('correct-reveal');
-                btnB.classList.add('wrong-reveal');
+                badgeLeft.classList.add('badge-correct');
+                badgeRight.classList.add('badge-wrong');
             } else {
                 zoneRight.classList.add('reveal-correct');
                 zoneLeft.classList.add('reveal-wrong');
-                btnB.classList.add('correct-reveal');
-                btnA.classList.add('wrong-reveal');
+                badgeRight.classList.add('badge-correct');
+                badgeLeft.classList.add('badge-wrong');
             }
 
-            const isCorrect = (currentSelectedAnswer === q.answer);
-
-            if (isCorrect) {
-                playSound('correct');
-                userCorrectCount++;
-                userScore += 10 + timeLeft;
-                statusIcon.className = "fa-solid fa-circle-check";
-                statusText.textContent = "BENAR!";
-            } else {
-                playSound('wrong');
-                statusIcon.className = "fa-solid fa-circle-xmark";
-                statusText.textContent = currentSelectedAnswer === null ? "WAKTU HABIS!" : "SALAH!";
-
-                if (gameMode === 'elimination') {
-                    isEliminated = true;
-                    statusText.textContent = "TERELIMINASI!";
-                }
-            }
+            playSound('correct');
+            statusIcon.className = "fa-solid fa-flag-checkered";
+            statusText.textContent = "WAKTU HABIS!";
 
             overlay.classList.add('active');
 
-            // JEDA 5 DETIK UNTUK MELIHAT JAWABAN & KAMERA BERWARNA
+            // JEDA 5 DETIK UNTUK MELIHAT KAMERA DENGAN BORDER BERWARNA
             let pauseTime = 5;
             nextTimerText.textContent = `Soal berikutnya dalam ${pauseTime} detik...`;
 
@@ -928,21 +879,16 @@
             stopCamera();
             showScreen('screen-result');
 
-            document.getElementById('user-final-score').textContent = userScore;
+            document.getElementById('user-final-score').textContent = userCorrectCount * 10;
             document.getElementById('user-final-correct').textContent = userCorrectCount;
             
             const statusEl = document.getElementById('user-final-status');
-            if (isEliminated && gameMode === 'elimination') {
-                statusEl.textContent = "Tereliminasi";
-                statusEl.style.color = "var(--danger)";
-            } else {
-                statusEl.textContent = "Berhasil Selesai / Bertahan";
-                statusEl.style.color = "var(--success)";
-            }
+            statusEl.textContent = "Selesai Bermain";
+            statusEl.style.color = "var(--success)";
 
-            document.getElementById('podium-1-name').textContent = isEliminated ? "Siswa A (100 Pt)" : `${playerName} (${userScore} Pt)`;
-            document.getElementById('podium-2-name').textContent = isEliminated ? `${playerName} (${userScore} Pt)` : "Siswa B (85 Pt)";
-            document.getElementById('podium-3-name').textContent = "Siswa C (70 Pt)";
+            document.getElementById('podium-1-name').textContent = `${playerName}`;
+            document.getElementById('podium-2-name').textContent = "Siswa B";
+            document.getElementById('podium-3-name').textContent = "Siswa C";
         }
 
         function resetToWelcome() {
