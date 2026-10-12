@@ -1,1605 +1,1291 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permainan Seru Matematika - Math Play Zone</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts (Fredoka & Outfit) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Camera, CameraOff, Trophy, Play, Pause, RotateCcw, 
+  CheckCircle2, XCircle, Clock, Users, Award, ShieldAlert, 
+  Volume2, VolumeX, Plus, Trash2, Edit3, Share2, HelpCircle, 
+  Sparkles, Code, Settings, ChevronRight, ArrowLeft, Check, X,
+  UserCheck, Zap, RefreshCw, Eye, AlertCircle, BookOpen, User,
+  Video, Sliders, Image, CheckCircle
+} from 'lucide-react';
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        pastel: {
-                            pink: '#FFB7B2',
-                            yellow: '#FFDAC1',
-                            green: '#E2F0CB',
-                            mint: '#B5EAD7',
-                            purple: '#C7CEEA',
-                            blue: '#A8DADC',
-                            darkBlue: '#457B9D',
-                            coral: '#FF6B6B'
-                        }
-                    },
-                    fontFamily: {
-                        fredoka: ['Fredoka', 'sans-serif'],
-                        outfit: ['Outfit', 'sans-serif']
-                    }
-                }
-            }
+class SoundEffects {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  playTone(freq, type, duration, gainVal = 0.1) {
+    if (this.muted) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
+
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+      gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration);
+    } catch (e) {
+      console.warn("Audio play error:", e);
+    }
+  }
+
+  tick() {
+    this.playTone(800, 'sine', 0.05, 0.05);
+  }
+
+  correct() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+      setTimeout(() => this.playTone(freq, 'triangle', 0.2, 0.15), idx * 80);
+    });
+  }
+
+  wrong() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    this.playTone(200, 'sawtooth', 0.25, 0.2);
+    setTimeout(() => this.playTone(150, 'sawtooth', 0.35, 0.2), 150);
+  }
+
+  eliminated() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    [300, 250, 200, 150].forEach((freq, idx) => {
+      setTimeout(() => this.playTone(freq, 'sawtooth', 0.2, 0.2), idx * 100);
+    });
+  }
+
+  fanfare() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    const notes = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+    const delays = [0, 150, 300, 450, 600, 850];
+    const durations = [0.12, 0.12, 0.12, 0.12, 0.2, 0.6];
+    notes.forEach((freq, idx) => {
+      setTimeout(() => this.playTone(freq, 'triangle', durations[idx], 0.2), delays[idx]);
+    });
+  }
+}
+
+const sfx = new SoundEffects();
+
+const DEEP_LEARNING_KURMER_2026_QUESTIONS = [
+  {
+    id: 'dl1',
+    subject: 'Literasi Digital & AI (Kurmer 2026)',
+    grade: 'Umum / SMA-SMP',
+    question: 'Kecerdasan Buatan (AI) Generatif dapat berpikir kritis dan merasakan kesadaran emosional seperti manusia secara mandiri.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'B',
+    duration: 10,
+    explanation: 'AI bekerja berdasarkan pemrosesan pola data matematis, bukan memiliki kesadaran emosional atau pemikiran mandiri.'
+  },
+  {
+    id: 'dl2',
+    subject: 'Sains & Lingkungan (Deep Learning)',
+    grade: 'Umum / SMP-SMA',
+    question: 'Pemanasan global terutama disebabkan oleh bocornya lapisan ozon yang memasukkan panas matahari secara langsung.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'B',
+    duration: 12,
+    explanation: 'Pemanasan global disebabkan oleh Efek Rumah Kaca yang merangkap radiasi panas bumi, bukan oleh lubang lapisan ozon.'
+  },
+  {
+    id: 'dl3',
+    subject: 'Matematika & Geometri Logis',
+    grade: 'Umum / SD-SMP',
+    question: 'Jika panjang jari-jari r suatu lingkaran dilipatgandakan menjadi 2r, maka luas lingkaran menjadi 4 kali lipat dari semula.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'A',
+    duration: 12,
+    explanation: 'Luas lingkaran dikalkulasi dengan L = πr². Jika r menjadi 2r, maka L = π(2r)² = 4πr² (4 kali lipat).'
+  },
+  {
+    id: 'dl4',
+    subject: 'Pembelajaran Mendalam (Deep Learning)',
+    grade: 'Edukasi Kurmer 2026',
+    question: 'Tujuan utama pendekatan Deep Learning Kurikulum Merdeka adalah menghafal sebanyak mungkin rumus dan teks pelajaran.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'B',
+    duration: 10,
+    explanation: 'Deep Learning mengutamakan pemahaman konsep mendalam (Mindful), penalaran kritis (Meaningful), dan kegembiraan belajar (Joyful).'
+  },
+  {
+    id: 'dl5',
+    subject: 'Sains & Fisika Terapan',
+    grade: 'Umum / SMP-SMA',
+    question: 'Kecepatan gelombang bunyi di udara jauh lebih cepat dibandingkan kecepatan gelombang cahaya.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'B',
+    duration: 10,
+    explanation: 'Cahaya merambat hingga 300.000 km/s, sedangkan bunyi hanya merambat sekitar 340 m/s di udara.'
+  },
+  {
+    id: 'dl6',
+    subject: 'Literasi & Penalaran Logis',
+    grade: 'Umum / SD-SMP',
+    question: 'Pernyataan "Semua kucing adalah hewan, maka semua hewan adalah kucing" merupakan bentuk kesimpulan logika yang sah.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'B',
+    duration: 10,
+    explanation: 'Ini adalah kekeliruan logika silogisme terbalik (fallacy of converse). Hewan mencakup jenis lain selain kucing.'
+  },
+  {
+    id: 'dl7',
+    subject: 'Sains & Biologi Sel',
+    grade: 'Umum / SMP-SMA',
+    question: 'Mitokondria dijuluki sebagai "pembangkit tenaga sel" karena menghasilkan molekul energi ATP melalui respirasi seluler.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'A',
+    duration: 10,
+    explanation: 'Mitokondria mengubah nutrisi menjadi ATP yang dijadikan energi utama bagi aktivitas sel.'
+  },
+  {
+    id: 'dl8',
+    subject: 'Ekonomi & Finansial Modern',
+    grade: 'Umum / SMA',
+    question: 'Deflasi adalah kondisi ekonomi di mana harga barang secara umum mengalami penurunan terus-menerus.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'A',
+    duration: 10,
+    explanation: 'Deflasi merujuk pada penurunan harga secara umum, sedangkan Inflasi adalah kenaikan harga secara umum.'
+  },
+  {
+    id: 'dl9',
+    subject: 'Karakter Profil Pelajar Pancasila',
+    grade: 'Kurmer 2026',
+    question: 'Gotong royong, kemandirian, dan bernalar kritis merupakan bagian dari dimensi Profil Pelajar Pancasila.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'A',
+    duration: 8,
+    explanation: 'Dimensi Profil Pelajar Pancasila mencakup Beriman, Berkebinekaan Global, Gotong Royong, Mandiri, Bernalar Kritis, dan Kreatif.'
+  },
+  {
+    id: 'dl10',
+    subject: 'Geografi & Astronomi',
+    grade: 'Umum / SD-SMP',
+    question: 'Rotasi Bumi pada porosnya menyebabkan terjadinya pergantian siang dan malam di wilayah bumi.',
+    optionA: 'Benar',
+    optionB: 'Salah',
+    correctKey: 'A',
+    duration: 8,
+    explanation: 'Perputaran Bumi pada porosnya (Rotasi) mengakibatkan bagian bumi bergiliran menghadap matahari (siang dan malam).'
+  }
+];
+
+export default function App() {
+  // Navigation View: 'HOME' | 'PREPARE_DIRECT' | 'PLAY_DIRECT' | 'HOST_PANEL' | 'LEADERBOARD' | 'DEPLOY_GUIDE'
+  const [view, setView] = useState('HOME');
+  
+  // Audio Mute State
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Custom Toast Notification System (Bebas dari alert/confirm)
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
+
+  // Game Settings & Question Bank State
+  const [playerName, setPlayerName] = useState('Pemain 1');
+  const [gameMode, setGameMode] = useState('POINTS'); // 'SURVIVAL' or 'POINTS'
+  const [questions, setQuestions] = useState(DEEP_LEARNING_KURMER_2026_QUESTIONS);
+
+  // Direct Play Engine State
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [gameState, setGameState] = useState('QUESTION'); // 'QUESTION', 'REVEAL', 'FINISHED'
+  const [timer, setTimer] = useState(10);
+  const [selectedAnswer, setSelectedAnswer] = useState(null); // 'A' or 'B'
+  const [score, setScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [isEliminated, setIsEliminated] = useState(false);
+  const [answerTime, setAnswerTime] = useState(0);
+  const timerRef = useRef(null);
+
+  // Camera State & Testing Diagnostics
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraDevices, setCameraDevices] = useState([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
+  const [showCameraTestModal, setShowCameraTestModal] = useState(false);
+  const [testSnapshot, setTestSnapshot] = useState(null);
+  const [videoStats, setVideoStats] = useState({ width: 0, height: 0, status: 'Belum Aktif' });
+
+  const videoRef = useRef(null);
+  const testVideoRef = useRef(null);
+
+  const loadCameraDevices = async () => {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+        setCameraDevices(videoInputs);
+        if (videoInputs.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(videoInputs[0].deviceId);
         }
-    </script>
+      }
+    } catch (err) {
+      console.warn("Gagal membaca daftar perangkat kamera:", err);
+    }
+  };
 
-    <style>
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: #F8F9FA;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Card tactile depth button effect */
-        .btn-push {
-            transition: all 0.1s ease;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
-        }
-        .btn-push:active:not(:disabled) {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
-        }
-
-        /* Glassmorphism modal background */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-        }
-
-        /* 2048 Tile Color Schemes */
-        .tile-val-2 { background: #E2F0CB; color: #4B6B12; }
-        .tile-val-4 { background: #B5EAD7; color: #1B5E4B; }
-        .tile-val-8 { background: #FFDAC1; color: #8A4B10; }
-        .tile-val-16 { background: #FFB7B2; color: #8A1C14; }
-        .tile-val-32 { background: #FF9AA2; color: #7A0D15; }
-        .tile-val-64 { background: #E27D60; color: #FFFFFF; }
-        .tile-val-128 { background: #C7CEEA; color: #2D3A82; }
-        .tile-val-256 { background: #A8DADC; color: #1D4E89; }
-        .tile-val-512 { background: #F4A261; color: #FFFFFF; }
-        .tile-val-1024 { background: #E76F51; color: #FFFFFF; }
-        .tile-val-2048 { background: #2A9D8F; color: #FFFFFF; }
-
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
-        }
-        .pulse-glow {
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between overflow-x-hidden">
-
-    <!-- TOP NAVIGATION BAR -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Brand Logo & Title -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-xl shadow-md transform hover:rotate-6 transition-transform">
-                        <i class="fa-solid font-bold fa-calculator"></i>
-                    </div>
-                    <div>
-                        <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500 font-outfit">
-                            MathPlay Zone
-                        </span>
-                        <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 ml-2 bg-purple-100 text-purple-700 rounded-full">
-                            EduFun
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Global Stats & Controls -->
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- Total Star Counter -->
-                    <div class="flex items-center space-x-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full shadow-inner">
-                        <i class="fa-solid fa-star text-amber-500 text-base animate-bounce"></i>
-                        <span id="global-stars" class="font-bold text-amber-700 text-sm">0</span>
-                    </div>
-
-                    <!-- Sound FX Toggle Button -->
-                    <button id="sound-toggle-btn" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors" title="Beralih Suara">
-                        <i id="sound-icon" class="fa-solid fa-volume-high"></i>
-                    </button>
-
-                    <!-- Mobile Navigation Menu Toggle -->
-                    <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- DESKTOP NAVIGATION BAR -->
-        <nav class="hidden md:flex justify-center bg-slate-100/70 border-t border-slate-200 px-4 py-2 space-x-2 overflow-x-auto">
-            <button onclick="navigateTo('home')" id="nav-btn-home" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-indigo-600 bg-white shadow-sm">
-                <i class="fa-solid fa-house"></i>
-                <span>Beranda</span>
-            </button>
-            <button onclick="navigateTo('quiz')" id="nav-btn-quiz" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-solid fa-bolt text-amber-500"></i>
-                <span>Kuis Cepat</span>
-            </button>
-            <button onclick="navigateTo('game2048')" id="nav-btn-game2048" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-solid fa-shapes text-emerald-500"></i>
-                <span>Puzzle 2048</span>
-            </button>
-            <button onclick="navigateTo('sudoku')" id="nav-btn-sudoku" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-solid fa-border-all text-blue-500"></i>
-                <span>Sudoku Logika</span>
-            </button>
-            <button onclick="navigateTo('target')" id="nav-btn-target" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-solid fa-bullseye text-rose-500"></i>
-                <span>Target Number</span>
-            </button>
-            <button onclick="navigateTo('rpg')" id="nav-btn-rpg" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
-                <span>Prodigy Quest</span>
-            </button>
-            <button onclick="navigateTo('python')" id="nav-btn-python" class="nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600">
-                <i class="fa-brands fa-python text-sky-600"></i>
-                <span>Python CLI</span>
-            </button>
-        </nav>
-
-        <!-- MOBILE NAVIGATION MENU -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-2">
-            <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-indigo-50">
-                <i class="fa-solid fa-house text-indigo-500 w-5"></i>
-                <span>Beranda Menu Utama</span>
-            </button>
-            <button onclick="navigateTo('quiz'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-amber-50">
-                <i class="fa-solid fa-bolt text-amber-500 w-5"></i>
-                <span>Kuis Berhitung Cepat</span>
-            </button>
-            <button onclick="navigateTo('game2048'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-emerald-50">
-                <i class="fa-solid fa-shapes text-emerald-500 w-5"></i>
-                <span>Puzzle Matematika 2048</span>
-            </button>
-            <button onclick="navigateTo('sudoku'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-blue-50">
-                <i class="fa-solid fa-border-all text-blue-500 w-5"></i>
-                <span>Sudoku Tantangan</span>
-            </button>
-            <button onclick="navigateTo('target'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-rose-50">
-                <i class="fa-solid fa-bullseye text-rose-500 w-5"></i>
-                <span>Target Number Puzzle</span>
-            </button>
-            <button onclick="navigateTo('rpg'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-purple-50">
-                <i class="fa-solid fa-wand-magic-sparkles text-purple-500 w-5"></i>
-                <span>Prodigy RPG Quest</span>
-            </button>
-            <button onclick="navigateTo('python'); toggleMobileMenu();" class="w-full text-left px-4 py-2.5 rounded-xl text-slate-700 font-semibold flex items-center space-x-3 hover:bg-sky-50">
-                <i class="fa-brands fa-python text-sky-600 w-5"></i>
-                <span>Python CLI Exporter</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- MAIN CONTENT VIEW CONTAINERS -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-
-        <!-- ================= PAGE 1: HOME HUB ================= -->
-        <section id="page-home" class="view-page space-y-8">
-            <!-- Hero Banner -->
-            <div class="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-6 sm:p-10 text-white shadow-xl overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 opacity-15 text-9xl">
-                    <i class="fa-solid fa-brain"></i>
-                </div>
-                <div class="relative z-10 max-w-2xl space-y-4">
-                    <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider text-white">
-                        🎮 Dunia Matematika Interaktif
-                    </span>
-                    <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight font-outfit">
-                        Asah Otakmu Dengan Cara yang Penuh Warna & Seru!
-                    </h1>
-                    <p class="text-indigo-100 text-sm sm:text-base leading-relaxed">
-                        Pilih berbagai koleksi permainan logika & aritmatika seru yang dirancang khusus untuk meningkatkan keterampilan berhitung, strategi, dan kecepatan berpikirmu!
-                    </p>
-                    <div class="pt-2 flex flex-wrap gap-3">
-                        <button onclick="navigateTo('quiz')" class="btn-push bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-2xl shadow-md flex items-center space-x-2">
-                            <i class="fa-solid fa-play"></i>
-                            <span>Mulai Kuis Cepat</span>
-                        </button>
-                        <button onclick="navigateTo('rpg')" class="btn-push bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-2xl backdrop-blur-md flex items-center space-x-2">
-                            <i class="fa-solid fa-dragon"></i>
-                            <span>Petualangan RPG</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Game Selection Cards Grid -->
-            <div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center space-x-2">
-                    <i class="fa-solid fa-gamepad text-indigo-500"></i>
-                    <span>Pilihan Permainan Matematika</span>
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Card 1: Math Quiz -->
-                    <div onclick="navigateTo('quiz')" class="bg-white rounded-3xl p-6 border-2 border-amber-100 hover:border-amber-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-bolt"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Kuis Berhitung Cepat</h3>
-                                <p class="text-slate-500 text-sm mt-1">Uji kecepatan hitung (+, -, ×) angka 1-20 dalam batas waktu 10 detik. Memiliki sistem skor & nyawa!</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
-                            <span>Sistem Skor & Timer</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-
-                    <!-- Card 2: 2048 Puzzle -->
-                    <div onclick="navigateTo('game2048')" class="bg-white rounded-3xl p-6 border-2 border-emerald-100 hover:border-emerald-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-shapes"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Puzzle 2048 Math</h3>
-                                <p class="text-slate-500 text-sm mt-1">Gabungkan angka-angka kelipatan 2 hingga mencapai ubin 2048! Dilengkapi kontrol sentuh & undo.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
-                            <span>Puzzle Logika Kelipatan</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-
-                    <!-- Card 3: Sudoku -->
-                    <div onclick="navigateTo('sudoku')" class="bg-white rounded-3xl p-6 border-2 border-blue-100 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-border-all"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Sudoku Logika</h3>
-                                <p class="text-slate-500 text-sm mt-1">Isi kisi 9x9 dengan angka 1-9 tanpa ada pengulangan di baris, kolom, atau area 3x3.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
-                            <span>Tingkat Mudah - Sulit</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-
-                    <!-- Card 4: Target Number -->
-                    <div onclick="navigateTo('target')" class="bg-white rounded-3xl p-6 border-2 border-rose-100 hover:border-rose-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-bullseye"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Target Number Puzzle</h3>
-                                <p class="text-slate-500 text-sm mt-1">Gunakan 4 angka acak dan operator (+, -, ×, ÷) untuk mencapai angka target yang ditentukan!</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-rose-600">
-                            <span>Kombinasi Operasi Hitung</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-
-                    <!-- Card 5: Prodigy Quest RPG -->
-                    <div onclick="navigateTo('rpg')" class="bg-white rounded-3xl p-6 border-2 border-purple-100 hover:border-purple-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-dragon"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Prodigy Math RPG</h3>
-                                <p class="text-slate-500 text-sm mt-1">Kalahkan monster dengan kekuatan sihir matematika! Dapatkan koin emas dan naikkan level pahlawanmu.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600">
-                            <span>RPG Adventure & Battle</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-
-                    <!-- Card 6: Python CLI Exporter -->
-                    <div onclick="navigateTo('python')" class="bg-white rounded-3xl p-6 border-2 border-sky-100 hover:border-sky-300 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <div class="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform">
-                                <i class="fa-brands fa-python"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-slate-800 group-hover:text-sky-600 transition-colors">Python CLI Script Tool</h3>
-                                <p class="text-slate-500 text-sm mt-1">Jalankan simulasi game matematika CLI Python 3 atau ekspor kodenya langsung ke GitHub/file .py!</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-sky-600">
-                            <span>Terminal Simulator & Generator</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 2: MATH QUIZ (KUIS BERHITUNG CEPAT) ================= -->
-        <section id="page-quiz" class="view-page hidden max-w-2xl mx-auto">
-            <div class="bg-white rounded-3xl shadow-lg border border-amber-100 p-6 sm:p-8 relative">
-                <!-- Quiz Header Info -->
-                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                    <!-- Lives counter -->
-                    <div class="flex items-center space-x-1" id="quiz-lives-container">
-                        <!-- Filled by JS -->
-                    </div>
-
-                    <!-- Score display -->
-                    <div class="bg-amber-100 text-amber-800 px-4 py-1.5 rounded-full text-sm font-bold flex items-center space-x-2">
-                        <i class="fa-solid fa-trophy text-amber-600"></i>
-                        <span>Skor: <span id="quiz-score">0</span></span>
-                    </div>
-                </div>
-
-                <!-- Timer Progress Bar -->
-                <div class="mb-6 space-y-1">
-                    <div class="flex justify-between text-xs font-bold text-slate-500">
-                        <span>Waktu Tersisa</span>
-                        <span id="quiz-timer-text">10s</span>
-                    </div>
-                    <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div id="quiz-timer-bar" class="h-full bg-amber-400 transition-all duration-100 ease-linear rounded-full"></div>
-                    </div>
-                </div>
-
-                <!-- Math Problem Card Display -->
-                <div class="bg-slate-50 rounded-2xl p-8 text-center border border-slate-200 mb-6 shadow-inner">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Soal Matematika</span>
-                    <div id="quiz-question" class="text-4xl sm:text-5xl font-extrabold text-slate-800 font-outfit tracking-wider">
-                        12 + 8 = ?
-                    </div>
-                </div>
-
-                <!-- Answer Choices Buttons (4 Options Grid) -->
-                <div id="quiz-options-container" class="grid grid-cols-2 gap-4">
-                    <!-- Option buttons dynamically generated -->
-                </div>
-
-                <!-- Game Over Overlay Modal for Quiz -->
-                <div id="quiz-gameover-modal" class="hidden absolute inset-0 glass-panel rounded-3xl z-20 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                    <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-3xl font-bold animate-bounce">
-                        <i class="fa-solid fa-heart-crack"></i>
-                    </div>
-                    <h3 class="text-2xl font-extrabold text-slate-800">Permainan Selesai!</h3>
-                    <p class="text-slate-600 text-sm">Skor Akhir Kamu: <span id="quiz-final-score" class="font-extrabold text-amber-600 text-xl">0</span></p>
-                    <button onclick="startQuiz()" class="btn-push bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-2xl text-base shadow-md">
-                        <i class="fa-solid fa-rotate-right mr-2"></i>Mulai Lagi
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 3: 2048 GAME ================= -->
-        <section id="page-game2048" class="view-page hidden max-w-xl mx-auto space-y-4">
-            <!-- 2048 Top Control Bar -->
-            <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <div>
-                    <h2 class="text-xl font-extrabold text-slate-800">Puzzle 2048</h2>
-                    <p class="text-xs text-slate-500">Gabungkan angka sama!</p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="bg-emerald-50 px-3 py-1.5 rounded-xl text-center border border-emerald-200">
-                        <span class="text-[10px] uppercase font-bold text-emerald-600 block">Skor</span>
-                        <span id="g2048-score" class="font-extrabold text-emerald-800 text-base">0</span>
-                    </div>
-                    <div class="bg-amber-50 px-3 py-1.5 rounded-xl text-center border border-amber-200">
-                        <span class="text-[10px] uppercase font-bold text-amber-600 block">Terbaik</span>
-                        <span id="g2048-best" class="font-extrabold text-amber-800 text-base">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex justify-between items-center px-1">
-                <button onclick="undoMove2048()" class="btn-push bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Undo</span>
-                </button>
-                <button onclick="init2048()" class="btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>Ulang Lagi</span>
-                </button>
-            </div>
-
-            <!-- 2048 Board Container -->
-            <div class="bg-slate-300 p-3 rounded-3xl relative shadow-md select-none touch-none" id="2048-touch-area">
-                <div id="grid-2048-container" class="grid grid-cols-4 gap-3">
-                    <!-- 16 Cells rendered by JS -->
-                </div>
-
-                <!-- Game Over Overlay -->
-                <div id="2048-gameover" class="hidden absolute inset-0 glass-panel rounded-3xl z-20 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                    <h3 class="text-2xl font-extrabold text-slate-800">Tidak Ada Langkah Tersisa!</h3>
-                    <p class="text-slate-600 text-sm">Skor Kamu: <span id="2048-modal-score" class="font-bold text-emerald-600">0</span></p>
-                    <button onclick="init2048()" class="btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm">
-                        Coba Lagi
-                    </button>
-                </div>
-            </div>
-
-            <!-- On-Screen Direction Touch Controls for Mobile Users -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-                <span class="text-xs font-bold text-slate-400 block mb-2">Gunakan Tombol PanahKeyboard atau Tombol Layar:</span>
-                <div class="inline-grid grid-cols-3 gap-2 w-48 mx-auto">
-                    <div></div>
-                    <button onclick="handle2048Move('up')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-up"></i></button>
-                    <div></div>
-                    <button onclick="handle2048Move('left')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button onclick="handle2048Move('down')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-down"></i></button>
-                    <button onclick="handle2048Move('right')" class="btn-push bg-slate-100 hover:bg-slate-200 p-3 rounded-xl font-bold text-slate-700"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 4: SUDOKU GAME ================= -->
-        <section id="page-sudoku" class="view-page hidden max-w-xl mx-auto space-y-4">
-            <!-- Header controls -->
-            <div class="flex flex-wrap items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 gap-3 shadow-sm">
-                <div>
-                    <h2 class="text-xl font-extrabold text-slate-800">Sudoku Logika</h2>
-                    <span id="sudoku-timer-display" class="text-xs font-semibold text-blue-600">Waktu: 00:00</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <select id="sudoku-difficulty" onchange="initSudoku()" class="bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none">
-                        <option value="easy">Mudah</option>
-                        <option value="medium">Sedang</option>
-                        <option value="hard">Sulit</option>
-                    </select>
-                    <button onclick="initSudoku()" class="btn-push bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs">
-                        Baru
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sudoku Board Container (9x9 Grid) -->
-            <div class="bg-slate-800 p-2 sm:p-3 rounded-3xl shadow-lg aspect-square">
-                <div id="sudoku-board-grid" class="grid grid-cols-9 gap-0.5 sm:gap-1 h-full w-full bg-slate-700 p-1 rounded-2xl">
-                    <!-- 81 cells populated by JS -->
-                </div>
-            </div>
-
-            <!-- Keypad (1-9 & Tools) -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div class="grid grid-cols-9 gap-1.5">
-                    <button onclick="inputSudokuNumber(1)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">1</button>
-                    <button onclick="inputSudokuNumber(2)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">2</button>
-                    <button onclick="inputSudokuNumber(3)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">3</button>
-                    <button onclick="inputSudokuNumber(4)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">4</button>
-                    <button onclick="inputSudokuNumber(5)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">5</button>
-                    <button onclick="inputSudokuNumber(6)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">6</button>
-                    <button onclick="inputSudokuNumber(7)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">7</button>
-                    <button onclick="inputSudokuNumber(8)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">8</button>
-                    <button onclick="inputSudokuNumber(9)" class="btn-push bg-blue-50 hover:bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-lg">9</button>
-                </div>
-                <div class="flex justify-between space-x-2 pt-2 border-t border-slate-100">
-                    <button onclick="eraseSudokuCell()" class="flex-1 btn-push bg-rose-50 hover:bg-rose-100 text-rose-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
-                        <i class="fa-solid fa-eraser"></i>
-                        <span>Hapus</span>
-                    </button>
-                    <button onclick="checkSudokuSolution()" class="flex-1 btn-push bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
-                        <i class="fa-solid fa-check-double"></i>
-                        <span>Cek Jawaban</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 5: TARGET NUMBER GAME ================= -->
-        <section id="page-target" class="view-page hidden max-w-2xl mx-auto space-y-6">
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-md space-y-6">
-                <!-- Target Header -->
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-extrabold text-slate-800">Target Number</h2>
-                        <p class="text-xs text-slate-500">Susun kombinasi matematika!</p>
-                    </div>
-                    <button onclick="initTargetGame()" class="btn-push bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-1">
-                        <i class="fa-solid fa-shuffle"></i>
-                        <span>Soal Baru</span>
-                    </button>
-                </div>
-
-                <!-- Display Target Number Goal -->
-                <div class="bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-2xl p-6 text-center shadow-lg">
-                    <span class="text-xs font-bold uppercase tracking-widest text-rose-100 block mb-1">Capai Angka Target Ini:</span>
-                    <span id="target-goal-number" class="text-5xl font-black font-outfit">23</span>
-                </div>
-
-                <!-- Equation Builder Input Screen -->
-                <div class="bg-slate-100 rounded-2xl p-4 min-h-[70px] flex items-center justify-between border border-slate-200">
-                    <div id="target-expression-display" class="text-xl sm:text-2xl font-extrabold text-slate-800 font-outfit tracking-wide flex flex-wrap gap-2 items-center">
-                        <!-- User's build expression tags -->
-                    </div>
-                    <button onclick="clearTargetExpression()" class="text-rose-500 hover:text-rose-700 text-sm font-bold p-2">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-
-                <!-- Source Number Buttons Grid -->
-                <div>
-                    <span class="text-xs font-bold text-slate-400 block mb-2 uppercase tracking-wider">Angka yang Tersedia:</span>
-                    <div id="target-numbers-container" class="grid grid-cols-4 gap-3">
-                        <!-- 4 random source numbers generated here -->
-                    </div>
-                </div>
-
-                <!-- Operator Buttons -->
-                <div>
-                    <span class="text-xs font-bold text-slate-400 block mb-2 uppercase tracking-wider">Pilih Operator:</span>
-                    <div class="grid grid-cols-4 gap-3">
-                        <button onclick="appendTargetOp('+')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">+</button>
-                        <button onclick="appendTargetOp('-')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">-</button>
-                        <button onclick="appendTargetOp('×')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">×</button>
-                        <button onclick="appendTargetOp('÷')" class="btn-push bg-amber-100 hover:bg-amber-200 text-amber-800 py-3 rounded-2xl font-bold text-2xl shadow-sm">÷</button>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button onclick="evaluateTargetAnswer()" class="w-full btn-push bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl text-base shadow-md">
-                    <i class="fa-solid fa-calculator mr-2"></i>Hitung & Periksa Target
-                </button>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 6: PRODIGY RPG QUEST ================= -->
-        <section id="page-rpg" class="view-page hidden max-w-3xl mx-auto space-y-6">
-            <div class="bg-slate-900 rounded-3xl p-6 text-white border-4 border-purple-500/30 shadow-2xl space-y-6">
-                <!-- Battle Stage Info Header -->
-                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="px-3 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-full text-xs font-bold">
-                            Tingkat <span id="rpg-stage-num">1</span>
-                        </span>
-                        <h2 class="text-xl font-bold font-outfit text-purple-200">Petualangan Matematika RPG</h2>
-                    </div>
-                    <div class="flex items-center space-x-2 text-amber-400 font-bold text-sm bg-slate-800 px-3 py-1 rounded-xl">
-                        <i class="fa-solid fa-coins"></i>
-                        <span id="rpg-gold">0</span> Gold
-                    </div>
-                </div>
-
-                <!-- Arena Combat Display (Player VS Monster) -->
-                <div class="grid grid-cols-2 gap-4 bg-slate-800/80 p-6 rounded-2xl border border-slate-700 items-center">
-                    <!-- Player Unit -->
-                    <div class="text-center space-y-2">
-                        <div class="w-20 h-20 mx-auto rounded-full bg-indigo-600 flex items-center justify-center text-3xl text-indigo-200 border-4 border-indigo-400 shadow-lg pulse-glow">
-                            <i class="fa-solid fa-user-ninja"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-indigo-300">Pahlawan Mat</h4>
-                        <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden border border-slate-600">
-                            <div id="rpg-player-hp" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
-                        </div>
-                        <span id="rpg-player-hp-text" class="text-[10px] text-slate-400 font-bold">100 / 100 HP</span>
-                    </div>
-
-                    <!-- Monster Unit -->
-                    <div class="text-center space-y-2">
-                        <div id="rpg-monster-avatar" class="w-20 h-20 mx-auto rounded-full bg-rose-700 flex items-center justify-center text-3xl text-rose-200 border-4 border-rose-500 shadow-lg">
-                            <i class="fa-solid fa-dragon"></i>
-                        </div>
-                        <h4 id="rpg-monster-name" class="font-bold text-sm text-rose-300">Naga Slime</h4>
-                        <div class="w-full bg-slate-700 h-3 rounded-full overflow-hidden border border-slate-600">
-                            <div id="rpg-monster-hp" class="bg-rose-500 h-full w-full transition-all duration-300"></div>
-                        </div>
-                        <span id="rpg-monster-hp-text" class="text-[10px] text-slate-400 font-bold">50 / 50 HP</span>
-                    </div>
-                </div>
-
-                <!-- RPG Spell Question Box -->
-                <div class="bg-slate-800 p-6 rounded-2xl border border-purple-500/30 text-center space-y-4">
-                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider block">Mantra Serangan Sihir Matematika</span>
-                    <div id="rpg-question" class="text-3xl font-extrabold text-white font-outfit">
-                        7 × 6 = ?
-                    </div>
-                    <div id="rpg-options" class="grid grid-cols-2 gap-3 pt-2">
-                        <!-- Spell Choice Buttons rendered by JS -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= PAGE 7: PYTHON CLI GENERATOR & SIMULATOR ================= -->
-        <section id="page-python" class="view-page hidden max-w-4xl mx-auto space-y-6">
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-sky-100 shadow-md space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl">
-                            <i class="fa-brands fa-python"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-extrabold text-slate-800">Python CLI Game Script Tool</h2>
-                            <p class="text-xs text-slate-500">Generator & Terminal Simulator Python 3</p>
-                        </div>
-                    </div>
-                    <button onclick="downloadPythonScript()" class="btn-push bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center space-x-2">
-                        <i class="fa-solid fa-download"></i>
-                        <span>Unduh Script .py</span>
-                    </button>
-                </div>
-
-                <!-- Browser Terminal Simulator -->
-                <div class="bg-slate-900 rounded-2xl p-5 font-mono text-xs text-emerald-400 shadow-inner border border-slate-800 space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2 text-slate-400">
-                        <span><i class="fa-solid fa-terminal mr-2"></i>Terminal Python Simulator</span>
-                        <span class="text-[10px]">Python 3.10 CLI</span>
-                    </div>
-
-                    <div id="cli-terminal-output" class="min-h-[160px] max-h-[220px] overflow-y-auto space-y-1 custom-scrollbar leading-relaxed">
-                        <p class="text-slate-400">=== GAME MATEMATIKA PYTHON CLI ===</p>
-                        <p class="text-slate-400">Pilih Tingkat Kesulitan:</p>
-                        <p class="text-slate-400">1. Mudah (1-10)</p>
-                        <p class="text-slate-400">2. Sedang (1-50)</p>
-                        <p class="text-slate-400">3. Sulit (1-100)</p>
-                    </div>
-
-                    <!-- Input controls for web terminal simulator -->
-                    <div class="flex space-x-2 pt-2 border-t border-slate-800">
-                        <input type="text" id="cli-user-input" placeholder="Ketik jawaban / pilihan..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500">
-                        <button onclick="sendCliInput()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg font-bold">
-                            Kirim
-                        </button>
-                        <button onclick="resetCliSimulator()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded-lg font-bold">
-                            Reset
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Python Source Code Display box for copying/pushing to GitHub -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-500 uppercase">Kode Python 3 Modular (Siap Push Ke GitHub):</span>
-                        <button onclick="copyPythonCode()" class="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center space-x-1">
-                            <i class="fa-solid fa-copy"></i>
-                            <span>Salin Kode</span>
-                        </button>
-                    </div>
-                    <pre class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs font-mono overflow-x-auto max-h-[280px] custom-scrollbar border border-slate-700"><code id="python-code-block">
-import random
-
-def get_difficulty_range(choice):
-    if choice == '1':
-        return 1, 10
-    elif choice == '2':
-        return 1, 50
-    elif choice == '3':
-        return 1, 100
-    return 1, 10
-
-def generate_question(min_val, max_val):
-    num1 = random.randint(min_val, max_val)
-    num2 = random.randint(min_val, max_val)
-    op = random.choice(['+', '-', '*'])
-    if op == '+':
-        ans = num1 + num2
-    elif op == '-':
-        ans = num1 - num2
-    else:
-        ans = num1 * num2
-    return num1, op, num2, ans
-
-def run_game():
-    print("=== GAME MATEMATIKA CLI PYTHON ===")
-    print("1. Mudah (1-10)\n2. Sedang (1-50)\n3. Sulit (1-100)")
-    choice = input("Pilih tingkat kesulitan (1/2/3): ")
-    min_v, max_v = get_difficulty_range(choice)
-    
-    score = 0
-    total_q = 10
-    
-    for i in range(1, total_q + 1):
-        n1, op, n2, correct_ans = generate_question(min_v, max_v)
-        try:
-            user_ans = int(input(f"Soal {i}/{total_q}: {n1} {op} {n2} = "))
-            if user_ans == correct_ans:
-                print(" Correct! (+10 pts)\n")
-                score += 10
-            else:
-                print(f" Wrong! Jawaban benar: {correct_ans}\n")
-        except ValueError:
-            print(" Input tidak valid!\n")
-            
-    accuracy = (score / (total_q * 10)) * 100
-    print("="*30)
-    print(f"HASIL AKHIR - Total Skor: {score} / 100")
-    print(f"Akurasi Jawaban: {accuracy:.1f}%")
-    print("="*30)
-
-if __name__ == "__main__":
-    run_game()
-                    </code></pre>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center space-x-2">
-                <span class="font-extrabold text-indigo-600 font-outfit">MathPlay Zone</span>
-                <span>&copy; 2026 Permainan Seru Matematika</span>
-            </div>
-            <div class="flex space-x-4">
-                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('quiz')">Kuis Cepat</span>
-                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('game2048')">2048</span>
-                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('sudoku')">Sudoku</span>
-                <span class="hover:text-indigo-600 cursor-pointer" onclick="navigateTo('target')">Target Number</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Notification Toast Modal Container -->
-    <div id="toast-message" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 pointer-events-none">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="toast-text" class="text-sm font-semibold">Pesan Notifikasi</span>
-    </div>
-
-    <script>
-        // ================= GLOBAL STATE =================
-        let isAudioMuted = false;
-        let globalStars = parseInt(localStorage.getItem('math_stars') || '0');
-
-        // Web Audio API Sound Effects Generator (No external MP3 files needed)
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
-
-        function playSound(type) {
-            if (isAudioMuted) return;
-            try {
-                if (!audioCtx) audioCtx = new AudioContext();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                if (type === 'correct') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.25);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
-                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2); // A2
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.25);
-                } else if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.05);
-                }
-            } catch (e) {
-                console.log('Audio error:', e);
-            }
+  const toggleCamera = async (overrideDeviceId = null) => {
+    if (cameraActive && !overrideDeviceId) {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+      setCameraStream(null);
+      setCameraActive(false);
+      setVideoStats({ width: 0, height: 0, status: 'Kamera Dimatikan' });
+      showToast("Kamera dinonaktifkan.", "info");
+    } else {
+      try {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
         }
 
-        function toggleAudio() {
-            isAudioMuted = !isAudioMuted;
-            const icon = document.getElementById('sound-icon');
-            if (isAudioMuted) {
-                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
-                showToast('Suara Dimatikan', 'fa-volume-xmark');
-            } else {
-                icon.className = 'fa-solid fa-volume-high text-slate-700';
-                showToast('Suara Dinyalakan', 'fa-volume-high');
-                playSound('click');
-            }
-        }
+        const deviceIdToUse = overrideDeviceId || selectedDeviceId;
+        const constraints = {
+          video: deviceIdToUse 
+            ? { deviceId: { exact: deviceIdToUse }, width: { ideal: 640 }, height: { ideal: 480 } }
+            : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        };
 
-        function addStars(count) {
-            globalStars += count;
-            localStorage.setItem('math_stars', globalStars.toString());
-            document.getElementById('global-stars').textContent = globalStars;
-        }
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        setCameraStream(stream);
+        setCameraActive(true);
+        loadCameraDevices();
 
-        function showToast(msg, icon = 'fa-circle-check') {
-            const toast = document.getElementById('toast-message');
-            document.getElementById('toast-text').textContent = msg;
-            document.getElementById('toast-icon').className = `fa-solid ${icon} text-amber-400`;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 2500);
-        }
-
-        function triggerConfetti() {
-            if (window.confetti) {
-                confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
-            }
-        }
-
-        // ================= NAVIGATION ROUTER =================
-        function navigateTo(pageId) {
-            playSound('click');
-            // Hide all views
-            document.querySelectorAll('.view-page').forEach(page => page.classList.add('hidden'));
-            
-            // Show requested view
-            const target = document.getElementById(`page-${pageId}`);
-            if (target) {
-                target.classList.remove('hidden');
-            }
-
-            // Update Desktop Nav UI styling
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.className = "nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-slate-600";
-            });
-            const activeNav = document.getElementById(`nav-btn-${pageId}`);
-            if (activeNav) {
-                activeNav.className = "nav-tab px-4 py-2 rounded-xl font-semibold text-sm flex items-center space-x-2 transition-all hover:bg-white hover:shadow-sm text-indigo-600 bg-white shadow-sm";
-            }
-
-            // Trigger initialization for selected mini-game
-            if (pageId === 'quiz') startQuiz();
-            if (pageId === 'game2048') init2048();
-            if (pageId === 'sudoku') initSudoku();
-            if (pageId === 'target') initTargetGame();
-            if (pageId === 'rpg') initRpgQuest();
-            if (pageId === 'python') resetCliSimulator();
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        // ================= GAME 1: MATH SPEED QUIZ ENGINE =================
-        let quizScore = 0;
-        let quizLives = 3;
-        let quizTimer = null;
-        let quizTimeLeft = 10;
-        let currentQuizAnswer = 0;
-
-        function startQuiz() {
-            quizScore = 0;
-            quizLives = 3;
-            document.getElementById('quiz-score').textContent = '0';
-            document.getElementById('quiz-gameover-modal').classList.add('hidden');
-            renderQuizLives();
-            nextQuizQuestion();
-        }
-
-        function renderQuizLives() {
-            const container = document.getElementById('quiz-lives-container');
-            container.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                if (i < quizLives) {
-                    container.innerHTML += `<i class="fa-solid fa-heart text-rose-500 text-lg"></i>`;
-                } else {
-                    container.innerHTML += `<i class="fa-regular fa-heart text-slate-300 text-lg"></i>`;
-                }
-            }
-        }
-
-        function nextQuizQuestion() {
-            if (quizLives <= 0) {
-                endQuizGame();
-                return;
-            }
-
-            // Generate question numbers 1-20
-            const opChoice = ['+', '-', '×'][Math.floor(Math.random() * 3)];
-            let n1 = Math.floor(Math.random() * 20) + 1;
-            let n2 = Math.floor(Math.random() * 20) + 1;
-
-            if (opChoice === '-') {
-                if (n1 < n2) [n1, n2] = [n2, n1]; // Avoid negative answers
-                currentQuizAnswer = n1 - n2;
-            } else if (opChoice === '+') {
-                currentQuizAnswer = n1 + n2;
-            } else {
-                n1 = Math.floor(Math.random() * 10) + 1;
-                n2 = Math.floor(Math.random() * 10) + 1;
-                currentQuizAnswer = n1 * n2;
-            }
-
-            document.getElementById('quiz-question').textContent = `${n1} ${opChoice} ${n2} = ?`;
-
-            // Options generator
-            const options = [currentQuizAnswer];
-            while (options.length < 4) {
-                const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                const wrongVal = currentQuizAnswer + offset;
-                if (wrongVal >= 0 && !options.includes(wrongVal)) {
-                    options.push(wrongVal);
-                }
-            }
-            options.sort(() => Math.random() - 0.5);
-
-            // Render options
-            const optsContainer = document.getElementById('quiz-options-container');
-            optsContainer.innerHTML = '';
-            options.forEach(opt => {
-                optsContainer.innerHTML += `
-                    <button onclick="checkQuizAnswer(${opt})" class="btn-push bg-slate-100 hover:bg-amber-200 hover:border-amber-400 border-2 border-slate-200 text-slate-800 font-extrabold text-2xl py-4 rounded-2xl shadow-sm transition-all font-outfit">
-                        ${opt}
-                    </button>
-                `;
-            });
-
-            // Start 10 second countdown timer
-            resetQuizTimer();
-        }
-
-        function resetQuizTimer() {
-            clearInterval(quizTimer);
-            quizTimeLeft = 10;
-            updateTimerDisplay();
-
-            quizTimer = setInterval(() => {
-                quizTimeLeft -= 0.1;
-                if (quizTimeLeft <= 0) {
-                    clearInterval(quizTimer);
-                    playSound('wrong');
-                    quizLives--;
-                    renderQuizLives();
-                    showToast('Waktu Habis! (-1 Nyawa)', 'fa-triangle-exclamation');
-                    nextQuizQuestion();
-                } else {
-                    updateTimerDisplay();
-                }
-            }, 100);
-        }
-
-        function updateTimerDisplay() {
-            document.getElementById('quiz-timer-text').textContent = `${Math.max(0, quizTimeLeft).toFixed(1)}s`;
-            const percent = (quizTimeLeft / 10) * 100;
-            document.getElementById('quiz-timer-bar').style.width = `${percent}%`;
-        }
-
-        function checkQuizAnswer(selectedVal) {
-            clearInterval(quizTimer);
-            if (selectedVal === currentQuizAnswer) {
-                playSound('correct');
-                quizScore += 10;
-                addStars(1);
-                document.getElementById('quiz-score').textContent = quizScore;
-                showToast('Benar! +10 Skor', 'fa-circle-check');
-            } else {
-                playSound('wrong');
-                quizLives--;
-                renderQuizLives();
-                showToast(`Salah! Jawaban: ${currentQuizAnswer}`, 'fa-circle-xmark');
-            }
-            nextQuizQuestion();
-        }
-
-        function endQuizGame() {
-            clearInterval(quizTimer);
-            document.getElementById('quiz-final-score').textContent = quizScore;
-            document.getElementById('quiz-gameover-modal').classList.remove('hidden');
-            if (quizScore > 0) triggerConfetti();
-        }
-
-        // ================= GAME 2: 2048 MATH PUZZLE ENGINE =================
-        let board2048 = [];
-        let score2048 = 0;
-        let best2048 = parseInt(localStorage.getItem('2048_best') || '0');
-        let prevBoard2048 = null;
-        let prevScore2048 = 0;
-
-        function init2048() {
-            board2048 = Array(4).fill().map(() => Array(4).fill(0));
-            score2048 = 0;
-            document.getElementById('g2048-score').textContent = '0';
-            document.getElementById('g2048-best').textContent = best2048;
-            document.getElementById('2048-gameover').classList.add('hidden');
-            addNewTile2048();
-            addNewTile2048();
-            renderBoard2048();
-        }
-
-        function renderBoard2048() {
-            const container = document.getElementById('grid-2048-container');
-            container.innerHTML = '';
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 4; c++) {
-                    const val = board2048[r][c];
-                    const valClass = val > 0 ? `tile-val-${Math.min(val, 2048)}` : 'bg-slate-200/60';
-                    container.innerHTML += `
-                        <div class="aspect-square rounded-2xl ${valClass} flex items-center justify-center font-extrabold text-xl sm:text-2xl shadow-inner transition-all transform duration-150">
-                            ${val > 0 ? val : ''}
-                        </div>
-                    `;
-                }
-            }
-        }
-
-        function addNewTile2048() {
-            let emptyCells = [];
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 4; c++) {
-                    if (board2048[r][c] === 0) emptyCells.push({ r, c });
-                }
-            }
-            if (emptyCells.length > 0) {
-                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                board2048[randomCell.r][randomCell.c] = Math.random() < 0.9 ? 2 : 4;
-            }
-        }
-
-        function save2048State() {
-            prevBoard2048 = JSON.parse(JSON.stringify(board2048));
-            prevScore2048 = score2048;
-        }
-
-        function undoMove2048() {
-            if (prevBoard2048) {
-                board2048 = JSON.parse(JSON.stringify(prevBoard2048));
-                score2048 = prevScore2048;
-                document.getElementById('g2048-score').textContent = score2048;
-                renderBoard2048();
-                showToast('Langkah Dibatalkan', 'fa-rotate-left');
-            }
-        }
-
-        function handle2048Move(dir) {
-            save2048State();
-            let moved = false;
-
-            if (dir === 'left' || dir === 'right') {
-                for (let r = 0; r < 4; r++) {
-                    let row = board2048[r].filter(val => val !== 0);
-                    if (dir === 'right') row.reverse();
-
-                    let mergedRow = [];
-                    for (let i = 0; i < row.length; i++) {
-                        if (i < row.length - 1 && row[i] === row[i + 1]) {
-                            const mergedVal = row[i] * 2;
-                            mergedRow.push(mergedVal);
-                            score2048 += mergedVal;
-                            i++;
-                            moved = true;
-                        } else {
-                            mergedRow.push(row[i]);
-                        }
-                    }
-
-                    while (mergedRow.length < 4) mergedRow.push(0);
-                    if (dir === 'right') mergedRow.reverse();
-
-                    if (JSON.stringify(board2048[r]) !== JSON.stringify(mergedRow)) moved = true;
-                    board2048[r] = mergedRow;
-                }
-            } else if (dir === 'up' || dir === 'down') {
-                for (let c = 0; c < 4; c++) {
-                    let col = [];
-                    for (let r = 0; r < 4; r++) if (board2048[r][c] !== 0) col.push(board2048[r][c]);
-                    if (dir === 'down') col.reverse();
-
-                    let mergedCol = [];
-                    for (let i = 0; i < col.length; i++) {
-                        if (i < col.length - 1 && col[i] === col[i + 1]) {
-                            const mergedVal = col[i] * 2;
-                            mergedCol.push(mergedVal);
-                            score2048 += mergedVal;
-                            i++;
-                            moved = true;
-                        } else {
-                            mergedCol.push(col[i]);
-                        }
-                    }
-
-                    while (mergedCol.length < 4) mergedCol.push(0);
-                    if (dir === 'down') mergedCol.reverse();
-
-                    for (let r = 0; r < 4; r++) {
-                        if (board2048[r][c] !== mergedCol[r]) moved = true;
-                        board2048[r][c] = mergedCol[r];
-                    }
-                }
-            }
-
-            if (moved) {
-                playSound('click');
-                addNewTile2048();
-                renderBoard2048();
-
-                if (score2048 > best2048) {
-                    best2048 = score2048;
-                    localStorage.setItem('2048_best', best2048.toString());
-                }
-                document.getElementById('g2048-score').textContent = score2048;
-                document.getElementById('g2048-best').textContent = best2048;
-
-                check2048GameOver();
-            }
-        }
-
-        function check2048GameOver() {
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 4; c++) {
-                    if (board2048[r][c] === 0) return;
-                    if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return;
-                    if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return;
-                }
-            }
-            document.getElementById('2048-modal-score').textContent = score2048;
-            document.getElementById('2048-gameover').classList.remove('hidden');
-        }
-
-        // Keyboard navigation bindings
-        window.addEventListener('keydown', (e) => {
-            if (document.getElementById('page-game2048').classList.contains('hidden')) return;
-            if (e.key === 'ArrowUp' || e.key === 'w') handle2048Move('up');
-            if (e.key === 'ArrowDown' || e.key === 's') handle2048Move('down');
-            if (e.key === 'ArrowLeft' || e.key === 'a') handle2048Move('left');
-            if (e.key === 'ArrowRight' || e.key === 'd') handle2048Move('right');
+        const videoTrack = stream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+        setVideoStats({
+          width: settings.width || 640,
+          height: settings.height || 480,
+          status: 'Kamera Aktif & Berfungsi Normal'
         });
 
-        // ================= GAME 3: SUDOKU ENGINE =================
-        let sudokuGrid = Array(81).fill(0);
-        let sudokuSolution = Array(81).fill(0);
-        let selectedSudokuIndex = null;
+        showToast("Kamera berhasil diaktifkan!", "success");
+        sfx.correct();
+      } catch (err) {
+        console.error("Gagal mengaktifkan kamera:", err);
+        setCameraActive(false);
+        setVideoStats({ width: 0, height: 0, status: 'Izin Ditolak / Tidak Ditemukan' });
+        showToast("Gagal mengakses kamera. Pastikan izin kamera telah diberikan di browser Anda.", "error");
+      }
+    }
+  };
 
-        const presetSudokus = {
-            easy: [
-                "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
-                "534678912672195348198342567859761423426853791713924856961537284287419635345286179"
-            ],
-            medium: [
-                "000260701680070090190004500820100040004602900050003028009300074040050036703018000",
-                "435269781682571493197834562826195347374682915951423628519326874248759136763918254"
-            ]
-        };
+  // Capture Snapshot in Camera Tester
+  const takeTestSnapshot = () => {
+    const activeVideo = testVideoRef.current || videoRef.current;
+    if (!activeVideo || !cameraActive) {
+      showToast("Aktifkan kamera terlebih dahulu untuk mengambil foto tes.", "error");
+      return;
+    }
 
-        function initSudoku() {
-            const diff = document.getElementById('sudoku-difficulty').value;
-            const puzzleStr = presetSudokus[diff] ? presetSudokus[diff][0] : presetSudokus['easy'][0];
-            const solStr = presetSudokus[diff] ? presetSudokus[diff][1] : presetSudokus['easy'][1];
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = activeVideo.videoWidth || 640;
+      canvas.height = activeVideo.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+      setTestSnapshot(canvas.toDataURL('image/png'));
+      sfx.correct();
+      showToast("Foto tes berhasil diambil!", "success");
+    } catch (e) {
+      showToast("Gagal mengambil gambar snapshot.", "error");
+    }
+  };
 
-            sudokuGrid = puzzleStr.split('').map(v => parseInt(v));
-            sudokuSolution = solStr.split('').map(v => parseInt(v));
-            selectedSudokuIndex = null;
+  useEffect(() => {
+    if (cameraStream) {
+      if (videoRef.current) videoRef.current.srcObject = cameraStream;
+      if (testVideoRef.current) testVideoRef.current.srcObject = cameraStream;
+    }
+  }, [cameraStream, view, showCameraTestModal]);
 
-            renderSudokuBoard();
-        }
+  const toggleMute = () => {
+    sfx.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
 
-        function renderSudokuBoard() {
-            const board = document.getElementById('sudoku-board-grid');
-            board.innerHTML = '';
+  useEffect(() => {
+    if (view === 'PLAY_DIRECT' && gameState === 'QUESTION') {
+      timerRef.current = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            handleDirectTimeUp();
+            return 0;
+          }
+          sfx.tick();
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
 
-            for (let i = 0; i < 81; i++) {
-                const row = Math.floor(i / 9);
-                const col = i % 9;
-                const val = sudokuGrid[i];
-                const isSelected = selectedSudokuIndex === i;
+    return () => clearInterval(timerRef.current);
+  }, [view, gameState, currentQIndex]);
 
-                // Add thicker border logic for 3x3 sub-grids
-                let borderClasses = "border border-slate-700 ";
-                if (col % 3 === 2 && col !== 8) borderClasses += "border-r-2 border-r-slate-400 ";
-                if (row % 3 === 2 && row !== 8) borderClasses += "border-b-2 border-b-slate-400 ";
+  // Start Direct Game Immediately
+  const handleStartDirectGame = () => {
+    setCurrentQIndex(0);
+    setScore(0);
+    setCorrectCount(0);
+    setIsEliminated(false);
+    setSelectedAnswer(null);
+    setGameState('QUESTION');
+    setTimer(questions[0]?.duration || 10);
+    setView('PLAY_DIRECT');
+    sfx.tick();
+  };
 
-                const bgClass = isSelected ? 'bg-amber-300 text-slate-900' : (val > 0 ? 'bg-slate-100 text-slate-900 font-bold' : 'bg-slate-800 text-blue-400 hover:bg-slate-700');
+  const handleDirectAnswerSelect = (key) => {
+    if (gameState !== 'QUESTION' || isEliminated || selectedAnswer !== null) return;
 
-                board.innerHTML += `
-                    <button onclick="selectSudokuCell(${i})" class="${borderClasses} ${bgClass} rounded-md text-base sm:text-lg flex items-center justify-center font-outfit transition-colors">
-                        ${val > 0 ? val : ''}
-                    </button>
-                `;
-            }
-        }
+    const timeSpent = (questions[currentQIndex]?.duration || 10) - timer;
+    setSelectedAnswer(key);
+    setAnswerTime(timeSpent);
+    sfx.tick();
+  };
 
-        function selectSudokuCell(idx) {
-            playSound('click');
-            selectedSudokuIndex = idx;
-            renderSudokuBoard();
-        }
+  const handleDirectTimeUp = () => {
+    setGameState('REVEAL');
+    const currentQ = questions[currentQIndex];
 
-        function inputSudokuNumber(num) {
-            if (selectedSudokuIndex !== null) {
-                playSound('click');
-                sudokuGrid[selectedSudokuIndex] = num;
-                renderSudokuBoard();
-            } else {
-                showToast('Pilih Kotak Terlebih Dahulu', 'fa-hand-pointer');
-            }
-        }
+    if (selectedAnswer === currentQ.correctKey) {
+      sfx.correct();
+      const bonus = Math.max(0, Math.round((10 - answerTime) * 10));
+      setScore(prev => prev + 100 + bonus);
+      setCorrectCount(prev => prev + 1);
+    } else {
+      if (gameMode === 'SURVIVAL') {
+        setIsEliminated(true);
+        sfx.eliminated();
+      } else {
+        sfx.wrong();
+      }
+    }
+  };
 
-        function eraseSudokuCell() {
-            if (selectedSudokuIndex !== null) {
-                playSound('click');
-                sudokuGrid[selectedSudokuIndex] = 0;
-                renderSudokuBoard();
-            }
-        }
+  const handleNextDirectQuestion = () => {
+    if (currentQIndex + 1 < questions.length && (!isEliminated || gameMode !== 'SURVIVAL')) {
+      const nextIdx = currentQIndex + 1;
+      setCurrentQIndex(nextIdx);
+      setSelectedAnswer(null);
+      setGameState('QUESTION');
+      setTimer(questions[nextIdx]?.duration || 10);
+      sfx.tick();
+    } else {
+      setGameState('FINISHED');
+      sfx.fanfare();
+      setView('LEADERBOARD');
+    }
+  };
 
-        function checkSudokuSolution() {
-            let isCorrect = true;
-            for (let i = 0; i < 81; i++) {
-                if (sudokuGrid[i] !== sudokuSolution[i]) {
-                    isCorrect = false;
-                    break;
-                }
-            }
-            if (isCorrect) {
-                playSound('correct');
-                addStars(10);
-                triggerConfetti();
-                showToast('Selamat! Sudoku Selesai Sempurna! +10 Bintang', 'fa-award');
-            } else {
-                playSound('wrong');
-                showToast('Masih Ada Angka yang Belum Sesuai', 'fa-circle-xmark');
-            }
-        }
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [showQModal, setShowQModal] = useState(false);
 
-        // ================= GAME 4: TARGET NUMBER GAME ENGINE =================
-        let targetGoal = 23;
-        let targetNumbers = [2, 4, 5, 9];
-        let targetUsedIndices = [];
-        let targetExpression = [];
+  const handleSaveQuestion = (q) => {
+    if (!q.question || !q.optionA || !q.optionB) {
+      showToast("Harap isi teks pertanyaan dan opsi A & B.", "error");
+      return;
+    }
+    if (q.id) {
+      setQuestions(prev => prev.map(item => item.id === q.id ? q : item));
+      showToast("Soal berhasil diperbarui!", "success");
+    } else {
+      setQuestions(prev => [...prev, { ...q, id: 'q_' + Date.now() }]);
+      showToast("Soal baru berhasil ditambahkan!", "success");
+    }
+    setShowQModal(false);
+    setEditingQuestion(null);
+  };
 
-        function initTargetGame() {
-            // Generate 4 numbers and achievable target
-            targetNumbers = [
-                Math.floor(Math.random() * 9) + 1,
-                Math.floor(Math.random() * 9) + 1,
-                Math.floor(Math.random() * 9) + 1,
-                Math.floor(Math.random() * 9) + 1
-            ];
-            // Simple target calculation guarantee
-            targetGoal = (targetNumbers[0] * targetNumbers[1]) + targetNumbers[2] + targetNumbers[3];
-            
-            targetUsedIndices = [];
-            targetExpression = [];
+  const handleDeleteQuestion = (id) => {
+    if (questions.length <= 1) {
+      showToast("Game harus memiliki minimal 1 pertanyaan!", "error");
+      return;
+    }
+    setQuestions(prev => prev.filter(q => q.id !== id));
+    showToast("Soal dihapus.", "info");
+  };
 
-            document.getElementById('target-goal-number').textContent = targetGoal;
-            renderTargetNumbers();
-            renderTargetExpression();
-        }
+  const handleShuffleQuestions = () => {
+    setQuestions(prev => [...prev].sort(() => Math.random() - 0.5));
+    showToast("Urutan soal berhasil diacak!", "success");
+  };
 
-        function renderTargetNumbers() {
-            const container = document.getElementById('target-numbers-container');
-            container.innerHTML = '';
-            targetNumbers.forEach((num, idx) => {
-                const isUsed = targetUsedIndices.includes(idx);
-                container.innerHTML += `
-                    <button onclick="appendTargetNumber(${num}, ${idx})" ${isUsed ? 'disabled' : ''} 
-                        class="btn-push ${isUsed ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-rose-100 hover:bg-rose-200 text-rose-800'} py-4 rounded-2xl font-extrabold text-2xl shadow-sm transition-all">
-                        ${num}
-                    </button>
-                `;
-            });
-        }
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+      {/* Custom Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-bounce">
+          <div className={`px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 ${
+            toast.type === 'error' ? 'bg-rose-900 border-rose-500 text-rose-100' :
+            toast.type === 'success' ? 'bg-emerald-900 border-emerald-500 text-emerald-100' :
+            'bg-indigo-900 border-indigo-500 text-indigo-100'
+          }`}>
+            {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
+            {toast.type === 'success' && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+            {toast.type === 'info' && <Sparkles className="w-4 h-4 text-indigo-400" />}
+            <span>{toast.message}</span>
+          </div>
+        </div>
+      )}
 
-        function renderTargetExpression() {
-            const display = document.getElementById('target-expression-display');
-            if (targetExpression.length === 0) {
-                display.innerHTML = `<span class="text-slate-400 text-sm font-normal">Klik angka & operator...</span>`;
-                return;
-            }
-            display.innerHTML = targetExpression.map(item => `
-                <span class="px-3 py-1 ${typeof item === 'number' ? 'bg-rose-500 text-white' : 'bg-amber-400 text-slate-900'} rounded-xl shadow-sm font-bold">
-                    ${item}
+      {/* Navigation Top Bar */}
+      <header className="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-40 px-4 py-3 shadow-md">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <div 
+            onClick={() => setView('HOME')} 
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition">
+              <Camera className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
+                KAMERA BENAR-SALAH
+              </h1>
+              <p className="text-[11px] text-slate-400 font-medium">Deep Learning Kurikulum Merdeka 2026</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Audio Toggle */}
+            <button
+              onClick={toggleMute}
+              className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-semibold ${
+                isMuted 
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
+                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+              }`}
+              title={isMuted ? "Suara Dimatikan" : "Suara Aktif"}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              <span className="hidden sm:inline">{isMuted ? "Bisu" : "Suara"}</span>
+            </button>
+
+            {/* Camera Diagnostic Tester Button */}
+            <button
+              onClick={() => {
+                loadCameraDevices();
+                setShowCameraTestModal(true);
+              }}
+              className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 text-xs font-semibold flex items-center gap-1.5 transition"
+            >
+              <Video className="w-4 h-4 text-amber-400" />
+              <span className="hidden sm:inline">Tes Kamera</span>
+            </button>
+
+            {/* Quick Camera Toggle */}
+            <button
+              onClick={() => toggleCamera()}
+              className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-semibold ${
+                cameraActive 
+                  ? 'bg-indigo-500/20 border-indigo-400 text-indigo-300 hover:bg-indigo-500/30' 
+                  : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              {cameraActive ? <Camera className="w-4 h-4 text-emerald-400 animate-pulse" /> : <CameraOff className="w-4 h-4 text-slate-400" />}
+              <span className="hidden md:inline">{cameraActive ? "Kamera Aktif" : "Aktifkan Kamera"}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="max-w-5xl w-full mx-auto p-4 flex-1 flex flex-col justify-center">
+
+        {/* =========================================================================
+            VIEW 1: HOME PAGE
+           ========================================================================= */}
+        {view === 'HOME' && (
+          <div className="space-y-8 my-auto py-6">
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" /> Tanpa Login • Siapkan Materi & Langsung Main
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                Game Kamera <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Benar atau Salah</span>
+              </h2>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Uji pemahaman materi umum dan konsep <strong className="text-indigo-300">Deep Learning Kurikulum Merdeka 2026</strong> secara interaktif. Beraksi dengan kamera dan jawab cepat sebelum waktu habis!
+              </p>
+            </div>
+
+            {/* HERO DIRECT PLAY ACTION BOX */}
+            <div className="max-w-xl mx-auto bg-gradient-to-b from-indigo-900/40 via-slate-800/90 to-slate-800 border-2 border-indigo-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                <Zap className="w-32 h-32 text-indigo-400" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                  ⚡ Mode Cepat (Tanpa Syarat)
                 </span>
-            `).join('');
-        }
+                <h3 className="text-2xl font-black text-white">Langsung Bermain</h3>
+                <p className="text-slate-300 text-xs">
+                  Siapkan nama atau gunakan materi kuis standar 2026 yang sudah siap pakai!
+                </p>
+              </div>
 
-        function appendTargetNumber(num, idx) {
-            if (targetUsedIndices.includes(idx)) return;
-            playSound('click');
-            targetUsedIndices.push(idx);
-            targetExpression.push(num);
-            renderTargetNumbers();
-            renderTargetExpression();
-        }
+              {/* Camera Diagnostic Quick Status Banner */}
+              <div className="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-3 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${cameraActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
+                  <span className="text-slate-300 font-medium">
+                    Status Kamera: <strong className={cameraActive ? "text-emerald-400" : "text-slate-400"}>
+                      {cameraActive ? "Terhubung & Siap" : "Belum Diaktifkan"}
+                    </strong>
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    loadCameraDevices();
+                    setShowCameraTestModal(true);
+                  }}
+                  className="text-amber-400 hover:text-amber-300 font-bold underline flex items-center gap-1"
+                >
+                  <Video className="w-3.5 h-3.5" /> Uji Kamera
+                </button>
+              </div>
 
-        function appendTargetOp(op) {
-            if (targetExpression.length === 0) return;
-            const last = targetExpression[targetExpression.length - 1];
-            if (typeof last === 'string') return; // Avoid double operators
-            playSound('click');
-            targetExpression.push(op);
-            renderTargetExpression();
-        }
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  onClick={handleStartDirectGame}
+                  className="flex-1 py-4 px-6 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 hover:from-indigo-400 hover:to-pink-500 text-white font-extrabold text-base rounded-2xl shadow-xl shadow-indigo-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <Play className="w-5 h-5 fill-current" /> MULAI BERMAIN SEKARANG
+                </button>
+                <button
+                  onClick={() => setView('PREPARE_DIRECT')}
+                  className="py-4 px-5 bg-slate-700/80 hover:bg-slate-600 border border-slate-600 text-slate-200 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-4 h-4 text-purple-400" /> Atur Materi ({questions.length} Soal)
+                </button>
+              </div>
+            </div>
 
-        function clearTargetExpression() {
-            playSound('click');
-            targetUsedIndices = [];
-            targetExpression = [];
-            renderTargetNumbers();
-            renderTargetExpression();
-        }
+            {/* Secondary Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto pt-2">
+              <button
+                onClick={() => setView('HOST_PANEL')}
+                className="p-4 bg-slate-800/80 border border-slate-700/80 hover:border-slate-600 rounded-2xl text-left transition flex items-center gap-3 group"
+              >
+                <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl group-hover:scale-105 transition">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-white">Mode Kelas & Proyektor</h4>
+                  <p className="text-[11px] text-slate-400">Atur kuis untuk tayang di depan kelas</p>
+                </div>
+              </button>
 
-        function evaluateTargetAnswer() {
-            if (targetExpression.length === 0) return;
-            try {
-                // Convert expression to js readable format
-                let exprStr = targetExpression.map(item => {
-                    if (item === '×') return '*';
-                    if (item === '÷') return '/';
-                    return item;
-                }).join('');
+              <button
+                onClick={() => setView('DEPLOY_GUIDE')}
+                className="p-4 bg-slate-800/80 border border-slate-700/80 hover:border-slate-600 rounded-2xl text-left transition flex items-center gap-3 group"
+              >
+                <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:scale-105 transition">
+                  <Code className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-white">Panduan Deploy Server</h4>
+                  <p className="text-[11px] text-slate-400">Langkah publikasi gratis ke Vercel</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
 
-                const result = eval(exprStr);
+        {/* =========================================================================
+            VIEW 2: PREPARE MATERIAL & OPTIONS
+           ========================================================================= */}
+        {view === 'PREPARE_DIRECT' && (
+          <div className="max-w-3xl mx-auto w-full space-y-6 py-4">
+            <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('HOME')}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl transition"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h2 className="text-lg font-bold text-white">Persiapan Materi & Aturan Kuis</h2>
+                  <p className="text-xs text-slate-400">Atur nama pemain dan koleksi soal sebelum langsung bertanding</p>
+                </div>
+              </div>
 
-                if (Math.abs(result - targetGoal) < 0.001) {
-                    playSound('correct');
-                    addStars(5);
-                    triggerConfetti();
-                    showToast('Luar Biasa! Target Tercapai (+5 Bintang)', 'fa-bullseye');
-                } else {
-                    playSound('wrong');
-                    showToast(`Hasil Kamu: ${result}. Belum Mencapai ${targetGoal}`, 'fa-circle-xmark');
-                }
-            } catch (e) {
-                playSound('wrong');
-                showToast('Format Ekspresi Tidak Valid!', 'fa-triangle-exclamation');
-            }
-        }
+              <button
+                onClick={handleStartDirectGame}
+                className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+              >
+                <Play className="w-4 h-4 fill-current" /> Mulai Main ({questions.length} Soal)
+              </button>
+            </div>
 
-        // ================= GAME 5: PRODIGY RPG QUEST ENGINE =================
-        let rpgPlayerHp = 100;
-        let rpgMonsterHp = 50;
-        let rpgMonsterMaxHp = 50;
-        let rpgStage = 1;
-        let rpgGold = 0;
-        let rpgCorrectAns = 0;
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Settings Box */}
+              <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 space-y-4">
+                <h3 className="font-bold text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2 text-sm">
+                  <User className="w-4 h-4 text-indigo-400" /> Profil & Mode
+                </h3>
 
-        function initRpgQuest() {
-            rpgPlayerHp = 100;
-            rpgStage = 1;
-            rpgGold = 0;
-            spawnRpgMonster();
-            updateRpgUi();
-        }
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Nama Pemain</label>
+                    <input
+                      type="text"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-semibold"
+                    />
+                  </div>
 
-        function spawnRpgMonster() {
-            rpgMonsterMaxHp = 40 + (rpgStage * 15);
-            rpgMonsterHp = rpgMonsterMaxHp;
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Mode Aturan Game</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setGameMode('POINTS')}
+                        className={`p-2 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition ${
+                          gameMode === 'POINTS'
+                            ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300'
+                            : 'bg-slate-900 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        <Zap className="w-4 h-4" /> Mode Poin
+                      </button>
+                      <button
+                        onClick={() => setGameMode('SURVIVAL')}
+                        className={`p-2 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition ${
+                          gameMode === 'SURVIVAL'
+                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                            : 'bg-slate-900 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        <ShieldAlert className="w-4 h-4" /> Eliminasi
+                      </button>
+                    </div>
+                  </div>
 
-            const monsters = [
-                { name: "Slime Hitung", icon: "fa-ghost" },
-                { name: "Goblin Kurang", icon: "fa-hat-wizard" },
-                { name: "Naga Perkalian", icon: "fa-dragon" },
-                { name: "Raja Aljabar", icon: "fa-crown" }
-            ];
-            const m = monsters[(rpgStage - 1) % monsters.length];
-            document.getElementById('rpg-monster-name').textContent = m.name;
-            document.getElementById('rpg-monster-avatar').innerHTML = `<i class="fa-solid ${m.icon}"></i>`;
-
-            generateRpgQuestion();
-        }
-
-        function generateRpgQuestion() {
-            const n1 = Math.floor(Math.random() * (10 * rpgStage)) + 1;
-            const n2 = Math.floor(Math.random() * 10) + 1;
-            rpgCorrectAns = n1 + n2;
-
-            document.getElementById('rpg-question').textContent = `${n1} + ${n2} = ?`;
-
-            const choices = [rpgCorrectAns];
-            while (choices.length < 4) {
-                const wrong = rpgCorrectAns + (Math.floor(Math.random() * 6) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                if (wrong >= 0 && !choices.includes(wrong)) choices.push(wrong);
-            }
-            choices.sort(() => Math.random() - 0.5);
-
-            const container = document.getElementById('rpg-options');
-            container.innerHTML = '';
-            choices.forEach(choice => {
-                container.innerHTML += `
-                    <button onclick="attackRpgMonster(${choice})" class="btn-push bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xl py-3 rounded-xl shadow-md border border-purple-400">
-                        ✨ ${choice}
+                  <div className="pt-2 border-t border-slate-700">
+                    <button
+                      onClick={handleShuffleQuestions}
+                      className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-xl text-purple-300 flex items-center justify-center gap-1.5 transition"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Acak Urutan Soal
                     </button>
-                `;
-            });
-        }
+                  </div>
+                </div>
+              </div>
 
-        function attackRpgMonster(choice) {
-            if (choice === rpgCorrectAns) {
-                playSound('correct');
-                const damage = 25;
-                rpgMonsterHp = Math.max(0, rpgMonsterHp - damage);
-                rpgGold += 10;
-                addStars(2);
-                showToast(`Mantra Sukses! Monster -${damage} HP`, 'fa-wand-magic-sparkles');
+              {/* Questions Bank Box */}
+              <div className="md:col-span-2 bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 space-y-4">
+                <div className="flex justify-between items-center border-b border-slate-700 pb-2">
+                  <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-purple-400" /> Daftar Soal Deep Learning Kurmer ({questions.length})
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setEditingQuestion({
+                        id: '',
+                        subject: 'Umum / Deep Learning',
+                        grade: 'Umum',
+                        question: '',
+                        optionA: 'Benar',
+                        optionB: 'Salah',
+                        correctKey: 'A',
+                        duration: 10,
+                        explanation: ''
+                      });
+                      setShowQModal(true);
+                    }}
+                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Tambah Soal
+                  </button>
+                </div>
 
-                if (rpgMonsterHp <= 0) {
-                    triggerConfetti();
-                    rpgStage++;
-                    showToast(`Monster Kalahkan! Naik Ke Tingkat ${rpgStage}`, 'fa-trophy');
-                    setTimeout(spawnRpgMonster, 1000);
-                } else {
-                    generateRpgQuestion();
-                }
-            } else {
-                playSound('wrong');
-                const monsterDmg = 15;
-                rpgPlayerHp = Math.max(0, rpgPlayerHp - monsterDmg);
-                showToast(`Mantra Meleset! Pahlawan -${monsterDmg} HP`, 'fa-heart-crack');
+                <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+                  {questions.map((q, idx) => (
+                    <div 
+                      key={q.id} 
+                      className="bg-slate-900/90 border border-slate-700/70 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:border-slate-600 transition"
+                    >
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+                            Soal #{idx + 1}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold truncate max-w-[200px]">
+                            {q.subject}
+                          </span>
+                        </div>
+                        <p className="text-xs font-semibold text-slate-200 line-clamp-2">{q.question}</p>
+                      </div>
 
-                if (rpgPlayerHp <= 0) {
-                    showToast('Pahlawan Gugur! Mengulang Petualangan...', 'fa-skull');
-                    setTimeout(initRpgQuest, 1500);
-                } else {
-                    generateRpgQuestion();
-                }
-            }
-            updateRpgUi();
-        }
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button
+                          onClick={() => {
+                            setEditingQuestion(q);
+                            setShowQModal(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition"
+                          title="Edit"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuestion(q.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+                          title="Hapus"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-        function updateRpgUi() {
-            document.getElementById('rpg-stage-num').textContent = rpgStage;
-            document.getElementById('rpg-gold').textContent = rpgGold;
-            document.getElementById('rpg-player-hp-text').textContent = `${rpgPlayerHp} / 100 HP`;
-            document.getElementById('rpg-monster-hp-text').textContent = `${rpgMonsterHp} / ${rpgMonsterMaxHp} HP`;
+        {/* =========================================================================
+            VIEW 3: DIRECT GAMEPLAY ARENA
+           ========================================================================= */}
+        {view === 'PLAY_DIRECT' && (
+          <div className="max-w-2xl mx-auto w-full space-y-4 py-2">
+            {/* Top Player Info Bar */}
+            <div className="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setView('HOME')}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <div>
+                  <h3 className="font-bold text-white text-sm">{playerName}</h3>
+                  <span className="text-[10px] text-indigo-300">
+                    Mode: {gameMode === 'SURVIVAL' ? 'Eliminasi Bertahan' : 'Akumulasi Poin'}
+                  </span>
+                </div>
+              </div>
 
-            document.getElementById('rpg-player-hp').style.width = `${rpgPlayerHp}%`;
-            document.getElementById('rpg-monster-hp').style.width = `${(rpgMonsterHp / rpgMonsterMaxHp) * 100}%`;
-        }
+              <div className="flex items-center gap-3">
+                {/* Live Webcam Thumbnail in Game */}
+                {cameraActive && (
+                  <div className="w-20 aspect-video bg-black rounded-lg border border-emerald-500 overflow-hidden relative shadow-md">
+                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  </div>
+                )}
 
-        // ================= PYTHON CLI SIMULATOR ENGINE =================
-        let cliState = 'MENU'; // MENU, PLAYING, FINISHED
-        let cliMin = 1, cliMax = 10;
-        let cliCurrentQ = 0;
-        let cliScore = 0;
-        let cliTargetAns = 0;
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block">TOTAL SKOR</span>
+                  <span className="text-lg font-black font-mono text-indigo-300">{score} pt</span>
+                </div>
+              </div>
+            </div>
 
-        function resetCliSimulator() {
-            cliState = 'MENU';
-            cliCurrentQ = 0;
-            cliScore = 0;
-            const term = document.getElementById('cli-terminal-output');
-            term.innerHTML = `
-                <p class="text-slate-400">=== GAME MATEMATIKA PYTHON CLI ===</p>
-                <p class="text-slate-400">Pilih Tingkat Kesulitan:</p>
-                <p class="text-slate-400">1. Mudah (1-10)</p>
-                <p class="text-slate-400">2. Sedang (1-50)</p>
-                <p class="text-slate-400">3. Sulit (1-100)</p>
-            `;
-        }
+            {/* Elimination Overlay */}
+            {isEliminated && gameMode === 'SURVIVAL' && (
+              <div className="bg-rose-950/90 border border-rose-800 rounded-3xl p-6 text-center space-y-3">
+                <ShieldAlert className="w-10 h-10 text-rose-400 mx-auto" />
+                <h3 className="text-2xl font-black text-rose-200">Kamu Tereliminasi!</h3>
+                <p className="text-xs text-rose-300">
+                  Jawaban pada pertanyaan ini kurang tepat dalam Mode Bertahan.
+                </p>
+                <button
+                  onClick={handleStartDirectGame}
+                  className="mt-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl"
+                >
+                  Coba Lagi Dari Awal
+                </button>
+              </div>
+            )}
 
-        function sendCliInput() {
-            const inputEl = document.getElementById('cli-user-input');
-            const val = inputEl.value.trim();
-            if (!val) return;
-            inputEl.value = '';
+            {/* Question Card */}
+            {(!isEliminated || gameMode !== 'SURVIVAL') && (
+              <div className="bg-slate-800/90 border border-slate-700 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+                {/* Status Header */}
+                <div className="flex justify-between items-center">
+                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded-xl border border-purple-500/30">
+                    Soal #{currentQIndex + 1} dari {questions.length}
+                  </span>
 
-            const term = document.getElementById('cli-terminal-output');
-            term.innerHTML += `<p class="text-sky-300">&gt; ${val}</p>`;
+                  {/* Circular Timer Visual */}
+                  <div className="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 font-mono font-bold text-amber-400 text-sm">
+                    <Clock className={`w-4 h-4 ${timer <= 3 ? 'text-rose-400 animate-bounce' : ''}`} />
+                    <span className={timer <= 3 ? 'text-rose-400' : ''}>{timer}s</span>
+                  </div>
+                </div>
 
-            if (cliState === 'MENU') {
-                if (val === '1') { cliMin = 1; cliMax = 10; }
-                else if (val === '2') { cliMin = 1; cliMax = 50; }
-                else if (val === '3') { cliMin = 1; cliMax = 100; }
-                else { cliMin = 1; cliMax = 10; }
+                {/* Question Topic & Text */}
+                <div className="text-center py-2 space-y-2">
+                  <span className="text-[11px] text-indigo-300 font-bold uppercase tracking-wider">
+                    [{questions[currentQIndex]?.subject}]
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-white leading-relaxed">
+                    "{questions[currentQIndex]?.question}"
+                  </h3>
+                </div>
 
-                cliState = 'PLAYING';
-                cliCurrentQ = 1;
-                cliScore = 0;
-                askNextCliQuestion();
-            } else if (cliState === 'PLAYING') {
-                const userAns = parseInt(val);
-                if (userAns === cliTargetAns) {
-                    cliScore += 10;
-                    term.innerHTML += `<p class="text-emerald-400"> Correct! (+10 pts)</p>`;
-                } else {
-                    term.innerHTML += `<p class="text-rose-400"> Wrong! Jawaban benar: ${cliTargetAns}</p>`;
-                }
+                {/* Big Tactile Benar / Salah Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Option A (Benar) */}
+                  <button
+                    disabled={gameState !== 'QUESTION' || selectedAnswer !== null}
+                    onClick={() => handleDirectAnswerSelect('A')}
+                    className={`p-5 rounded-2xl border-2 font-bold text-lg flex items-center justify-between transition-all transform active:scale-95 ${
+                      gameState === 'REVEAL'
+                        ? questions[currentQIndex]?.correctKey === 'A'
+                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/20'
+                          : selectedAnswer === 'A'
+                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                            : 'bg-slate-900 border-slate-800 opacity-50'
+                        : selectedAnswer === 'A'
+                          ? 'bg-indigo-600 border-indigo-400 text-white ring-4 ring-indigo-500/30'
+                          : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-xl bg-indigo-500/30 text-indigo-300 flex items-center justify-center font-black text-sm">
+                        A
+                      </span>
+                      <span>{questions[currentQIndex]?.optionA}</span>
+                    </div>
 
-                cliCurrentQ++;
-                if (cliCurrentQ > 10) {
-                    cliState = 'FINISHED';
-                    const accuracy = (cliScore / 100) * 100;
-                    term.innerHTML += `
-                        <p class="text-amber-300">==============================</p>
-                        <p class="text-amber-300">HASIL AKHIR - Total Skor: ${cliScore} / 100</p>
-                        <p class="text-amber-300">Akurasi Jawaban: ${accuracy.toFixed(1)}%</p>
-                        <p class="text-amber-300">==============================</p>
-                        <p class="text-slate-400">Ketik apapun lalu tekan Kirim untuk reset.</p>
-                    `;
-                } else {
-                    askNextCliQuestion();
-                }
-            } else if (cliState === 'FINISHED') {
-                resetCliSimulator();
-            }
+                    {gameState === 'REVEAL' && questions[currentQIndex]?.correctKey === 'A' && (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                    )}
+                  </button>
 
-            term.scrollTop = term.scrollHeight;
-        }
+                  {/* Option B (Salah) */}
+                  <button
+                    disabled={gameState !== 'QUESTION' || selectedAnswer !== null}
+                    onClick={() => handleDirectAnswerSelect('B')}
+                    className={`p-5 rounded-2xl border-2 font-bold text-lg flex items-center justify-between transition-all transform active:scale-95 ${
+                      gameState === 'REVEAL'
+                        ? questions[currentQIndex]?.correctKey === 'B'
+                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/20'
+                          : selectedAnswer === 'B'
+                            ? 'bg-rose-500/20 border-rose-500 text-rose-300'
+                            : 'bg-slate-900 border-slate-800 opacity-50'
+                        : selectedAnswer === 'B'
+                          ? 'bg-purple-600 border-purple-400 text-white ring-4 ring-purple-500/30'
+                          : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-8 h-8 rounded-xl bg-purple-500/30 text-purple-300 flex items-center justify-center font-black text-sm">
+                        B
+                      </span>
+                      <span>{questions[currentQIndex]?.optionB}</span>
+                    </div>
 
-        function askNextCliQuestion() {
-            const n1 = Math.floor(Math.random() * (cliMax - cliMin + 1)) + cliMin;
-            const n2 = Math.floor(Math.random() * (cliMax - cliMin + 1)) + cliMin;
-            const ops = ['+', '-', '*'];
-            const op = ops[Math.floor(Math.random() * ops.length)];
+                    {gameState === 'REVEAL' && questions[currentQIndex]?.correctKey === 'B' && (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                    )}
+                  </button>
+                </div>
 
-            if (op === '+') cliTargetAns = n1 + n2;
-            if (op === '-') cliTargetAns = n1 - n2;
-            if (op === '*') cliTargetAns = n1 * n2;
+                {/* Explanation Banner */}
+                {gameState === 'REVEAL' && (
+                  <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-xs text-indigo-200 space-y-2 animate-fade-in">
+                    <span className="font-bold flex items-center gap-1 text-indigo-300 text-xs">
+                      <Sparkles className="w-4 h-4" /> Penjelasan Pembelajaran:
+                    </span>
+                    <p className="leading-relaxed">{questions[currentQIndex]?.explanation}</p>
+                    <button
+                      onClick={handleNextDirectQuestion}
+                      className="mt-2 w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition"
+                    >
+                      <span>Lanjut Soal Berikutnya</span> <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
-            const term = document.getElementById('cli-terminal-output');
-            term.innerHTML += `<p class="text-slate-200">Soal ${cliCurrentQ}/10: ${n1} ${op} ${n2} = ?</p>`;
-        }
+        {/* =========================================================================
+            VIEW 4: LEADERBOARD & HASIL AKHIR
+           ========================================================================= */}
+        {view === 'LEADERBOARD' && (
+          <div className="max-w-md mx-auto w-full space-y-6 py-6 text-center">
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+              <div className="p-3 bg-amber-500/20 border border-amber-500/30 w-fit rounded-2xl mx-auto text-amber-400">
+                <Trophy className="w-10 h-10 animate-bounce" />
+              </div>
 
-        function copyPythonCode() {
-            const code = document.getElementById('python-code-block').innerText;
-            const dummy = document.createElement('textarea');
-            document.body.appendChild(dummy);
-            dummy.value = code;
-            dummy.select();
-            document.execCommand('copy');
-            document.body.removeChild(dummy);
-            showToast('Kode Python Berhasil Disalin!', 'fa-copy');
-        }
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-white">Permainan Selesai!</h2>
+                <p className="text-xs text-slate-400">Hasil pertandingan kuis untuk <strong className="text-white">{playerName}</strong></p>
+              </div>
 
-        function downloadPythonScript() {
-            const code = document.getElementById('python-code-block').innerText;
-            const blob = new Blob([code], { type: 'text/x-python' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'math_game_cli.py';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Mengunduh math_game_cli.py', 'fa-download');
-        }
+              <div className="bg-slate-900 p-4 rounded-2xl border border-slate-700 space-y-3">
+                <div className="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-2">
+                  <span>Jawaban Benar</span>
+                  <span className="font-bold text-emerald-400">{correctCount} dari {questions.length} Soal</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-400">
+                  <span>Total Skor Terkumpul</span>
+                  <span className="font-mono font-black text-lg text-indigo-300">{score} pt</span>
+                </div>
+              </div>
 
-        // ================= APP INITIALIZATION =================
-        window.onload = function() {
-            document.getElementById('global-stars').textContent = globalStars;
-            // Launch Home Hub by default
-            navigateTo('home');
-        };
-    </script>
-</body>
-</html>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleStartDirectGame}
+                  className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg"
+                >
+                  <RotateCcw className="w-4 h-4" /> Main Lagi
+                </button>
+                <button
+                  onClick={() => setView('HOME')}
+                  className="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl"
+                >
+                  Beranda
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            VIEW 5: TEACHER HOST PANEL
+           ========================================================================= */}
+        {view === 'HOST_PANEL' && (
+          <div className="space-y-6 py-4">
+            <div className="flex justify-between items-center bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('HOME')}
+                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl transition"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h2 className="text-lg font-bold text-white">Panel Kelola Guru & Mode Proyektor</h2>
+                  <p className="text-xs text-slate-400">Tampilkan kuis secara interaktif di layar depan kelas</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleStartDirectGame}
+                className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2"
+              >
+                <Play className="w-4 h-4 fill-current" /> Buka Kuis Langsung
+              </button>
+            </div>
+
+            <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 space-y-3">
+              <h3 className="font-bold text-slate-200 text-sm">Mode Proyektor Kelas</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Anda dapat menghubungkan layar ke proyektor kelas dan mengajak seluruh siswa menjawab secara bersamaan. Gunakan tombol kamera di bagian atas untuk mengaktifkan pratinjau reaksi siswa saat menjawab!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            VIEW 6: PANDUAN DEPLOYMENT GITHUB & VERCEL
+           ========================================================================= */}
+        {view === 'DEPLOY_GUIDE' && (
+          <div className="max-w-4xl mx-auto w-full space-y-6 py-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('HOME')}
+                  className="p-2 bg-slate-800 hover:bg-slate-700 rounded-xl"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h2 className="text-2xl font-black text-white">Panduan Deploy GitHub & Vercel</h2>
+                  <p className="text-xs text-slate-400">Langkah-langkah publikasi aplikasi ke server cloud publik</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm">
+              <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 space-y-3">
+                <h3 className="font-bold text-indigo-300 flex items-center gap-2 text-base">
+                  <Code className="w-5 h-5" /> 1. File Konfigurasi <code className="text-purple-300 font-mono">package.json</code>
+                </h3>
+                <pre className="bg-slate-900 p-4 rounded-xl font-mono text-slate-300 overflow-x-auto text-xs border border-slate-800">
+{`{
+  "name": "game-kamera-benar-salah",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5"
+  }
+}`}
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            MODAL 1: DIAGNOSTIC & TEST CAMERA TOOL
+           ========================================================================= */}
+        {showCameraTestModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-slate-700 pb-3">
+                <div className="flex items-center gap-2">
+                  <Video className="w-5 h-5 text-amber-400" />
+                  <h3 className="font-bold text-base text-white">Uji & Diagnosis Kamera</h3>
+                </div>
+                <button 
+                  onClick={() => setShowCameraTestModal(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Camera Live Preview & Snapshot Display */}
+              <div className="space-y-3">
+                <div className="aspect-video bg-black rounded-2xl border-2 border-slate-700 overflow-hidden relative flex items-center justify-center">
+                  {cameraActive ? (
+                    <video ref={testVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center p-4 space-y-2">
+                      <CameraOff className="w-10 h-10 text-slate-500 mx-auto" />
+                      <p className="text-xs text-slate-400">Kamera saat ini belum diaktifkan.</p>
+                    </div>
+                  )}
+
+                  {cameraActive && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur rounded-lg text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1.5 border border-emerald-500/30">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      LIVE ({videoStats.width}x{videoStats.height})
+                    </div>
+                  )}
+                </div>
+
+                {/* Device Selector (If Multiple Cameras Present) */}
+                {cameraDevices.length > 0 && (
+                  <div>
+                    <label className="block text-xs text-slate-400 mb-1">Pilih Perangkat Kamera:</label>
+                    <select
+                      value={selectedDeviceId}
+                      onChange={(e) => {
+                        setSelectedDeviceId(e.target.value);
+                        toggleCamera(e.target.value);
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-slate-200 focus:outline-none"
+                    >
+                      {cameraDevices.map((device, idx) => (
+                        <option key={device.deviceId || idx} value={device.deviceId}>
+                          {device.label || `Kamera ${idx + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Action Buttons inside Camera Tester */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => toggleCamera()}
+                    className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
+                      cameraActive 
+                        ? 'bg-rose-600 hover:bg-rose-500 text-white' 
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    }`}
+                  >
+                    {cameraActive ? <CameraOff className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+                    <span>{cameraActive ? "Matikan Kamera" : "Nyalakan Kamera"}</span>
+                  </button>
+
+                  <button
+                    disabled={!cameraActive}
+                    onClick={takeTestSnapshot}
+                    className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
+                  >
+                    <Image className="w-4 h-4" />
+                    <span>Ambil Foto Uji</span>
+                  </button>
+                </div>
+
+                {/* Snapshot Thumbnail Preview */}
+                {testSnapshot && (
+                  <div className="p-3 bg-slate-900 rounded-2xl border border-slate-700 space-y-2">
+                    <span className="text-[10px] text-indigo-300 font-bold block">Hasil Tangkapan Gambar Tes:</span>
+                    <img src={testSnapshot} alt="Snapshot Test" className="w-28 rounded-lg border border-slate-700 shadow-md" />
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-slate-700 flex justify-end">
+                <button
+                  onClick={() => setShowCameraTestModal(false)}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl"
+                >
+                  Selesai Uji
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            MODAL 2: EDIT / ADD QUESTION
+           ========================================================================= */}
+        {showQModal && editingQuestion && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 className="font-bold text-base text-white">
+                  {editingQuestion.id ? 'Edit Pertanyaan' : 'Tambah Pertanyaan Baru'}
+                </h3>
+                <button 
+                  onClick={() => setShowQModal(false)}
+                  className="p-1 text-slate-400 hover:text-white rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-slate-400 mb-1">Teks Pertanyaan</label>
+                  <textarea
+                    rows={3}
+                    value={editingQuestion.question}
+                    onChange={(e) => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:border-indigo-500"
+                    placeholder="Tuliskan pertanyaan di sini..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 mb-1">Kunci Jawaban Benar</label>
+                    <select
+                      value={editingQuestion.correctKey}
+                      onChange={(e) => setEditingQuestion({ ...editingQuestion, correctKey: e.target.value })}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
+                    >
+                      <option value="A">A (Benar)</option>
+                      <option value="B">B (Salah)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 mb-1">Mata Pelajaran / Topik</label>
+                    <input
+                      type="text"
+                      value={editingQuestion.subject}
+                      onChange={(e) => setEditingQuestion({ ...editingQuestion, subject: e.target.value })}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1">Penjelasan Pembelajaran</label>
+                  <input
+                    type="text"
+                    value={editingQuestion.explanation}
+                    onChange={(e) => setEditingQuestion({ ...editingQuestion, explanation: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white"
+                    placeholder="Penjelasan ringkas saat kunci terbuka..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-700">
+                <button
+                  onClick={() => setShowQModal(false)}
+                  className="px-4 py-2 bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => handleSaveQuestion(editingQuestion)}
+                  className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl"
+                >
+                  Simpan Pertanyaan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 border-t border-slate-800 py-3 px-4 text-center text-xs text-slate-400">
+        <p>Aplikasi Game Kamera Benar-Salah • Deep Learning Kurikulum Merdeka 2026</p>
+      </footer>
+    </div>
+  );
+}
