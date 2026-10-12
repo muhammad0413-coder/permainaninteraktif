@@ -342,6 +342,7 @@
         .podium-2 { height: 125px; background: linear-gradient(to top, #64748b, #cbd5e1); color: #1e293b; }
         .podium-3 { height: 95px; background: linear-gradient(to top, #b45309, #fde68a); color: #451a03; }
 
+        /* MODAL STYLES */
         .modal {
             display: none;
             position: fixed;
@@ -358,10 +359,11 @@
         .modal-content {
             background: white;
             border-radius: 20px;
-            max-width: 480px;
+            max-width: 500px;
             width: 100%;
             padding: 22px;
             text-align: center;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
         }
 
         .test-video-box {
@@ -516,7 +518,7 @@
             </div>
         </div>
 
-        <!-- 4. PANEL GURU (DENGAN REVISI: DILENGKAPI OTOMATIS BENAR/SALAH TANPA PERLU MENGETIK OPTION A & B) -->
+        <!-- 4. PANEL GURU -->
         <div id="screen-teacher" class="screen">
             <div class="card" style="text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -564,6 +566,40 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- MODAL EDIT SOAL (PROMPT POPUP MODAL) -->
+    <div id="modal-edit-question" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 style="margin-bottom: 15px; color: var(--primary); text-align: center;"><i class="fa-solid fa-pen-to-square"></i> Edit Soal Tersimpan</h3>
+            
+            <div class="form-group">
+                <label>Teks Pertanyaan / Pernyataan</label>
+                <input type="text" id="edit-q-text" placeholder="Ubah pertanyaan di sini...">
+            </div>
+
+            <div class="form-group">
+                <label>Kunci Jawaban Baru</label>
+                <select id="edit-q-key">
+                    <option value="A">BENAR (Posisi Kiri)</option>
+                    <option value="B">SALAH (Posisi Kanan)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Durasi Timer (Detik)</label>
+                <input type="number" id="edit-q-timer" value="10">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-success" style="flex: 1; justify-content: center;" onclick="saveModalEdit()">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                </button>
+                <button class="btn btn-secondary" onclick="closeEditModal()">
+                    Batal
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL TES KAMERA -->
@@ -652,6 +688,9 @@
         let pauseInterval = null;
         let timeLeft = 10;
         let mediaStream = null;
+
+        // State Edit Soal
+        let editingIndex = null;
 
         // Count Wajah Realtime
         let leftCount = 0;
@@ -909,7 +948,7 @@
             showScreen('screen-welcome');
         }
 
-        /* 6. PANEL GURU (REVISI: TANPA FORM MENGETIK A/B, OTOMATIS TERSIMPAN BENAR/SALAH) */
+        /* 6. PANEL GURU & FITUR PROMPT MODAL EDIT SOAL */
         function renderTeacherQuestions() {
             const container = document.getElementById('questions-list-container');
             document.getElementById('q-count').textContent = questions.length;
@@ -920,10 +959,15 @@
                 item.className = 'question-item';
                 item.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong>Soal ${index + 1} (${q.subject})</strong>
-                        <button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="deleteQuestion(${index})">
-                            <i class="fa-solid fa-trash"></i> Hapus
-                        </button>
+                        <strong>Soal ${index + 1} (${q.subject}) - ${q.timer} Detik</strong>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-warning" style="padding: 4px 10px; font-size:0.75rem;" onclick="promptEditQuestion(${index})">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button class="btn btn-danger" style="padding: 4px 10px; font-size:0.75rem;" onclick="deleteQuestion(${index})">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </div>
                     </div>
                     <p style="margin: 6px 0; font-weight:600; font-size:0.9rem;">${q.question}</p>
                     <div style="font-size:0.8rem; color:#475569;">
@@ -959,6 +1003,44 @@
             renderTeacherQuestions();
 
             document.getElementById('input-q-text').value = '';
+        }
+
+        /* PROMPT MODAL POPUP EDIT */
+        function promptEditQuestion(index) {
+            editingIndex = index;
+            const q = questions[index];
+
+            document.getElementById('edit-q-text').value = q.question;
+            document.getElementById('edit-q-key').value = q.answer;
+            document.getElementById('edit-q-timer').value = q.timer;
+
+            document.getElementById('modal-edit-question').classList.add('active');
+        }
+
+        function saveModalEdit() {
+            if (editingIndex === null) return;
+
+            const newText = document.getElementById('edit-q-text').value.trim();
+            const newKey = document.getElementById('edit-q-key').value;
+            const newTimer = parseInt(document.getElementById('edit-q-timer').value) || 10;
+
+            if (!newText) {
+                alert("Pertanyaan tidak boleh kosong!");
+                return;
+            }
+
+            questions[editingIndex].question = newText;
+            questions[editingIndex].answer = newKey;
+            questions[editingIndex].timer = newTimer;
+
+            localStorage.setItem('game_questions', JSON.stringify(questions));
+            closeEditModal();
+            renderTeacherQuestions();
+        }
+
+        function closeEditModal() {
+            editingIndex = null;
+            document.getElementById('modal-edit-question').classList.remove('active');
         }
 
         function deleteQuestion(index) {
