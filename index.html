@@ -3,1061 +3,845 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Kamera Kelompok Benar-Salah - Deep Learning Kurmer 2026</title>
-    <!-- Google Fonts & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Petualangan Berhitung - Matematika Fase A</title>
     
-    <!-- Face Detection API (tracking.js) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
-
+    <!-- Google Fonts for Kids -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Baloo 2"', 'cursive', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            light: '#fdfbf7',
+                            blue: '#4fc3f7',
+                            yellow: '#ffca28',
+                            orange: '#ff9800',
+                            red: '#ef5350',
+                            green: '#66bb6a',
+                            purple: '#ab47bc'
+                        }
+                    },
+                    boxShadow: {
+                        'btn': '0 6px 0px 0px rgba(0,0,0,0.15)',
+                        'btn-active': '0 2px 0px 0px rgba(0,0,0,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        :root {
-            --primary: #4338ca;
-            --primary-light: #6366f1;
-            --secondary: #0ea5e9;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #0f172a;
-            --card-bg: rgba(255, 255, 255, 0.96);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            user-select: none;
-        }
-
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: var(--dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            background-color: #e0f7fa;
+            user-select: none; /* Prevent text selection for better app feel */
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn-game {
+            transition: all 0.1s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+        }
+        .btn-game:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
         }
 
-        header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            z-index: 100;
+        .emoji-item {
+            font-size: 2.5rem;
+            display: inline-block;
+            margin: 0.2rem;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0);
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #38bdf8;
+        /* Animations */
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
         }
-
-        .header-nav { display: flex; gap: 10px; }
-
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
         }
-
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--primary-light); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-secondary { background: #475569; color: white; }
-
-        .container {
-            flex: 1;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
         }
-
-        .screen { display: none; width: 100%; }
-        .screen.active { display: flex; flex-direction: column; align-items: center; }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 25px;
-            width: 100%;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
-            text-align: center;
-            margin-bottom: 15px;
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
+        
+        .anim-bounce-in { animation: bounceIn 0.5s ease-out forwards; }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
+        .anim-float { animation: float 3s ease-in-out infinite; }
 
-        h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 8px; }
-        p.subtitle { color: #64748b; margin-bottom: 20px; font-size: 0.9rem; }
-
-        .form-group { margin-bottom: 18px; text-align: left; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 0.9rem; }
-        input, select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        .game-layout {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            gap: 12px;
-        }
-
-        /* CONTAINER KAMERA UTAMA */
-        .camera-container {
-            position: relative;
-            width: 100%;
-            height: 480px;
-            background: #000;
-            border-radius: 24px;
-            overflow: hidden;
-            border: 4px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-
-        /* SOAL TERINTEGRASI DI DALAM KAMERA */
-        .camera-question-overlay {
+        /* Hidden class to toggle screens */
+        .screen-hidden { display: none !important; }
+        
+        /* Particle styles for confetti */
+        .particle {
             position: absolute;
-            top: 52px;
-            left: 15px;
-            right: 15px;
-            background: rgba(15, 23, 42, 0.88);
-            color: white;
-            padding: 14px 20px;
-            border-radius: 16px;
-            font-size: 1.15rem;
-            font-weight: 700;
-            text-align: center;
-            z-index: 8;
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            line-height: 1.4;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .camera-header-info {
-            position: absolute;
-            top: 12px;
-            left: 15px;
-            right: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 8;
-        }
-
-        .info-pill {
-            background: rgba(15, 23, 42, 0.75);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .camera-divider-line {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: translateX(-50%);
-            box-shadow: 0 0 12px rgba(255,255,255,0.8);
-            z-index: 5;
-        }
-
-        .camera-split-zones {
-            position: absolute;
-            inset: 0;
-            display: flex;
             pointer-events: none;
-            z-index: 4;
-        }
-
-        .zone-left, .zone-right {
-            flex: 1;
-            background: transparent;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 20px;
-        }
-
-        .zone-left { align-items: flex-start; border-right: 1px dashed rgba(255, 255, 255, 0.4); }
-        .zone-right { align-items: flex-end; }
-
-        /* BINGKAI PINGGIRAN HASIL */
-        .zone-left.reveal-correct, .zone-right.reveal-correct {
-            box-shadow: inset 0 0 0 12px #22c55e;
-            background: rgba(34, 197, 94, 0.12);
-        }
-
-        .zone-left.reveal-wrong, .zone-right.reveal-wrong {
-            box-shadow: inset 0 0 0 12px #ef4444;
-            background: rgba(239, 68, 68, 0.12);
-        }
-
-        .zone-badge {
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: white;
-            text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(4px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .person-count-pill {
-            margin-top: 6px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            background: rgba(0,0,0,0.7);
-            color: #38bdf8;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .timer-badge {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--warning);
-            color: white;
-            width: 54px;
-            height: 54px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.35rem;
-            font-weight: 800;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 7;
-            animation: pulse 1s infinite alternate;
+            animation: fall 1s linear forwards;
         }
-
-        @keyframes pulse {
-            0% { transform: translateX(-50%) scale(1); }
-            100% { transform: translateX(-50%) scale(1.08); }
-        }
-
-        .status-overlay {
-            position: absolute;
-            inset: 0;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 2rem;
-            font-weight: 800;
-            z-index: 10;
-            text-transform: uppercase;
-            pointer-events: none;
-        }
-
-        .status-overlay.active { display: flex; }
-
-        .status-box {
-            background: rgba(15, 23, 42, 0.9);
-            padding: 18px 30px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-
-        .podium {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 12px;
-            margin: 20px 0;
-            height: 180px;
-        }
-
-        .podium-place {
-            width: 85px;
-            background: linear-gradient(to top, var(--primary), var(--primary-light));
-            border-radius: 12px 12px 0 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 10px;
-            color: white;
-            font-weight: 700;
-        }
-
-        .podium-1 { height: 160px; background: linear-gradient(to top, #ca8a04, #fef08a); color: #713f12; }
-        .podium-2 { height: 125px; background: linear-gradient(to top, #64748b, #cbd5e1); color: #1e293b; }
-        .podium-3 { height: 95px; background: linear-gradient(to top, #b45309, #fde68a); color: #451a03; }
-
-        /* MODAL STYLES */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.active { display: flex; }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 100%;
-            padding: 22px;
-            text-align: center;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
-        }
-
-        .test-video-box {
-            position: relative;
-            width: 100%;
-            height: 240px;
-            background: #000;
-            border-radius: 14px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .question-item {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-
-        @media (max-width: 600px) {
-            .camera-container { height: 400px; }
-            .camera-question-overlay { font-size: 0.95rem; top: 45px; padding: 10px; }
-            .zone-badge { font-size: 0.75rem; padding: 5px 10px; }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
-<body>
+<body class="text-slate-800 h-screen w-full flex items-center justify-center overflow-hidden">
 
-    <header>
-        <div class="logo">
-            <i class="fa-solid fa-camera-retro"></i> GAME KAMERA KELOMPOK
-        </div>
-        <div class="header-nav">
-            <button class="btn btn-warning" onclick="openCameraTest()">
-                <i class="fa-solid fa-video"></i> Tes Kamera
-            </button>
-            <button class="btn btn-secondary" onclick="showScreen('screen-teacher')">
-                <i class="fa-solid fa-user-gear"></i> Panel Guru
-            </button>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <!-- 1. BERANDA / UTAMA -->
-        <div id="screen-welcome" class="screen active">
-            <div class="card">
-                <h1><i class="fa-solid fa-users-between-lines"></i> Game Kamera Kelompok</h1>
-                <p class="subtitle">Deteksi Otomatis Jumlah Siswa di Kamera (Kurmer 2026)</p>
-                
-                <div class="form-group">
-                    <label><i class="fa-solid fa-users"></i> Nama Kelompok Siswa</label>
-                    <input type="text" id="input-player-name" placeholder="Masukkan nama kelompok..." autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <label><i class="fa-solid fa-shield-halved"></i> Mode Permainan</label>
-                    <select id="select-game-mode">
-                        <option value="point">Mode Poin Kelompok (Bermain Sampai Selesai)</option>
-                        <option value="elimination">Mode Bertahan (Gugur Jika Kelompok Salah)</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-success" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.05rem;" onclick="startGame()">
-                    <i class="fa-solid fa-play"></i> Mulai Permainan Kelompok
-                </button>
-            </div>
-        </div>
-
-        <!-- 2. GAMEPLAY FULL KAMERA -->
-        <div id="screen-game" class="screen">
-            <div class="game-layout">
-                
-                <div class="camera-container">
-                    <video id="game-video" autoplay playsinline muted></video>
-
-                    <div class="camera-header-info">
-                        <span class="info-pill" id="badge-subject"><i class="fa-solid fa-book"></i> IPAS SD</span>
-                        <span class="info-pill" id="label-player-name"><i class="fa-solid fa-users"></i> Kelompok</span>
-                        <span class="info-pill" id="badge-progress">Soal 1 / 10</span>
-                    </div>
-
-                    <div class="camera-question-overlay" id="text-question">
-                        Memuat pertanyaan...
-                    </div>
-
-                    <div class="camera-split-zones">
-                        <div class="zone-left" id="zone-left">
-                            <span class="zone-badge" id="badge-left"><i class="fa-solid fa-circle-check"></i> BENAR</span>
-                            <span class="person-count-pill" id="count-left"><i class="fa-solid fa-user"></i> 0 Orang</span>
-                        </div>
-                        <div class="zone-right" id="zone-right">
-                            <span class="zone-badge" id="badge-right"><i class="fa-solid fa-circle-xmark"></i> SALAH</span>
-                            <span class="person-count-pill" id="count-right"><i class="fa-solid fa-user"></i> 0 Orang</span>
-                        </div>
-                    </div>
-
-                    <div class="camera-divider-line"></div>
-                    <div class="timer-badge" id="badge-timer">10</div>
-
-                    <div id="status-overlay" class="status-overlay">
-                        <div class="status-box">
-                            <i id="status-icon" class="fa-solid" style="font-size: 2.8rem; margin-bottom: 5px;"></i>
-                            <span id="status-text" style="font-size: 1.4rem;"></span>
-                            <p id="status-detail" style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;"></p>
-                            <span id="next-timer-text" style="font-size: 0.85rem; margin-top: 10px; font-weight: 600; color: #38bdf8;">
-                                Soal berikutnya dalam 5 detik...
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- 3. HASIL AKHIR & LEADERBOARD -->
-        <div id="screen-result" class="screen">
-            <div class="card">
-                <h1><i class="fa-solid fa-trophy" style="color: #eab308;"></i> Hasil Akhir Permainan</h1>
-                <p class="subtitle">Skor & Peringkat Kelompok Pembelajaran SD</p>
-
-                <div class="podium">
-                    <div class="podium-place podium-2">
-                        <i class="fa-solid fa-medal" style="font-size: 1.3rem;"></i>
-                        <span>2nd</span>
-                        <small id="podium-2-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
-                    </div>
-                    <div class="podium-1 podium-place">
-                        <i class="fa-solid fa-crown" style="font-size: 1.8rem;"></i>
-                        <span>1st</span>
-                        <small id="podium-1-name" style="font-size: 0.8rem; text-align: center; margin-top: 4px;">-</small>
-                    </div>
-                    <div class="podium-3 podium-place">
-                        <i class="fa-solid fa-award" style="font-size: 1.2rem;"></i>
-                        <span>3rd</span>
-                        <small id="podium-3-name" style="font-size: 0.75rem; text-align: center; margin-top: 4px;">-</small>
-                    </div>
-                </div>
-
-                <div style="background: #f1f5f9; padding: 15px; border-radius: 14px; margin-bottom: 18px; text-align: left;">
-                    <h3 style="margin-bottom: 6px; color: var(--primary); font-size: 1rem;"><i class="fa-solid fa-chart-pie"></i> Performa Kelompok Anda:</h3>
-                    <p style="font-size:0.9rem;">Status: <strong id="user-final-status">-</strong></p>
-                    <p style="font-size:0.9rem;">Total Poin: <strong id="user-final-score">0</strong> Poin</p>
-                    <p style="font-size:0.9rem;">Soal Berhasil Dimenangkan: <strong id="user-final-correct">0</strong> dari 10 Soal</p>
-                </div>
-
-                <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="resetToWelcome()">
-                    <i class="fa-solid fa-rotate-right"></i> Main Lagi
-                </button>
-            </div>
-        </div>
-
-        <!-- 4. PANEL GURU -->
-        <div id="screen-teacher" class="screen">
-            <div class="card" style="text-align: left;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="font-size:1.3rem;"><i class="fa-solid fa-chalkboard-user"></i> Panel Kelola Soal Guru</h2>
-                    <button class="btn btn-secondary" onclick="showScreen('screen-welcome')">
-                        <i class="fa-solid fa-arrow-left"></i> Kembali
-                    </button>
-                </div>
-
-                <div style="background: #f8fafc; padding: 15px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 12px; font-size: 1rem; color: var(--primary);">Buat Soal Pernyataan Baru</h3>
-                    
-                    <div class="form-group">
-                        <label>Teks Pertanyaan / Pernyataan</label>
-                        <input type="text" id="input-q-text" placeholder="Contoh: Fotosintesis tumbuhan menghasilkan oksigen...">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>Kunci Jawaban</label>
-                            <select id="select-q-key">
-                                <option value="A">BENAR (Posisi Kiri)</option>
-                                <option value="B">SALAH (Posisi Kanan)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Durasi (Detik)</label>
-                            <input type="number" id="input-q-timer" value="10">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="addQuestion()">
-                        <i class="fa-solid fa-plus"></i> Tambahkan Soal
-                    </button>
-                </div>
-
-                <h3>Daftar Soal Aktif (<span id="q-count">0</span>)</h3>
-                <div id="questions-list-container" style="margin-top: 12px;"></div>
-
-                <div style="margin-top: 15px;">
-                    <button class="btn btn-warning" onclick="resetDefaultQuestions()">
-                        <i class="fa-solid fa-arrows-rotate"></i> Reset ke 10 Soal Default Kurmer 2026
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <!-- Audio Controls (Fixed Top Right) -->
+    <div class="fixed top-4 right-4 z-50 flex gap-2">
+        <button id="btn-toggle-bgm" class="bg-white rounded-full p-3 shadow-btn text-xl hover:bg-gray-50 active:translate-y-1 active:shadow-btn-active transition-all" onclick="app.toggleBGM()">
+            🎵 <span id="bgm-status" class="text-sm font-bold">ON</span>
+        </button>
+        <button id="btn-toggle-voice" class="bg-white rounded-full p-3 shadow-btn text-xl hover:bg-gray-50 active:translate-y-1 active:shadow-btn-active transition-all" onclick="app.toggleVoice()">
+            🗣️ <span id="voice-status" class="text-sm font-bold">ON</span>
+        </button>
     </div>
 
-    <!-- MODAL EDIT SOAL (PROMPT POPUP MODAL) -->
-    <div id="modal-edit-question" class="modal">
-        <div class="modal-content" style="text-align: left;">
-            <h3 style="margin-bottom: 15px; color: var(--primary); text-align: center;"><i class="fa-solid fa-pen-to-square"></i> Edit Soal Tersimpan</h3>
+    <!-- Main App Container -->
+    <div id="app-container" class="relative w-full max-w-md h-full sm:h-[85vh] sm:rounded-3xl bg-brand-light shadow-2xl overflow-y-auto overflow-x-hidden border-4 border-white flex flex-col">
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: SPLASH & START -->
+        <!-- ============================================== -->
+        <div id="screen-splash" class="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-brand-blue to-blue-300">
+            <div class="text-6xl mb-4 anim-float">🚀🍎</div>
+            <h1 class="text-4xl font-extrabold text-white text-center drop-shadow-md mb-2">Petualangan Berhitung</h1>
+            <p class="text-white text-lg font-semibold mb-10 text-center drop-shadow-sm">Belajar Penjumlahan & Pengurangan</p>
             
-            <div class="form-group">
-                <label>Teks Pertanyaan / Pernyataan</label>
-                <input type="text" id="edit-q-text" placeholder="Ubah pertanyaan di sini...">
-            </div>
-
-            <div class="form-group">
-                <label>Kunci Jawaban Baru</label>
-                <select id="edit-q-key">
-                    <option value="A">BENAR (Posisi Kiri)</option>
-                    <option value="B">SALAH (Posisi Kanan)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Durasi Timer (Detik)</label>
-                <input type="number" id="edit-q-timer" value="10">
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-success" style="flex: 1; justify-content: center;" onclick="saveModalEdit()">
-                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
-                </button>
-                <button class="btn btn-secondary" onclick="closeEditModal()">
-                    Batal
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL TES KAMERA -->
-    <div id="modal-camera-test" class="modal">
-        <div class="modal-content">
-            <h3><i class="fa-solid fa-video"></i> Pengujian Deteksi Kamera</h3>
-            <p style="font-size: 0.85rem; color: #64748b; margin-top: 6px;">
-                Uji coba deteksi wajah otomatis di depan kamera.
-            </p>
-
-            <div class="test-video-box">
-                <video id="test-video" autoplay playsinline muted></video>
-                <div class="camera-divider-line"></div>
-            </div>
-
-            <div id="camera-test-status" style="font-weight: 700; margin-bottom: 12px; color: var(--warning); font-size: 0.9rem;">
-                Memeriksa Kamera...
-            </div>
-
-            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="closeCameraTest()">
-                Tutup Pengujian
+            <button onclick="app.startApp()" class="btn-game bg-brand-yellow text-brand-orange font-extrabold text-2xl py-4 px-10 rounded-full border-4 border-white anim-bounce-in">
+                Mulai Bermain! ▶
             </button>
         </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: APERSEPSI (Pemantik) -->
+        <!-- ============================================== -->
+        <div id="screen-apersepsi" class="screen-hidden w-full h-full flex flex-col p-6 bg-amber-50">
+            <h2 class="text-3xl font-bold text-center text-amber-600 mt-4 mb-6">Cerita Budi 👦</h2>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-amber-200 mb-6 relative">
+                <p class="text-xl leading-relaxed text-center" id="apersepsi-text">
+                    Budi punya <strong class="text-brand-orange text-2xl">5</strong> buah Apel. <br><br>
+                    <span id="ap-apples-1">🍎🍎🍎🍎🍎</span><br><br>
+                    Lalu, Ibu memberi Budi <strong class="text-brand-green text-2xl">3</strong> Apel lagi.<br>
+                    <span id="ap-apples-2" class="opacity-50">🍎🍎🍎</span>
+                </p>
+            </div>
+            
+            <p class="text-2xl font-bold text-center mb-6">Wah, menurutmu apel Budi jadi...</p>
+            
+            <div class="flex flex-col gap-4 mt-auto mb-10">
+                <button onclick="app.checkApersepsi(true)" class="btn-game bg-brand-green text-white font-bold text-2xl py-4 rounded-2xl">
+                    Bertambah Banyak 📈
+                </button>
+                <button onclick="app.checkApersepsi(false)" class="btn-game bg-brand-red text-white font-bold text-2xl py-4 rounded-2xl">
+                    Berkurang Sedikit 📉
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 3: MAIN MENU -->
+        <!-- ============================================== -->
+        <div id="screen-menu" class="screen-hidden w-full h-full flex flex-col p-6 bg-brand-light">
+            <h2 class="text-4xl font-extrabold text-center text-brand-blue mt-6 mb-2">Pilih Misi! 🗺️</h2>
+            <p class="text-center text-slate-500 mb-8 font-semibold">Pilih petualangan yang ingin kamu mainkan</p>
+            
+            <div class="flex flex-col gap-5 flex-1">
+                <button onclick="app.gotoScreen('materi-jumlah')" class="btn-game bg-brand-orange text-white rounded-3xl p-5 flex items-center gap-4">
+                    <div class="bg-white/20 p-3 rounded-2xl text-4xl">➕</div>
+                    <div class="text-left">
+                        <h3 class="text-2xl font-bold">Penjumlahan</h3>
+                        <p class="text-sm opacity-90">Belajar menggabungkan benda</p>
+                    </div>
+                </button>
+
+                <button onclick="app.gotoScreen('materi-kurang')" class="btn-game bg-brand-green text-white rounded-3xl p-5 flex items-center gap-4">
+                    <div class="bg-white/20 p-3 rounded-2xl text-4xl">➖</div>
+                    <div class="text-left">
+                        <h3 class="text-2xl font-bold">Pengurangan</h3>
+                        <p class="text-sm opacity-90">Belajar mengambil benda</p>
+                    </div>
+                </button>
+
+                <button onclick="app.startQuiz()" class="btn-game bg-brand-purple text-white rounded-3xl p-5 flex items-center gap-4">
+                    <div class="bg-white/20 p-3 rounded-2xl text-4xl">⭐</div>
+                    <div class="text-left">
+                        <h3 class="text-2xl font-bold">Kuis Ceria</h3>
+                        <p class="text-sm opacity-90">Uji kemampuanmu di sini</p>
+                    </div>
+                </button>
+                
+                <button onclick="app.gotoScreen('tantangan')" class="btn-game bg-brand-yellow text-amber-900 rounded-3xl p-5 flex items-center gap-4">
+                    <div class="bg-white/40 p-3 rounded-2xl text-4xl">🏠</div>
+                    <div class="text-left">
+                        <h3 class="text-2xl font-bold">Tantangan Rumah</h3>
+                        <p class="text-sm opacity-90">Main pakai benda di rumahmu</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 4: MATERI PENJUMLAHAN -->
+        <!-- ============================================== -->
+        <div id="screen-materi-jumlah" class="screen-hidden w-full h-full flex flex-col p-6 bg-orange-50">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="app.gotoScreen('menu')" class="bg-white rounded-full p-2 text-2xl shadow-sm hover:bg-gray-100">⬅️</button>
+                <h2 class="text-2xl font-bold text-brand-orange">Penjumlahan ➕</h2>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-orange-200 flex-1 flex flex-col">
+                <p class="text-lg text-center font-semibold mb-4 text-slate-600">Penjumlahan artinya <b>menggabungkan</b> sehingga benda menjadi lebih banyak.</p>
+                
+                <div class="flex justify-center items-center gap-2 mb-4 text-3xl font-bold">
+                    <span class="text-brand-blue">8</span>
+                    <span>+</span>
+                    <span class="text-brand-green">5</span>
+                    <span>=</span>
+                    <span id="jml-result-text" class="text-brand-orange text-4xl">?</span>
+                </div>
+
+                <!-- Simulation Area -->
+                <div class="bg-slate-50 rounded-2xl p-4 min-h-[200px] flex flex-col justify-center gap-4 border border-slate-200">
+                    <div id="jml-group-1" class="text-center min-h-[50px]">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div id="jml-operator" class="text-center font-bold text-2xl text-slate-400">DITAMBAH</div>
+                    <div id="jml-group-2" class="text-center min-h-[50px]">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-6">
+                    <button id="btn-sim-jumlah" onclick="app.simulasiJumlah()" class="w-full btn-game bg-brand-orange text-white font-bold text-2xl py-3 rounded-full">
+                        Gabungkan! 🪄
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 5: MATERI PENGURANGAN -->
+        <!-- ============================================== -->
+        <div id="screen-materi-kurang" class="screen-hidden w-full h-full flex flex-col p-6 bg-green-50">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="app.gotoScreen('menu')" class="bg-white rounded-full p-2 text-2xl shadow-sm hover:bg-gray-100">⬅️</button>
+                <h2 class="text-2xl font-bold text-brand-green">Pengurangan ➖</h2>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-green-200 flex-1 flex flex-col">
+                <p class="text-lg text-center font-semibold mb-4 text-slate-600">Pengurangan artinya <b>mengambil</b> sehingga benda menjadi lebih sedikit.</p>
+                
+                <div class="flex justify-center items-center gap-2 mb-4 text-3xl font-bold">
+                    <span class="text-brand-blue">12</span>
+                    <span>-</span>
+                    <span class="text-brand-red">4</span>
+                    <span>=</span>
+                    <span id="krg-result-text" class="text-brand-green text-4xl">?</span>
+                </div>
+
+                <!-- Simulation Area -->
+                <div class="bg-slate-50 rounded-2xl p-4 min-h-[200px] flex flex-col justify-center border border-slate-200 relative">
+                    <div id="krg-group" class="text-center">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-6">
+                    <button id="btn-sim-kurang" onclick="app.simulasiKurang()" class="w-full btn-game bg-brand-green text-white font-bold text-2xl py-3 rounded-full">
+                        Ambil 4 Permen! 🍬
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 6: KUIS CERIA -->
+        <!-- ============================================== -->
+        <div id="screen-kuis" class="screen-hidden w-full h-full flex flex-col p-6 bg-purple-50 relative">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="app.gotoScreen('menu')" class="bg-white rounded-full p-2 text-xl shadow-sm">⬅️</button>
+                <div class="bg-white px-4 py-1 rounded-full font-bold text-brand-purple shadow-sm">
+                    Soal <span id="kuis-progress">1/5</span>
+                </div>
+                <div class="font-bold text-amber-500 text-xl">⭐ <span id="kuis-score-live">0</span></div>
+            </div>
+
+            <div class="bg-white flex-1 rounded-3xl shadow-sm border-2 border-purple-200 p-5 flex flex-col">
+                <!-- Question Visual -->
+                <div id="kuis-visual" class="text-center min-h-[100px] flex items-center justify-center mb-2 bg-slate-50 rounded-xl p-2">
+                    <!-- JS fills -->
+                </div>
+                
+                <!-- Question Text -->
+                <p id="kuis-text" class="text-2xl font-bold text-center text-slate-700 mb-6 min-h-[80px] flex items-center justify-center">
+                    Pertanyaan disini?
+                </p>
+
+                <!-- Options -->
+                <div id="kuis-options" class="flex flex-col gap-3 mt-auto">
+                    <!-- Buttons generated by JS -->
+                </div>
+            </div>
+            
+            <!-- Quiz Feedback Overlay -->
+            <div id="kuis-feedback" class="absolute inset-0 bg-black/40 flex items-center justify-center z-20 hidden backdrop-blur-sm">
+                <div id="kuis-feedback-card" class="bg-white w-10/12 rounded-3xl p-6 text-center shadow-2xl transform scale-0 transition-transform duration-300">
+                    <div id="kuis-feedback-icon" class="text-6xl mb-2">🎉</div>
+                    <h3 id="kuis-feedback-title" class="text-3xl font-extrabold mb-2 text-brand-green">Hebat!</h3>
+                    <p id="kuis-feedback-msg" class="text-lg text-slate-600 mb-6 font-semibold">Jawabanmu sangat tepat.</p>
+                    <button onclick="app.nextKuis()" class="btn-game w-full bg-brand-blue text-white font-bold text-xl py-3 rounded-full">
+                        Lanjut ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 7: KUIS HASIL (RESULT) -->
+        <!-- ============================================== -->
+        <div id="screen-hasil" class="screen-hidden w-full h-full flex flex-col p-6 bg-brand-yellow justify-center items-center">
+            <h2 class="text-4xl font-extrabold text-amber-900 mb-4 text-center">Kuis Selesai! 🏆</h2>
+            
+            <div class="bg-white w-full rounded-3xl p-8 text-center shadow-xl mb-8 relative overflow-hidden">
+                <!-- Stars -->
+                <div id="hasil-stars" class="text-5xl mb-4 flex justify-center gap-2">
+                    <!-- Stars JS -->
+                </div>
+                <h3 class="text-6xl font-extrabold text-brand-blue mb-2" id="hasil-score">100</h3>
+                <p class="text-xl font-bold text-slate-600 mb-4">Skor Kamu</p>
+                
+                <div class="flex justify-center gap-8 text-lg font-semibold">
+                    <div class="text-brand-green">✅ <span id="hasil-benar">5</span> Benar</div>
+                    <div class="text-brand-red">❌ <span id="hasil-salah">0</span> Salah</div>
+                </div>
+            </div>
+            
+            <div class="flex w-full gap-4">
+                <button onclick="app.startQuiz()" class="flex-1 btn-game bg-white text-brand-purple font-bold text-xl py-4 rounded-full border-4 border-brand-purple">
+                    🔄 Ulangi
+                </button>
+                <button onclick="app.gotoScreen('menu')" class="flex-1 btn-game bg-brand-purple text-white font-bold text-xl py-4 rounded-full">
+                    🏠 Menu
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 8: TANTANGAN RUMAH -->
+        <!-- ============================================== -->
+        <div id="screen-tantangan" class="screen-hidden w-full h-full flex flex-col p-6 bg-sky-50">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="app.gotoScreen('menu')" class="bg-white rounded-full p-2 text-2xl shadow-sm hover:bg-gray-100">⬅️</button>
+                <h2 class="text-2xl font-bold text-brand-blue">Tantangan 🏠</h2>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-sky-200 flex-1 flex flex-col text-center justify-center items-center">
+                <div class="text-6xl mb-4">🥄👟</div>
+                <h3 class="text-2xl font-extrabold text-slate-700 mb-4">Ayo Bermain di Rumah!</h3>
+                <p class="text-lg text-slate-600 mb-6 font-semibold leading-relaxed">
+                    Coba cari <b class="text-brand-orange">10 Sendok</b> dan <b class="text-brand-green">5 Garpu</b> di dapur. 
+                    <br><br>
+                    Gabungkan semuanya, lalu hitung ada berapa jumlah alat makanmu sekarang? 
+                    <br><br>
+                    Ceritakan hasilnya pada orang tuamu ya! 😊
+                </p>
+                <div class="mt-auto w-full">
+                    <button onclick="app.playWinSound(); app.speak('Tantangan diterima! Selamat berhitung di rumah.'); app.gotoScreen('menu')" class="w-full btn-game bg-brand-blue text-white font-bold text-2xl py-4 rounded-full">
+                        Siap, Aku Bisa! 👍
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popups System Overlay -->
+        <div id="global-popup" class="absolute inset-0 bg-black/50 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+            <div class="bg-white p-8 rounded-3xl text-center max-w-[80%] anim-bounce-in shadow-2xl">
+                <div id="popup-icon" class="text-6xl mb-4">💡</div>
+                <p id="popup-text" class="text-2xl font-bold text-slate-800 mb-6">Pesan</p>
+                <button onclick="document.getElementById('global-popup').classList.add('hidden')" class="btn-game bg-brand-blue text-white font-bold text-xl py-2 px-8 rounded-full">
+                    Tutup
+                </button>
+            </div>
+        </div>
     </div>
 
+    <!-- JavaScript Application Logic -->
     <script>
-        /* 1. AUDIO SYNTHESIZER */
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
+        // ==========================================
+        // 1. AUDIO ENGINE (Web Audio API & Speech)
+        // ==========================================
+        class AudioEngine {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.isAudioOn = true;
+                this.isVoiceOn = true;
+                this.bgmOscillator = null;
+                this.bgmGain = null;
+                this.bgmInterval = null;
+                this.isPlayingBGM = false;
+            }
 
-            if (type === 'correct') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
-            } else if (type === 'tick') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(800, now);
-                gain.gain.setValueAtTime(0.08, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-                osc.start(now);
-                osc.stop(now + 0.05);
+            unlock() {
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(frequency, type, duration, vol=0.1) {
+                if (!this.isAudioOn) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+                
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            }
+
+            click() { this.playTone(600, 'sine', 0.1, 0.2); }
+            
+            win() {
+                if (!this.isAudioOn) return;
+                // Arpeggio C Major
+                setTimeout(() => this.playTone(523.25, 'sine', 0.2, 0.2), 0);
+                setTimeout(() => this.playTone(659.25, 'sine', 0.2, 0.2), 150);
+                setTimeout(() => this.playTone(783.99, 'sine', 0.3, 0.2), 300);
+                setTimeout(() => this.playTone(1046.50, 'triangle', 0.5, 0.3), 450);
+                this.shootConfetti();
+            }
+
+            wrong() {
+                if (!this.isAudioOn) return;
+                // Descending minor
+                setTimeout(() => this.playTone(300, 'square', 0.3, 0.1), 0);
+                setTimeout(() => this.playTone(250, 'square', 0.4, 0.1), 200);
+            }
+
+            speak(text) {
+                if (!this.isVoiceOn || !('speechSynthesis' in window)) return;
+                // Cancel previous speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9; // Slightly slower for kids
+                utterance.pitch = 1.1; // Slightly higher pitch
+                window.speechSynthesis.speak(utterance);
+            }
+
+            toggleBGM() {
+                this.isAudioOn = !this.isAudioOn;
+                return this.isAudioOn;
+            }
+
+            toggleVoice() {
+                this.isVoiceOn = !this.isVoiceOn;
+                if(!this.isVoiceOn) window.speechSynthesis.cancel();
+                return this.isVoiceOn;
+            }
+
+            shootConfetti() {
+                const container = document.getElementById('app-container');
+                for(let i=0; i<30; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'particle';
+                    el.style.left = Math.random() * 100 + '%';
+                    el.style.top = '-20px';
+                    el.style.width = Math.random() * 10 + 5 + 'px';
+                    el.style.height = el.style.width;
+                    el.style.backgroundColor = ['#ef5350', '#66bb6a', '#4fc3f7', '#ffca28'][Math.floor(Math.random()*4)];
+                    el.style.animationDuration = Math.random() * 1 + 1 + 's';
+                    container.appendChild(el);
+                    setTimeout(() => el.remove(), 2000);
+                }
             }
         }
 
-        /* 2. DATA SOAL KURMER 2026 */
-        const defaultQuestions = [
-            { id: 1, subject: "IPAS SD", question: "Proses fotosintesis tumbuhan menghasilkan oksigen dan glukosa.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 2, subject: "Matematika", question: "Hasil perhitungan dari 150 + 50 - 80 adalah 110.", optionA: "BENAR", optionB: "SALAH", answer: "B", timer: 10 },
-            { id: 3, subject: "Pancasila", question: "Simbol Pohon Beringin melambangkan Sila Ketiga Pancasila.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 4, subject: "Bahasa Indonesia", question: "Kata 'Membaca' dalam kalimat efektif berkedudukan sebagai Objek.", optionA: "BENAR", optionB: "SALAH", answer: "B", timer: 10 },
-            { id: 5, subject: "IPAS SD", question: "Planet Merkurius adalah planet yang paling dekat dengan Matahari.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 6, subject: "Seni Budaya", question: "Tari Kecak merupakan tarian daerah tradisional khas dari Bali.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 7, subject: "Matematika", question: "Luas persegi dengan panjang sisi 9 cm adalah 81 cm².", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 8, subject: "IPAS SD", question: "Perubahan wujud benda cair menjadi padat dinamakan mencair.", optionA: "BENAR", optionB: "SALAH", answer: "B", timer: 10 },
-            { id: 9, subject: "Bahasa Indonesia", question: "Lawan kata (antonim) dari kata 'Hemat' adalah 'Boros'.", optionA: "BENAR", optionB: "SALAH", answer: "A", timer: 10 },
-            { id: 10, subject: "Pancasila", question: "Sikap menghormati teman yang beribadah sesuai Sila Kedua Pancasila.", optionA: "BENAR", optionB: "SALAH", answer: "B", timer: 10 }
+        // ==========================================
+        // 2. DATA & STATE MANAGER
+        // ==========================================
+        const KUIS_DATA = [
+            {
+                q: "Ibu membeli 7 jeruk. Ayah membeli 5 jeruk. Berapa jumlah jeruk semuanya?",
+                vis: "🍊🍊🍊🍊🍊🍊🍊 + 🍊🍊🍊🍊🍊",
+                opts: [
+                    { t: "11", c: false },
+                    { t: "12", c: true },
+                    { t: "13", c: false }
+                ],
+                feedCorrect: "Hebat! 7 ditambah 5 sama dengan 12.",
+                feedWrong: "Kurang tepat. Yuk hitung lagi jumlah jeruknya!"
+            },
+            {
+                q: "Ada 15 permen di toples. Adik memakan 4 permen. Sisa permen adalah...",
+                vis: "🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬🍬 - 4 dimakan",
+                opts: [
+                    { t: "10", c: false },
+                    { t: "11", c: true },
+                    { t: "9", c: false }
+                ],
+                feedCorrect: "Pintar! 15 dikurang 4 sama dengan 11.",
+                feedWrong: "Oops, coba dihitung mundur dari 15 sebanyak 4 kali."
+            },
+            {
+                q: "9 + 8 = ?",
+                vis: "🍎🍎🍎🍎🍎🍎🍎🍎🍎 + 🍎🍎🍎🍎🍎🍎🍎🍎",
+                opts: [
+                    { t: "16", c: false },
+                    { t: "18", c: false },
+                    { t: "17", c: true }
+                ],
+                feedCorrect: "Wah luar biasa! 9 + 8 = 17.",
+                feedWrong: "Belum tepat. Coba gunakan jarimu untuk berhitung ya!"
+            },
+            {
+                q: "Di keranjang ada 20 telur. Terjatuh dan pecah 5 telur. Berapa telur yang utuh?",
+                vis: "🥚".repeat(20) + " 💥 5 Pecah",
+                opts: [
+                    { t: "15", c: true },
+                    { t: "16", c: false },
+                    { t: "14", c: false }
+                ],
+                feedCorrect: "Benar sekali! 20 dikurangi 5 sisa 15.",
+                feedWrong: "Tidak apa-apa, ayo hitung sisa telur yang tidak pecah."
+            },
+            {
+                q: "10 + 10 = ?",
+                vis: "⭐".repeat(10) + " + " + "⭐".repeat(10),
+                opts: [
+                    { t: "10", c: false },
+                    { t: "20", c: true },
+                    { t: "15", c: false }
+                ],
+                feedCorrect: "Sempurna! 10 ditambah 10 adalah 20.",
+                feedWrong: "Coba ingat-ingat lagi, 10 dan 10 jadi berapa ya?"
+            }
         ];
 
-        let questions = JSON.parse(localStorage.getItem('game_questions')) || defaultQuestions;
-        let currentQuestionIndex = 0;
-        let gameMode = 'point';
-        let playerName = 'Kelompok';
-        let userScore = 0;
-        let userCorrectCount = 0;
-        let isEliminated = false;
-        let timerInterval = null;
-        let pauseInterval = null;
-        let timeLeft = 10;
-        let mediaStream = null;
+        class AppController {
+            constructor() {
+                this.audio = new AudioEngine();
+                this.screens = ['splash', 'apersepsi', 'menu', 'materi-jumlah', 'materi-kurang', 'kuis', 'hasil', 'tantangan'];
+                this.currentScreen = 'splash';
+                
+                // Quiz State
+                this.kuisIndex = 0;
+                this.kuisBenar = 0;
+                this.kuisSalah = 0;
 
-        // State Edit Soal
-        let editingIndex = null;
+                this.bindGlobalClicks();
+            }
 
-        // Count Wajah Realtime
-        let leftCount = 0;
-        let rightCount = 0;
-        let trackingTracker = null;
-
-        /* 3. COMPUTER VISION (DETEKSI WAJAH KAMERA) */
-        function initFaceTracker() {
-            const video = document.getElementById('game-video');
-            const tracker = new tracking.ObjectTracker('face');
-            tracker.setInitialScale(4);
-            tracker.setStepSize(2);
-            tracker.setEdgesDensity(0.1);
-
-            trackingTracker = tracking.track('#game-video', tracker);
-
-            tracker.on('track', function(event) {
-                if (event.data.length === 0) {
-                    leftCount = 0;
-                    rightCount = 0;
-                } else {
-                    let l = 0;
-                    let r = 0;
-                    const videoWidth = video.videoWidth || 640;
-                    const halfWidth = videoWidth / 2;
-
-                    event.data.forEach(function(rect) {
-                        const mirroredX = videoWidth - (rect.x + rect.width);
-                        if (mirroredX < halfWidth) {
-                            l++;
-                        } else {
-                            r++;
-                        }
-                    });
-
-                    leftCount = l;
-                    rightCount = r;
-                }
-
-                document.getElementById('count-left').innerHTML = `<i class="fa-solid fa-user"></i> ${leftCount} Orang`;
-                document.getElementById('count-right').innerHTML = `<i class="fa-solid fa-user"></i> ${rightCount} Orang`;
-            });
-        }
-
-        async function startCamera(videoElementId) {
-            try {
-                if (mediaStream) { stopCamera(); }
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
-                    audio: false
+            bindGlobalClicks() {
+                // Attach click sound to all buttons
+                document.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (btn && !btn.id.includes('toggle')) {
+                        this.audio.click();
+                    }
                 });
-                const videoElement = document.getElementById(videoElementId);
-                if (videoElement) { videoElement.srcObject = mediaStream; }
-                return true;
-            } catch (err) {
-                console.warn("Kamera tidak aktif:", err);
-                return false;
-            }
-        }
-
-        function stopCamera() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
-        }
-
-        async function openCameraTest() {
-            document.getElementById('modal-camera-test').classList.add('active');
-            const statusEl = document.getElementById('camera-test-status');
-            statusEl.textContent = "Meminta Izin Kamera...";
-            statusEl.style.color = "var(--warning)";
-
-            const success = await startCamera('test-video');
-            if (success) {
-                statusEl.textContent = "Kamera Berfungsi!";
-                statusEl.style.color = "var(--success)";
-            } else {
-                statusEl.textContent = "Kamera Ditolak / Tidak Ditemukan";
-                statusEl.style.color = "var(--danger)";
-            }
-        }
-
-        function closeCameraTest() {
-            stopCamera();
-            document.getElementById('modal-camera-test').classList.remove('active');
-        }
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-
-            if (screenId === 'screen-teacher') {
-                renderTeacherQuestions();
-            }
-        }
-
-        /* 4. GAMEPLAY LOGIC */
-        async function startGame() {
-            const inputName = document.getElementById('input-player-name').value.trim();
-            if (!inputName) {
-                alert("Silakan masukkan nama kelompok Anda!");
-                return;
             }
 
-            playerName = inputName;
-            gameMode = document.getElementById('select-game-mode').value;
-            currentQuestionIndex = 0;
-            userScore = 0;
-            userCorrectCount = 0;
-            isEliminated = false;
-
-            document.getElementById('label-player-name').innerHTML = `<i class="fa-solid fa-users"></i> ${playerName}`;
-
-            showScreen('screen-game');
-            await startCamera('game-video');
-            initFaceTracker();
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            if (currentQuestionIndex >= questions.length || (isEliminated && gameMode === 'elimination')) {
-                finishGame();
-                return;
+            toggleBGM() {
+                const isOn = this.audio.toggleBGM();
+                document.getElementById('bgm-status').innerText = isOn ? 'ON' : 'OFF';
+                document.getElementById('btn-toggle-bgm').style.opacity = isOn ? '1' : '0.5';
             }
 
-            const q = questions[currentQuestionIndex];
-
-            const zoneLeft = document.getElementById('zone-left');
-            const zoneRight = document.getElementById('zone-right');
-            const badgeLeft = document.getElementById('badge-left');
-            const badgeRight = document.getElementById('badge-right');
-
-            zoneLeft.className = "zone-left";
-            zoneRight.className = "zone-right";
-            badgeLeft.className = "zone-badge";
-            badgeRight.className = "zone-badge";
-
-            badgeLeft.innerHTML = `<i class="fa-solid fa-circle-check"></i> BENAR`;
-            badgeRight.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> SALAH`;
-
-            const overlay = document.getElementById('status-overlay');
-            overlay.className = "status-overlay";
-
-            document.getElementById('badge-subject').innerHTML = `<i class="fa-solid fa-book"></i> ${q.subject}`;
-            document.getElementById('badge-progress').textContent = `Soal ${currentQuestionIndex + 1} / ${questions.length}`;
-            document.getElementById('text-question').textContent = q.question;
-
-            timeLeft = q.timer || 10;
-            document.getElementById('badge-timer').textContent = timeLeft;
-
-            clearInterval(timerInterval);
-            clearInterval(pauseInterval);
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById('badge-timer').textContent = timeLeft;
-                playSound('tick');
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    evaluateAnswer();
-                }
-            }, 1000);
-        }
-
-        function evaluateAnswer() {
-            const q = questions[currentQuestionIndex];
-            const zoneLeft = document.getElementById('zone-left');
-            const zoneRight = document.getElementById('zone-right');
-            const badgeLeft = document.getElementById('badge-left');
-            const badgeRight = document.getElementById('badge-right');
-            const overlay = document.getElementById('status-overlay');
-            const statusIcon = document.getElementById('status-icon');
-            const statusText = document.getElementById('status-text');
-            const statusDetail = document.getElementById('status-detail');
-            const nextTimerText = document.getElementById('next-timer-text');
-
-            if (q.answer === 'A') {
-                zoneLeft.classList.add('reveal-correct');
-                zoneRight.classList.add('reveal-wrong');
-                badgeLeft.classList.add('badge-correct');
-                badgeRight.classList.add('badge-wrong');
-            } else {
-                zoneRight.classList.add('reveal-correct');
-                zoneLeft.classList.add('reveal-wrong');
-                badgeRight.classList.add('badge-correct');
-                badgeLeft.classList.add('badge-wrong');
+            toggleVoice() {
+                const isOn = this.audio.toggleVoice();
+                document.getElementById('voice-status').innerText = isOn ? 'ON' : 'OFF';
+                document.getElementById('btn-toggle-voice').style.opacity = isOn ? '1' : '0.5';
             }
 
-            let groupWon = false;
-            let correctPeople = (q.answer === 'A') ? leftCount : rightCount;
-            let wrongPeople = (q.answer === 'A') ? rightCount : leftCount;
-
-            if (correctPeople > wrongPeople) {
-                groupWon = true;
+            showPopup(title, msg, icon='💡') {
+                const p = document.getElementById('global-popup');
+                document.getElementById('popup-icon').innerText = icon;
+                document.getElementById('popup-text').innerHTML = `<b>${title}</b><br><span class="text-lg">${msg}</span>`;
+                p.classList.remove('hidden');
             }
 
-            if (groupWon) {
-                playSound('correct');
-                userCorrectCount++;
-                userScore += 100;
-                statusIcon.className = "fa-solid fa-trophy";
-                statusIcon.style.color = "#22c55e";
-                statusText.textContent = "KELOMPOK MENDAPAT POIN!";
-                statusDetail.textContent = `Siswa di jawaban BENAR (${correctPeople} org) lebih banyak dari SALAH (${wrongPeople} org).`;
-            } else {
-                playSound('wrong');
-                statusIcon.className = "fa-solid fa-circle-xmark";
-                statusIcon.style.color = "#ef4444";
-                statusText.textContent = "TIDAK MENDAPAT POIN!";
-                statusDetail.textContent = `Siswa di jawaban SALAH (${wrongPeople} org) lebih banyak / sama dengan BENAR (${correctPeople} org).`;
+            gotoScreen(screenId) {
+                this.screens.forEach(s => {
+                    document.getElementById(`screen-${s}`).classList.add('screen-hidden');
+                });
+                const target = document.getElementById(`screen-${screenId}`);
+                target.classList.remove('screen-hidden');
+                target.classList.add('anim-bounce-in');
+                
+                this.currentScreen = screenId;
+                setTimeout(() => target.classList.remove('anim-bounce-in'), 500);
 
-                if (gameMode === 'elimination') {
-                    isEliminated = true;
-                    statusText.textContent = "KELOMPOK TERELIMINASI!";
-                }
+                // specific actions on load
+                if(screenId === 'materi-jumlah') this.initMateriJumlah();
+                if(screenId === 'materi-kurang') this.initMateriKurang();
             }
 
-            overlay.classList.add('active');
+            startApp() {
+                this.audio.unlock(); // Fix Autoplay policy
+                this.audio.speak("Halo! Selamat datang di Petualangan Berhitung!");
+                this.gotoScreen('apersepsi');
+            }
 
-            let pauseTime = 5;
-            nextTimerText.textContent = `Soal berikutnya dalam ${pauseTime} detik...`;
+            speak(text) {
+                this.audio.speak(text);
+            }
 
-            pauseInterval = setInterval(() => {
-                pauseTime--;
-                if (pauseTime > 0) {
-                    nextTimerText.textContent = `Soal berikutnya dalam ${pauseTime} detik...`;
+            playWinSound() { this.audio.win(); }
+
+            // ================== APERSEPSI ==================
+            checkApersepsi(isBertambah) {
+                if (isBertambah) {
+                    this.audio.win();
+                    this.audio.speak("Wah kamu pintar! Apel Budi bertambah karena digabungkan. Yuk belajar berhitung bersama!");
+                    this.showPopup("Benar Sekali! 🎉", "Apel Budi menjadi bertambah banyak. Mari kita belajar menjumlah dan mengurangi benda!");
+                    setTimeout(() => {
+                        document.getElementById('global-popup').classList.add('hidden');
+                        this.gotoScreen('menu');
+                    }, 4000);
                 } else {
-                    clearInterval(pauseInterval);
-                    currentQuestionIndex++;
-                    loadQuestion();
+                    this.audio.wrong();
+                    this.audio.speak("Hmm, sepertinya kurang tepat. Kalau diberi lagi, pastinya benda jadi bertambah banyak. Yuk kita pelajari!");
+                    this.showPopup("Ups.. 💡", "Kalau Ibu memberi lagi, berarti apelnya makin banyak. Ayo belajar sama-sama di menu utama.");
+                    setTimeout(() => {
+                        document.getElementById('global-popup').classList.add('hidden');
+                        this.gotoScreen('menu');
+                    }, 4500);
                 }
-            }, 1000);
-        }
-
-        /* 5. HASIL PERMAINAN */
-        function finishGame() {
-            stopCamera();
-            showScreen('screen-result');
-
-            document.getElementById('user-final-score').textContent = userScore;
-            document.getElementById('user-final-correct').textContent = userCorrectCount;
-            
-            const statusEl = document.getElementById('user-final-status');
-            statusEl.textContent = "Selesai Bermain";
-            statusEl.style.color = "var(--success)";
-
-            document.getElementById('podium-1-name').textContent = `${playerName}`;
-            document.getElementById('podium-2-name').textContent = "Kelompok B";
-            document.getElementById('podium-3-name').textContent = "Kelompok C";
-        }
-
-        function resetToWelcome() {
-            showScreen('screen-welcome');
-        }
-
-        /* 6. PANEL GURU & FITUR PROMPT MODAL EDIT SOAL */
-        function renderTeacherQuestions() {
-            const container = document.getElementById('questions-list-container');
-            document.getElementById('q-count').textContent = questions.length;
-            container.innerHTML = '';
-
-            questions.forEach((q, index) => {
-                const item = document.createElement('div');
-                item.className = 'question-item';
-                item.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong>Soal ${index + 1} (${q.subject}) - ${q.timer} Detik</strong>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-warning" style="padding: 4px 10px; font-size:0.75rem;" onclick="promptEditQuestion(${index})">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit
-                            </button>
-                            <button class="btn btn-danger" style="padding: 4px 10px; font-size:0.75rem;" onclick="deleteQuestion(${index})">
-                                <i class="fa-solid fa-trash"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                    <p style="margin: 6px 0; font-weight:600; font-size:0.9rem;">${q.question}</p>
-                    <div style="font-size:0.8rem; color:#475569;">
-                        <span>Kunci Jawaban: <strong style="color:${q.answer === 'A' ? '#22c55e' : '#ef4444'};">${q.answer === 'A' ? 'BENAR (Kiri)' : 'SALAH (Kanan)'}</strong></span>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function addQuestion() {
-            const text = document.getElementById('input-q-text').value.trim();
-            const key = document.getElementById('select-q-key').value;
-            const timer = parseInt(document.getElementById('input-q-timer').value) || 10;
-
-            if (!text) {
-                alert("Mohon masukkan teks pertanyaan!");
-                return;
             }
 
-            const newQ = {
-                id: Date.now(),
-                subject: "Umum SD",
-                question: text,
-                optionA: "BENAR",
-                optionB: "SALAH",
-                answer: key,
-                timer: timer
-            };
-
-            questions.push(newQ);
-            localStorage.setItem('game_questions', JSON.stringify(questions));
-            renderTeacherQuestions();
-
-            document.getElementById('input-q-text').value = '';
-        }
-
-        /* PROMPT MODAL POPUP EDIT */
-        function promptEditQuestion(index) {
-            editingIndex = index;
-            const q = questions[index];
-
-            document.getElementById('edit-q-text').value = q.question;
-            document.getElementById('edit-q-key').value = q.answer;
-            document.getElementById('edit-q-timer').value = q.timer;
-
-            document.getElementById('modal-edit-question').classList.add('active');
-        }
-
-        function saveModalEdit() {
-            if (editingIndex === null) return;
-
-            const newText = document.getElementById('edit-q-text').value.trim();
-            const newKey = document.getElementById('edit-q-key').value;
-            const newTimer = parseInt(document.getElementById('edit-q-timer').value) || 10;
-
-            if (!newText) {
-                alert("Pertanyaan tidak boleh kosong!");
-                return;
+            // ================== SIMULASI PENJUMLAHAN ==================
+            initMateriJumlah() {
+                const g1 = document.getElementById('jml-group-1');
+                const g2 = document.getElementById('jml-group-2');
+                document.getElementById('jml-result-text').innerText = "?";
+                document.getElementById('btn-sim-jumlah').disabled = false;
+                document.getElementById('btn-sim-jumlah').innerText = "Gabungkan! 🪄";
+                document.getElementById('jml-operator').innerText = "DITAMBAH";
+                
+                g1.innerHTML = this.generateEmojiHTML('🍊', 8);
+                g2.innerHTML = this.generateEmojiHTML('🍊', 5);
+                this.audio.speak("Penjumlahan artinya menggabungkan. Mari kita hitung, 8 jeruk ditambah 5 jeruk. Tekan tombol gabungkan.");
             }
 
-            questions[editingIndex].question = newText;
-            questions[editingIndex].answer = newKey;
-            questions[editingIndex].timer = newTimer;
+            generateEmojiHTML(emoji, count, animDelay=0.1) {
+                let html = '';
+                for(let i=0; i<count; i++) {
+                    html += `<span class="emoji-item" style="animation-delay: ${i*animDelay}s">${emoji}</span>`;
+                }
+                return html;
+            }
 
-            localStorage.setItem('game_questions', JSON.stringify(questions));
-            closeEditModal();
-            renderTeacherQuestions();
-        }
+            simulasiJumlah() {
+                const btn = document.getElementById('btn-sim-jumlah');
+                if (btn.innerText.includes("Ulangi")) {
+                    this.initMateriJumlah();
+                    return;
+                }
 
-        function closeEditModal() {
-            editingIndex = null;
-            document.getElementById('modal-edit-question').classList.remove('active');
-        }
+                btn.disabled = true;
+                const g1 = document.getElementById('jml-group-1');
+                const g2 = document.getElementById('jml-group-2');
+                const op = document.getElementById('jml-operator');
+                
+                op.innerText = "MENJADI";
+                g2.innerHTML = '';
+                g1.innerHTML = this.generateEmojiHTML('🍊', 13, 0.05); // Faster anim
+                
+                this.audio.speak("Satu, dua, tiga... tiga belas! Wah, jeruknya jadi ada tiga belas.");
+                
+                setTimeout(() => {
+                    document.getElementById('jml-result-text').innerText = "13";
+                    this.audio.win();
+                    btn.disabled = false;
+                    btn.innerText = "🔄 Ulangi Simulasi";
+                }, 1000);
+            }
 
-        function deleteQuestion(index) {
-            if (confirm("Hapus soal ini?")) {
-                questions.splice(index, 1);
-                localStorage.setItem('game_questions', JSON.stringify(questions));
-                renderTeacherQuestions();
+            // ================== SIMULASI PENGURANGAN ==================
+            initMateriKurang() {
+                const g = document.getElementById('krg-group');
+                document.getElementById('krg-result-text').innerText = "?";
+                document.getElementById('btn-sim-kurang').disabled = false;
+                document.getElementById('btn-sim-kurang').innerText = "Ambil 4 Permen! 🍬";
+                
+                g.innerHTML = this.generateEmojiHTML('🍬', 12);
+                this.audio.speak("Pengurangan artinya mengambil. Mari kita hitung, 12 permen diambil 4 permen. Tekan tombol Ambil.");
+            }
+
+            simulasiKurang() {
+                const btn = document.getElementById('btn-sim-kurang');
+                if (btn.innerText.includes("Ulangi")) {
+                    this.initMateriKurang();
+                    return;
+                }
+
+                btn.disabled = true;
+                const g = document.getElementById('krg-group');
+                
+                // Keep 8, fade out 4
+                let html = this.generateEmojiHTML('🍬', 8, 0);
+                for(let i=0; i<4; i++) {
+                    html += `<span class="emoji-item transition-all duration-1000 transform translate-y-10 opacity-0" style="animation: none;">🍬</span>`;
+                }
+                g.innerHTML = html;
+                
+                this.audio.speak("Empat permen diambil... Sisanya tinggal delapan permen!");
+                
+                setTimeout(() => {
+                    document.getElementById('krg-result-text').innerText = "8";
+                    this.audio.win();
+                    btn.disabled = false;
+                    btn.innerText = "🔄 Ulangi Simulasi";
+                }, 1500);
+            }
+
+            // ================== KUIS SYSTEM ==================
+            startQuiz() {
+                this.kuisIndex = 0;
+                this.kuisBenar = 0;
+                this.kuisSalah = 0;
+                
+                // Shuffle options for all questions
+                KUIS_DATA.forEach(q => {
+                    q.opts.sort(() => Math.random() - 0.5);
+                });
+                
+                this.audio.speak("Mari kita mulai Kuis Ceria. Jawab dengan hati-hati ya!");
+                this.gotoScreen('kuis');
+                this.renderKuis();
+            }
+
+            renderKuis() {
+                const q = KUIS_DATA[this.kuisIndex];
+                document.getElementById('kuis-progress').innerText = `${this.kuisIndex + 1}/${KUIS_DATA.length}`;
+                document.getElementById('kuis-score-live').innerText = this.kuisBenar * 20;
+                
+                document.getElementById('kuis-visual').innerText = q.vis;
+                document.getElementById('kuis-text').innerText = q.q;
+                
+                const optContainer = document.getElementById('kuis-options');
+                optContainer.innerHTML = '';
+                
+                q.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "btn-game w-full bg-sky-100 border-2 border-sky-300 text-sky-800 font-extrabold text-2xl py-4 rounded-2xl hover:bg-sky-200 transition-colors";
+                    btn.innerText = opt.t;
+                    btn.onclick = () => this.handleKuisAnswer(opt.c);
+                    optContainer.appendChild(btn);
+                });
+
+                // Auto speak question
+                setTimeout(() => this.audio.speak(q.q), 500);
+            }
+
+            handleKuisAnswer(isCorrect) {
+                const q = KUIS_DATA[this.kuisIndex];
+                const fCard = document.getElementById('kuis-feedback-card');
+                const fOverlay = document.getElementById('kuis-feedback');
+                const fIcon = document.getElementById('kuis-feedback-icon');
+                const fTitle = document.getElementById('kuis-feedback-title');
+                const fMsg = document.getElementById('kuis-feedback-msg');
+
+                fOverlay.classList.remove('hidden');
+                setTimeout(() => fCard.classList.remove('scale-0'), 10);
+
+                if (isCorrect) {
+                    this.kuisBenar++;
+                    this.audio.win();
+                    this.audio.speak(q.feedCorrect);
+                    fIcon.innerText = "🎉";
+                    fTitle.innerText = "Hebat!";
+                    fTitle.className = "text-3xl font-extrabold mb-2 text-brand-green";
+                    fMsg.innerText = q.feedCorrect;
+                } else {
+                    this.kuisSalah++;
+                    this.audio.wrong();
+                    this.audio.speak(q.feedWrong);
+                    fIcon.innerText = "💡";
+                    fTitle.innerText = "Ayo Coba Lagi!";
+                    fTitle.className = "text-3xl font-extrabold mb-2 text-brand-orange";
+                    fMsg.innerText = q.feedWrong;
+                }
+            }
+
+            nextKuis() {
+                const fCard = document.getElementById('kuis-feedback-card');
+                const fOverlay = document.getElementById('kuis-feedback');
+                
+                fCard.classList.add('scale-0');
+                setTimeout(() => {
+                    fOverlay.classList.add('hidden');
+                    this.kuisIndex++;
+                    if (this.kuisIndex < KUIS_DATA.length) {
+                        this.renderKuis();
+                    } else {
+                        this.showHasil();
+                    }
+                }, 300);
+            }
+
+            showHasil() {
+                this.gotoScreen('hasil');
+                const score = this.kuisBenar * 20;
+                document.getElementById('hasil-score').innerText = score;
+                document.getElementById('hasil-benar').innerText = this.kuisBenar;
+                document.getElementById('hasil-salah').innerText = this.kuisSalah;
+
+                let starsHtml = '';
+                let starCount = Math.floor(this.kuisBenar / (KUIS_DATA.length/3)); // basic logic: max 3 stars
+                if(this.kuisBenar === KUIS_DATA.length) starCount = 3;
+                if(this.kuisBenar === 0) starCount = 0;
+
+                for(let i=0; i<3; i++) {
+                    if (i < starCount) starsHtml += '<span class="anim-bounce-in" style="animation-delay: '+ (i*0.2) +'s">⭐</span>';
+                    else starsHtml += '<span class="grayscale opacity-30">⭐</span>';
+                }
+                document.getElementById('hasil-stars').innerHTML = starsHtml;
+
+                if (score >= 80) {
+                    this.audio.win();
+                    this.audio.speak(`Luar biasa! Nilaimu ${score}. Kamu sudah menguasai penjumlahan dan pengurangan.`);
+                } else {
+                    this.audio.speak(`Nilaimu ${score}. Semangat terus belajarnya ya, kamu pasti bisa jadi juara!`);
+                }
             }
         }
 
-        function resetDefaultQuestions() {
-            if (confirm("Kembalikan ke 10 Soal Default Kurikulum Merdeka 2026?")) {
-                questions = [...defaultQuestions];
-                localStorage.setItem('game_questions', JSON.stringify(questions));
-                renderTeacherQuestions();
-            }
-        }
+        // Initialize App
+        let app;
+        window.onload = () => {
+            app = new AppController();
+        };
+
     </script>
 </body>
 </html>
