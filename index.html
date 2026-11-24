@@ -1787,7 +1787,14 @@
                 <div class="grid-2">
                   <div class="form-group">
                     <label class="form-label">Nama Kelas / Rombel</label>
-                    <input type="text" id="set-kelas" class="form-control" placeholder="Kelas I (Satu)" required />
+                    <select id="set-kelas" class="form-control" required>
+                      <option value="Kelas I (Satu)">Kelas 1 — Kelas I (Satu)</option>
+                      <option value="Kelas II (Dua)">Kelas 2 — Kelas II (Dua)</option>
+                      <option value="Kelas III (Tiga)">Kelas 3 — Kelas III (Tiga)</option>
+                      <option value="Kelas IV (Empat)">Kelas 4 — Kelas IV (Empat)</option>
+                      <option value="Kelas V (Lima)">Kelas 5 — Kelas V (Lima)</option>
+                      <option value="Kelas VI (Enam)">Kelas 6 — Kelas VI (Enam)</option>
+                    </select>
                   </div>
                   <div class="form-group">
                     <label class="form-label">Tahun Ajaran</label>
@@ -1894,15 +1901,15 @@
             <div class="card-header">
               <div class="card-title">
                 <i data-lucide="user-plus" width="20" style="color: var(--primary);"></i>
-                <span>Kelola, Template, Impor & Ekspor Data Siswa (Acuan Kelas Terhubung ke Guru)</span>
+                <span>Kelola, Template, Impor & Ekspor Data Siswa (Master Kelas 1–6 Terhubung ke Guru)</span>
               </div>
             </div>
             <p class="text-sm text-muted mb-4">
-              Pilih <strong>Kelas / Akun Guru Tujuan</strong> di bawah ini, atau gunakan kolom <strong>Kelas</strong> di dalam file Excel saat Impor Massal agar data siswa otomatis masuk dan tersambung ke akun guru yang sesuai dengan kelasnya.
+              Pilih <strong>Kelas 1–6</strong> di bawah ini (atau gunakan kolom <strong>Kelas</strong> di dalam file Excel saat Impor Massal). Data otomatis tersimpan ke <strong>Master Kelas</strong> sehingga begitu guru kelas memilih kelasnya (1–6), seluruh siswa langsung muncul otomatis, bisa diubah, dan ditambah oleh guru kelas!
             </p>
             <div class="grid-2 items-end">
               <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Acuan Kelas & Akun Guru Tujuan</label>
+                <label class="form-label">Acuan Master Kelas (1–6) / Akun Guru</label>
                 <select id="admin-target-user-select" class="form-control"></select>
               </div>
               <div class="flex gap-2" style="flex-wrap: wrap;">
@@ -1910,10 +1917,10 @@
                   <i data-lucide="plus" width="15"></i> Tambah Siswa
                 </button>
                 <button type="button" id="btn-admin-download-stu-tpl" class="btn btn-outline btn-sm">
-                  <i data-lucide="download" width="15"></i> Template Siswa
+                  <i data-lucide="download" width="15"></i> Template Siswa (Kelas 1–6)
                 </button>
                 <label class="btn btn-success btn-sm" style="cursor: pointer;">
-                  <i data-lucide="upload" width="15"></i> Impor Siswa (Auto-Sync Kelas)
+                  <i data-lucide="upload" width="15"></i> Impor Siswa (Auto-Sync Kelas 1–6)
                   <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
                 </label>
                 <button type="button" id="btn-admin-export-stu" class="btn btn-warning btn-sm">
@@ -2170,10 +2177,21 @@
     // Email Admin Utama
     const ADMIN_EMAIL = 'muhammad0413@admin.sd.belajar.id';
 
+    // Daftar Standar Kelas 1 - 6 (Acuan Terpusat Admin & Guru)
+    const STANDARD_CLASSES = [
+      { id: 'kelas_1', num: '1', label: 'Kelas I (Satu)', shortLabel: 'Kelas 1' },
+      { id: 'kelas_2', num: '2', label: 'Kelas II (Dua)', shortLabel: 'Kelas 2' },
+      { id: 'kelas_3', num: '3', label: 'Kelas III (Tiga)', shortLabel: 'Kelas 3' },
+      { id: 'kelas_4', num: '4', label: 'Kelas IV (Empat)', shortLabel: 'Kelas 4' },
+      { id: 'kelas_5', num: '5', label: 'Kelas V (Lima)', shortLabel: 'Kelas 5' },
+      { id: 'kelas_6', num: '6', label: 'Kelas VI (Enam)', shortLabel: 'Kelas 6' }
+    ];
+
     // Global State
     let currentUser = null;
     let isAdminUser = false;
     let activeTargetUid = null;
+    let activeMasterClassFilter = '';
     let adminOwnProfilePhoto = '';
     let adminAllUsersList = [];
     let isRegisterMode = false;
@@ -2314,6 +2332,22 @@
 
     function getTargetUid() {
       return activeTargetUid || (currentUser ? currentUser.uid : null);
+    }
+
+    function getStandardClassInfo(kelasStr) {
+      const raw = String(kelasStr || '').trim();
+      const norm = normalizeKelasKey(raw);
+      for (const cls of STANDARD_CLASSES) {
+        if (norm.includes(cls.num)) return cls;
+      }
+      return STANDARD_CLASSES[0];
+    }
+
+    function getActiveClassDocId() {
+      if (isAdminUser && activeMasterClassFilter && currentUser && getTargetUid() === currentUser.uid) {
+        return activeMasterClassFilter;
+      }
+      return getStandardClassInfo(appSettings.kelas).id;
     }
 
     function compressImageToBase64(file, maxDim = 480, quality = 0.88) {
@@ -2758,7 +2792,9 @@
       document.getElementById('set-kop2').value = appSettings.kop2 || '';
       document.getElementById('set-sekolah').value = appSettings.sekolah || '';
       document.getElementById('set-kop3').value = appSettings.kop3 || '';
-      document.getElementById('set-kelas').value = appSettings.kelas || '';
+      const stdKelas = getStandardClassInfo(appSettings.kelas);
+      appSettings.kelas = stdKelas.label;
+      document.getElementById('set-kelas').value = stdKelas.label;
       document.getElementById('set-ta').value = appSettings.tahunAjaran || '';
       document.getElementById('set-kota').value = appSettings.kota || '';
       document.getElementById('set-ks-jabatan').value = appSettings.jabatanKS || '';
@@ -2900,12 +2936,16 @@
 
       try {
         const uid = getTargetUid();
+        const stdKelas = getStandardClassInfo(appSettings.kelas);
+        appSettings.kelas = stdKelas.label;
         await setDoc(doc(db, 'users', uid), {
           ...appSettings,
+          kelasId: stdKelas.id,
           updatedAt: new Date().toISOString()
         }, { merge: true });
         applySettingsToUI();
-        showToast('Pengaturan kelas & kop surat berhasil disimpan!');
+        await loadAllUserWorkspaceData();
+        showToast(`Pengaturan & data siswa ${stdKelas.label} berhasil dimuat dan tersinkron!`);
       } catch (err) {
         showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
       }
@@ -2953,13 +2993,38 @@
     }
 
     // =====================================================================
-    // MODULE 2: DATA SISWA (CRUD + EXCEL + PRINT F4)
+    // MODULE 2: DATA SISWA (CRUD + EXCEL + PRINT F4 — TERHUBUNG MASTER KELAS 1-6)
     // =====================================================================
     async function loadStudents() {
       try {
         const uid = getTargetUid();
-        const snap = await getDocs(collection(db, 'users', uid, 'students'));
-        studentsList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const classDocId = getActiveClassDocId();
+        const masterColRef = collection(db, 'shared_classes', classDocId, 'students');
+        const legacyColRef = collection(db, 'users', uid, 'students');
+
+        const [masterSnap, legacySnap] = await Promise.all([
+          getDocs(masterColRef),
+          getDocs(legacyColRef)
+        ]);
+
+        // Migrasi otomatis data lama guru ke Master Kelas bersama agar saling terhubung
+        if (masterSnap.empty && !legacySnap.empty) {
+          const batch = writeBatch(db);
+          legacySnap.docs.forEach((d) => {
+            const data = d.data();
+            batch.set(doc(db, 'shared_classes', classDocId, 'students', d.id), {
+              ...data,
+              kelasId: classDocId,
+              kelasAcuan: appSettings.kelas || ''
+            }, { merge: true });
+          });
+          await batch.commit();
+          const refreshedSnap = await getDocs(masterColRef);
+          studentsList = refreshedSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else {
+          studentsList = masterSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+
         studentsList.sort((a, b) => (Number(a.noUrut) || 999) - (Number(b.noUrut) || 999));
       } catch (err) {
         console.error('Gagal memuat siswa:', err);
@@ -3041,6 +3106,8 @@
     async function saveStudent(e) {
       e.preventDefault();
       const uid = getTargetUid();
+      const classDocId = getActiveClassDocId();
+      const stdKelas = STANDARD_CLASSES.find(c => c.id === classDocId) || getStandardClassInfo(appSettings.kelas);
       const id = document.getElementById('stu-id').value;
       const payload = {
         noUrut: Number(document.getElementById('stu-nourut').value) || 1,
@@ -3051,16 +3118,21 @@
         tmpLahir: document.getElementById('stu-tmplahir').value.trim(),
         tglLahir: document.getElementById('stu-tgllahir').value,
         ortu: document.getElementById('stu-ortu').value.trim(),
+        kelasId: classDocId,
+        kelasAcuan: stdKelas.label,
+        updatedBy: currentUser ? currentUser.email : '',
         updatedAt: new Date().toISOString()
       };
 
       try {
         if (id) {
-          await updateDoc(doc(db, 'users', uid, 'students', id), payload);
-          showToast('Data siswa berhasil diperbarui!');
+          await setDoc(doc(db, 'shared_classes', classDocId, 'students', id), payload, { merge: true });
+          await setDoc(doc(db, 'users', uid, 'students', id), payload, { merge: true }).catch(() => {});
+          showToast(`Data siswa ${stdKelas.shortLabel} berhasil diperbarui & tersinkron!`);
         } else {
-          await addDoc(collection(db, 'users', uid, 'students'), payload);
-          showToast('Siswa baru berhasil ditambahkan!');
+          const newRef = await addDoc(collection(db, 'shared_classes', classDocId, 'students'), payload);
+          await setDoc(doc(db, 'users', uid, 'students', newRef.id), payload, { merge: true }).catch(() => {});
+          showToast(`Siswa baru ${stdKelas.shortLabel} berhasil ditambahkan & tersinkron!`);
         }
         closeStudentModal();
         await loadStudents();
@@ -3078,8 +3150,10 @@
       if (!ok) return;
       try {
         const uid = getTargetUid();
-        await deleteDoc(doc(db, 'users', uid, 'students', id));
-        showToast('Data siswa dihapus.');
+        const classDocId = getActiveClassDocId();
+        await deleteDoc(doc(db, 'shared_classes', classDocId, 'students', id));
+        await deleteDoc(doc(db, 'users', uid, 'students', id)).catch(() => {});
+        showToast('Data siswa dihapus dari kelas.');
         await loadStudents();
         updateDashboardStats();
         if (isAdminUser && !document.getElementById('view-admin').classList.contains('hidden')) {
@@ -3094,27 +3168,23 @@
       const currentKelas = appSettings.kelas || 'Kelas I (Satu)';
       const wb = XLSX.utils.book_new();
 
-      if (isAdminUser && adminAllUsersList.length > 0) {
-        // Bagi Admin: Buat template berisi contoh kelas-kelas terdaftar agar langsung terbaca otomatis saat impor
-        const rows = [];
-        adminAllUsersList.forEach((u, idx) => {
-          const kelasLabel = u.kelas || `Kelas ${idx + 1}`;
-          rows.push({
-            'Kelas': kelasLabel,
-            'No Urut': 1,
-            'No Induk': `10${idx + 1}1`,
-            'NISN': `0160000${idx + 1}1`,
-            'Nama Lengkap': `Contoh Siswa 1 (${kelasLabel})`,
-            'L/P': 'L',
-            'Tempat Lahir': appSettings.kota || 'Jember',
-            'Tanggal Lahir (YYYY-MM-DD)': '2018-05-14',
-            'Nama Orang Tua': 'Nama Orang Tua'
-          });
-        });
+      if (isAdminUser) {
+        // Template Admin mencakup contoh Kelas 1 sampai Kelas 6 agar bisa langsung diimpor sekaligus
+        const rows = STANDARD_CLASSES.map((cls, idx) => ({
+          'Kelas': cls.shortLabel,
+          'No Urut': 1,
+          'No Induk': `10${idx + 1}1`,
+          'NISN': `0160000${idx + 1}1`,
+          'Nama Lengkap': `Contoh Siswa 1 (${cls.label})`,
+          'L/P': idx % 2 === 0 ? 'L' : 'P',
+          'Tempat Lahir': appSettings.kota || 'Jember',
+          'Tanggal Lahir (YYYY-MM-DD)': '2018-05-14',
+          'Nama Orang Tua': 'Nama Orang Tua'
+        }));
         const ws = XLSX.utils.json_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, 'Semua_Kelas');
-        XLSX.writeFile(wb, 'Template_Impor_Siswa_Otomatis_Admin.xlsx');
-        showToast('Template Excel multi-kelas untuk Admin berhasil diunduh.');
+        XLSX.utils.book_append_sheet(wb, ws, 'Semua_Kelas_1_6');
+        XLSX.writeFile(wb, 'Template_Impor_Siswa_Kelas_1_sd_6_Admin.xlsx');
+        showToast('Template Excel Master Kelas 1–6 berhasil diunduh.');
         return;
       }
 
@@ -3187,7 +3257,6 @@
       const file = e.target.files[0];
       if (!file) return;
       try {
-        // Pastikan daftar akun guru sudah dimuat jika akun yang login adalah Admin
         if (isAdminUser && !adminAllUsersList.length) {
           await loadAllAdminUsers();
         }
@@ -3195,12 +3264,11 @@
         const data = await file.arrayBuffer();
         const wb = XLSX.read(data);
         const defaultUid = getTargetUid();
+        const defaultClassId = getActiveClassDocId();
         const batch = writeBatch(db);
         let importedCount = 0;
-        const matchedTeachers = new Set();
-        const autoSyncEnabled = isAdminUser || forceAutoSync;
+        const matchedClasses = new Set();
 
-        // Baca seluruh sheet di dalam file Excel (mendukung multi-sheet per kelas maupun 1 sheet gabungan)
         wb.SheetNames.forEach((sheetName) => {
           const sheet = wb.Sheets[sheetName];
           const jsonRows = XLSX.utils.sheet_to_json(sheet);
@@ -3210,24 +3278,25 @@
             const nama = row['Nama Lengkap'] || row['Nama'] || row['nama'] || row['NAMA SISWA'] || '';
             if (!String(nama).trim()) return;
 
-            // Ambil acuan kelas dari kolom Excel, atau dari nama sheet jika nama sheet menyebut kelas
             const colKelas = String(row['Kelas'] || row['kelas'] || row['Rombel'] || row['KELAS'] || '').trim();
             const sheetHint = /kelas|rombel|[1-6]/i.test(sheetName) && !/template|semua|data/i.test(sheetName)
               ? sheetName.trim()
               : '';
             const rowKelas = colKelas || sheetHint;
 
-            const targetUidForRow = autoSyncEnabled && rowKelas
+            // Tentukan Master Kelas (kelas_1 s.d. kelas_6) sebagai sumber kebenaran bersama Admin & Guru
+            const stdKelas = rowKelas
+              ? getStandardClassInfo(rowKelas)
+              : (STANDARD_CLASSES.find(c => c.id === defaultClassId) || getStandardClassInfo(appSettings.kelas));
+
+            const targetClassId = stdKelas.id;
+            const targetUidForRow = rowKelas
               ? findTeacherUidByKelas(rowKelas, defaultUid)
               : defaultUid;
 
-            const teacherObj = adminAllUsersList.find((u) => u.uid === targetUidForRow);
-            if (teacherObj) {
-              matchedTeachers.add(`${teacherObj.kelas || rowKelas || 'Kelas'} (${teacherObj.namaGuru || teacherObj.email})`);
-            }
+            matchedClasses.add(stdKelas.label);
 
-            const ref = doc(collection(db, 'users', targetUidForRow, 'students'));
-            batch.set(ref, {
+            const studentPayload = {
               noUrut: Number(row['No Urut'] || row['No'] || row['NO'] || i + 1),
               noInduk: String(row['No Induk'] || row['NIS'] || row['NO INDUK'] || '').trim(),
               nisn: String(row['NISN'] || '').trim(),
@@ -3236,9 +3305,22 @@
               tmpLahir: String(row['Tempat Lahir'] || row['TEMPAT LAHIR'] || '').trim(),
               tglLahir: String(row['Tanggal Lahir (YYYY-MM-DD)'] || row['Tanggal Lahir'] || row['TANGGAL LAHIR'] || '').trim(),
               ortu: String(row['Nama Orang Tua'] || row['Orang Tua'] || row['NAMA ORANG TUA'] || '').trim(),
-              kelasAcuan: rowKelas || (teacherObj ? teacherObj.kelas : appSettings.kelas) || '',
+              kelasId: targetClassId,
+              kelasAcuan: stdKelas.label,
+              updatedBy: currentUser ? currentUser.email : '',
               updatedAt: new Date().toISOString()
-            });
+            };
+
+            // Simpan ke Master Kelas (otomatis terbaca saat guru memilih Kelas 1–6)
+            const sharedRef = doc(collection(db, 'shared_classes', targetClassId, 'students'));
+            batch.set(sharedRef, studentPayload);
+
+            // Sinkronkan juga ke koleksi akun guru jika guru sudah terdaftar di kelas tersebut
+            if (targetUidForRow && targetUidForRow !== currentUser?.uid) {
+              const userStuRef = doc(db, 'users', targetUidForRow, 'students', sharedRef.id);
+              batch.set(userStuRef, studentPayload);
+            }
+
             importedCount++;
           });
         });
@@ -3249,11 +3331,7 @@
         }
 
         await batch.commit();
-        if (autoSyncEnabled && matchedTeachers.size > 0) {
-          showToast(`${importedCount} siswa otomatis terbaca & tersimpan ke kelas: ${Array.from(matchedTeachers).join(', ')}`);
-        } else {
-          showToast(`${importedCount} data siswa berhasil diimpor!`);
-        }
+        showToast(`${importedCount} siswa berhasil diimpor ke Master ${Array.from(matchedClasses).join(', ')} dan otomatis terbaca di akun guru!`);
         await loadStudents();
         updateDashboardStats();
         if (isAdminUser) {
@@ -3267,8 +3345,8 @@
     }
 
     async function exportStudentsExcel() {
-      // Jika akun adalah Admin dan sedang berada di akun utamanya, otomatis ekspor gabungan seluruh kelas
-      if (isAdminUser && currentUser && getTargetUid() === currentUser.uid) {
+      // Jika akun adalah Admin dan sedang berada di akun utamanya tanpa memilih filter 1 kelas, ekspor semua kelas
+      if (isAdminUser && currentUser && getTargetUid() === currentUser.uid && !activeMasterClassFilter) {
         await exportAllClassesStudentsExcel();
         return;
       }
@@ -3277,9 +3355,10 @@
         showToast('Belum ada data siswa untuk diekspor.', 'error');
         return;
       }
+      const stdKelas = STANDARD_CLASSES.find(c => c.id === getActiveClassDocId()) || getStandardClassInfo(appSettings.kelas);
       const rows = studentsList.map((s, i) => ({
         'Sekolah': appSettings.sekolah || '',
-        'Kelas': appSettings.kelas || s.kelasAcuan || '',
+        'Kelas': stdKelas.label,
         'Guru / Wali Kelas': appSettings.namaGuru || '',
         'No Urut': s.noUrut || i + 1,
         'No Induk': s.noInduk || '',
@@ -3292,32 +3371,41 @@
       }));
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Data_Siswa');
-      XLSX.writeFile(wb, `Data_Siswa_${(appSettings.kelas || 'Kelas').replace(/\s+/g, '_')}.xlsx`);
-      showToast('Data siswa berhasil diekspor ke Excel.');
+      XLSX.utils.book_append_sheet(wb, ws, stdKelas.shortLabel.replace(/\s+/g, '_'));
+      XLSX.writeFile(wb, `Data_Siswa_${stdKelas.shortLabel.replace(/\s+/g, '_')}.xlsx`);
+      showToast(`Data siswa ${stdKelas.label} berhasil diekspor ke Excel.`);
     }
 
     async function exportAllClassesStudentsExcel() {
       if (!isAdminUser) return;
       try {
-        showToast('Menyiapkan ekspor otomatis seluruh kelas...');
+        showToast('Menyiapkan ekspor otomatis seluruh Master Kelas 1–6...');
         const usersSnap = await getDocs(collection(db, 'users'));
+        const teachersByClassId = {};
+        usersSnap.docs.forEach((d) => {
+          const u = d.data();
+          const clsInfo = getStandardClassInfo(u.kelas);
+          if (u.email !== ADMIN_EMAIL) {
+            teachersByClassId[clsInfo.id] = u;
+          }
+        });
+
         const allRows = [];
         const wb = XLSX.utils.book_new();
 
-        for (const uDoc of usersSnap.docs) {
-          const uData = uDoc.data();
-          const sSnap = await getDocs(collection(db, 'users', uDoc.id, 'students'));
+        for (const cls of STANDARD_CLASSES) {
+          const sSnap = await getDocs(collection(db, 'shared_classes', cls.id, 'students'));
           const stuDocs = sSnap.docs
             .map((d) => d.data())
             .sort((a, b) => (Number(a.noUrut) || 999) - (Number(b.noUrut) || 999));
 
+          const teacher = teachersByClassId[cls.id] || {};
           const classRows = [];
           stuDocs.forEach((s, idx) => {
             const rowObj = {
-              'Sekolah': uData.sekolah || '-',
-              'Kelas': uData.kelas || s.kelasAcuan || '-',
-              'Guru / Wali Kelas': uData.namaGuru || uData.email || '-',
+              'Sekolah': teacher.sekolah || appSettings.sekolah || '-',
+              'Kelas': cls.label,
+              'Guru / Wali Kelas': teacher.namaGuru || teacher.email || '-',
               'No Urut': s.noUrut || idx + 1,
               'No Induk': s.noInduk || '',
               'NISN': s.nisn || '',
@@ -3332,22 +3420,19 @@
           });
 
           if (classRows.length > 0) {
-            const rawSheetName = (uData.kelas || uData.namaGuru || uDoc.id).replace(/[\\/?*[\]:]/g, '').substring(0, 28) || 'Kelas';
-            if (!wb.SheetNames.includes(rawSheetName)) {
-              XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classRows), rawSheetName);
-            }
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(classRows), cls.shortLabel.replace(/\s+/g, '_'));
           }
         }
 
         if (!allRows.length) {
-          showToast('Belum ada data siswa di seluruh kelas.', 'error');
+          showToast('Belum ada data siswa di Master Kelas 1–6.', 'error');
           return;
         }
 
         const wsAll = XLSX.utils.json_to_sheet(allRows);
         XLSX.utils.book_append_sheet(wb, wsAll, 'Rekap_Semua_Kelas');
         XLSX.writeFile(wb, `Ekspor_Otomatis_Semua_Kelas_${getTodayISO()}.xlsx`);
-        showToast(`Berhasil mengekspor ${allRows.length} siswa dari seluruh kelas (rekap + sheet per kelas)!`);
+        showToast(`Berhasil mengekspor ${allRows.length} siswa dari Master Kelas 1–6!`);
       } catch (err) {
         showToast('Gagal mengekspor seluruh kelas: ' + err.message, 'error');
       }
@@ -4123,11 +4208,35 @@
     function populateAdminTargetSelect() {
       const sel = document.getElementById('admin-target-user-select');
       if (!sel) return;
-      const currentTarget = getTargetUid();
-      sel.innerHTML = adminAllUsersList.map((u) => {
-        const label = `${u.sekolah || 'Sekolah'} • ${u.kelas || 'Kelas'} — ${u.namaGuru || u.email || u.uid}`;
-        return `<option value="${escapeHtml(u.uid)}" ${u.uid === currentTarget ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+      const currentVal = activeMasterClassFilter || getTargetUid();
+
+      const masterOptions = STANDARD_CLASSES.map((cls) => {
+        const teachers = adminAllUsersList.filter(
+          (u) => u.email !== ADMIN_EMAIL && getStandardClassInfo(u.kelas).id === cls.id
+        );
+        const guruNames = teachers.length
+          ? teachers.map((t) => t.namaGuru || t.email).join(', ')
+          : 'Belum ada guru memilih kelas ini';
+        const val = `master:${cls.id}`;
+        return `<option value="${val}" ${currentVal === val || activeMasterClassFilter === cls.id ? 'selected' : ''}>Master ${cls.label} — (Guru: ${escapeHtml(guruNames)})</option>`;
       }).join('');
+
+      const teacherOptions = adminAllUsersList
+        .filter((u) => u.email !== ADMIN_EMAIL)
+        .map((u) => {
+          const label = `Akun Guru: ${u.namaGuru || u.email} (${u.kelas || 'Kelas'})`;
+          return `<option value="${escapeHtml(u.uid)}" ${!activeMasterClassFilter && getTargetUid() === u.uid ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        })
+        .join('');
+
+      sel.innerHTML = `
+        <optgroup label="Master Kelas Terpusat (Acuan Otomatis Guru Kelas 1–6)">
+          ${masterOptions}
+        </optgroup>
+        <optgroup label="Kelola Langsung Akun Guru Terdaftar">
+          ${teacherOptions}
+        </optgroup>
+      `;
     }
 
     async function loadAllAdminUsers() {
@@ -4136,27 +4245,38 @@
       if (tbody) tbody.innerHTML = `<tr><td colspan="11" class="empty-state">Memuat seluruh data yang masuk ke aplikasi...</td></tr>`;
 
       try {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        let sumStu = 0, sumJurGrd = 0, sumMat = 0;
+        const [usersSnap, ...sharedClassSnaps] = await Promise.all([
+          getDocs(collection(db, 'users')),
+          ...STANDARD_CLASSES.map((cls) => getDocs(collection(db, 'shared_classes', cls.id, 'students')))
+        ]);
+
+        const sharedCountMap = {};
+        let sumStu = 0;
+        STANDARD_CLASSES.forEach((cls, idx) => {
+          const cnt = sharedClassSnaps[idx].size;
+          sharedCountMap[cls.id] = cnt;
+          sumStu += cnt;
+        });
+
+        let sumJurGrd = 0, sumMat = 0;
 
         const rowsData = await Promise.all(
           usersSnap.docs.map(async (uDoc) => {
             const uData = uDoc.data();
-            const [sSnap, aSnap, gSnap, jSnap, mSnap] = await Promise.all([
-              getDocs(collection(db, 'users', uDoc.id, 'students')),
+            const [aSnap, gSnap, jSnap, mSnap] = await Promise.all([
               getDocs(collection(db, 'users', uDoc.id, 'attendance')),
               getDocs(collection(db, 'users', uDoc.id, 'grades')),
               getDocs(collection(db, 'users', uDoc.id, 'journals')),
               getDocs(collection(db, 'users', uDoc.id, 'materials'))
             ]);
-            sumStu += sSnap.size;
+            const clsInfo = getStandardClassInfo(uData.kelas);
             sumJurGrd += (jSnap.size + gSnap.size);
             sumMat += mSnap.size;
 
             return {
               uid: uDoc.id,
               ...uData,
-              stuCount: sSnap.size,
+              stuCount: sharedCountMap[clsInfo.id] || 0,
               attCount: aSnap.size,
               grdCount: gSnap.size,
               jurCount: jSnap.size,
@@ -4180,6 +4300,39 @@
       } catch (err) {
         console.error('Error Panel Admin:', err);
         tbody.innerHTML = `<tr><td colspan="11" class="empty-state" style="color: #dc2626;">Gagal memuat daftar akun: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    async function switchAdminTargetUser(targetValue, targetMenu = 'dashboard', silent = false) {
+      if (!isAdminUser || !targetValue) return;
+      if (String(targetValue).startsWith('master:')) {
+        const classId = targetValue.replace('master:', '');
+        activeTargetUid = currentUser.uid;
+        activeMasterClassFilter = classId;
+        const clsObj = STANDARD_CLASSES.find(c => c.id === classId) || STANDARD_CLASSES[0];
+        appSettings.kelas = clsObj.label;
+        applySettingsToUI();
+        await loadAllUserWorkspaceData();
+        populateAdminTargetSelect();
+        renderAdminUsersTable();
+        if (targetMenu) navigateTo(targetMenu);
+        if (!silent) {
+          showToast(`Membuka Master ${clsObj.label} (terhubung otomatis ke guru ${clsObj.shortLabel})`);
+        }
+        return;
+      }
+
+      activeMasterClassFilter = '';
+      activeTargetUid = targetValue;
+      await loadSettings();
+      await loadAllUserWorkspaceData();
+      populateAdminTargetSelect();
+      renderAdminUsersTable();
+      if (targetMenu) {
+        navigateTo(targetMenu);
+      }
+      if (!silent) {
+        showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetValue})`);
       }
     }
 
@@ -4562,6 +4715,7 @@
       onEl('btn-admin-back-own', 'click', async () => {
         if (!currentUser) return;
         activeTargetUid = currentUser.uid;
+        activeMasterClassFilter = '';
         await loadSettings();
         await loadAllUserWorkspaceData();
         navigateTo('dashboard');
@@ -4571,50 +4725,37 @@
       onEl('admin-search-input', 'input', renderAdminUsersTable);
       onEl('btn-reload-admin', 'click', loadAllAdminUsers);
       onEl('admin-target-user-select', 'change', async (e) => {
-        const chosenUid = e.target.value;
-        if (chosenUid) {
-          await switchAdminTargetUser(chosenUid, null, false);
+        const chosenVal = e.target.value;
+        if (chosenVal) {
+          await switchAdminTargetUser(chosenVal, null, false);
         }
       });
       onEl('btn-admin-add-student', 'click', async () => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value;
-        if (chosenUid && chosenUid !== getTargetUid()) {
-          await switchAdminTargetUser(chosenUid, null, true);
+        const chosenVal = document.getElementById('admin-target-user-select')?.value;
+        if (chosenVal) {
+          await switchAdminTargetUser(chosenVal, null, true);
         }
         openStudentModal();
       });
       onEl('admin-import-student-file', 'change', async (e) => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value;
-        if (chosenUid && chosenUid !== getTargetUid()) {
-          await switchAdminTargetUser(chosenUid, null, true);
+        const chosenVal = document.getElementById('admin-target-user-select')?.value;
+        if (chosenVal) {
+          await switchAdminTargetUser(chosenVal, null, true);
         }
         await importStudentsExcel(e, true);
       });
       onEl('btn-admin-download-stu-tpl', 'click', downloadStudentTemplate);
-      onEl('btn-admin-top-tpl', 'click', downloadStudentTemplate);
-      onEl('admin-top-import-stu', 'change', async (e) => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value;
-        if (chosenUid && chosenUid !== getTargetUid()) {
-          await switchAdminTargetUser(chosenUid, null, true);
-        }
-        await importStudentsExcel(e, true);
-      });
-      onEl('btn-admin-top-export', 'click', exportAllClassesStudentsExcel);
       onEl('btn-admin-export-stu', 'click', async () => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value;
-        if (chosenUid && chosenUid !== getTargetUid()) {
-          await switchAdminTargetUser(chosenUid, null, true);
+        const chosenVal = document.getElementById('admin-target-user-select')?.value;
+        if (chosenVal) {
+          await switchAdminTargetUser(chosenVal, null, true);
         }
         exportStudentsExcel();
       });
       onEl('btn-admin-export-all-stu', 'click', exportAllClassesStudentsExcel);
       onEl('btn-admin-open-students', 'click', async () => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
-        await switchAdminTargetUser(chosenUid, 'siswa', false);
-      });
-      onEl('btn-admin-open-materials', 'click', async () => {
-        const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
-        await switchAdminTargetUser(chosenUid, 'perangkat', false);
+        const chosenVal = document.getElementById('admin-target-user-select')?.value || getTargetUid();
+        await switchAdminTargetUser(chosenVal, 'siswa', false);
       });
       onEl('admin-users-tbody', 'click', (e) => {
         const btn = e.target.closest('[data-admin-uid]');
