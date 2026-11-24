@@ -335,7 +335,7 @@
     }
     .topbar {
       height: 70px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border-color);
       padding: 0 24px;
@@ -361,67 +361,268 @@
       margin: 0 auto;
     }
 
-    /* Hero Banner + Large Profile Photo */
+    /* =====================================================================
+       PREMIUM MODERN SCHOOL HERO BANNER (INSPIRED BY REFERENCE IMAGE)
+       ===================================================================== */
+    .hero-showcase-wrap {
+      position: relative;
+      margin-bottom: 24px;
+    }
     .hero-banner {
-      background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
-      border-radius: 20px;
-      padding: 28px 32px;
-      color: #fff;
+      background: linear-gradient(125deg, #0b2466 0%, #1d4ed8 46%, #3b82f6 82%, #7dd3fc 100%);
+      border-radius: 26px;
+      padding: 34px 38px 74px 38px;
+      color: #ffffff;
       position: relative;
       overflow: hidden;
-      margin-bottom: 24px;
-      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22);
+      box-shadow: 0 20px 45px -12px rgba(29, 78, 216, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.22);
     }
-    .hero-banner::after {
-      content: "";
+    /* Optional School Cover Photo Background Layer */
+    .hero-cover-bg {
       position: absolute;
-      right: -40px;
-      bottom: -60px;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.24;
+      mix-blend-mode: luminosity;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Soft Bokeh Orbs like Reference Image */
+    .hero-bokeh {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .hero-bokeh-1 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(147, 197, 253, 0.45) 0%, rgba(59, 130, 246, 0) 70%);
+      top: -90px;
+      left: -60px;
+      filter: blur(18px);
+    }
+    .hero-bokeh-2 {
       width: 240px;
       height: 240px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      pointer-events: none;
+      background: radial-gradient(circle, rgba(191, 219, 254, 0.42) 0%, rgba(96, 165, 250, 0) 70%);
+      bottom: -50px;
+      left: 38%;
+      filter: blur(16px);
     }
+    .hero-bokeh-3 {
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(224, 242, 254, 0.5) 0%, rgba(125, 211, 252, 0) 70%);
+      top: -60px;
+      right: 6%;
+      filter: blur(22px);
+    }
+    .hero-bokeh-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .hero-layout {
       display: flex;
       align-items: center;
-      gap: 28px;
+      justify-content: space-between;
+      gap: 32px;
       position: relative;
-      z-index: 2;
+      z-index: 3;
     }
-    .hero-avatar-wrap {
+    .hero-left-content {
+      flex: 1;
+      min-width: 0;
+      max-width: 650px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: #f0f9ff;
+    }
+    .hero-title-main {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+    .hero-title-accent {
+      color: #bae6fd;
+      display: inline-block;
+    }
+    .hero-desc-text {
+      font-size: 0.92rem;
+      color: rgba(241, 245, 249, 0.92);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-hero-pill-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.22);
+      transition: all 0.2s ease;
+    }
+    .btn-hero-pill-primary:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    }
+    .btn-hero-pill-glass {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(10px);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-hero-pill-glass:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: translateY(-2px);
+    }
+
+    /* Right Side Large Teacher/Admin Portrait Showcase */
+    .hero-right-portrait {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      position: relative;
       flex-shrink: 0;
     }
-    .hero-avatar-box {
-      width: 136px;
-      height: 136px;
-      border-radius: 26px;
-      border: 4px solid rgba(255, 255, 255, 0.45);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
+    .hero-portrait-frame {
+      width: 230px;
+      height: 245px;
+      border-radius: 28px;
+      border: 4px solid rgba(255, 255, 255, 0.55);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.28) 0%, rgba(147, 197, 253, 0.16) 100%);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 22px 44px rgba(15, 23, 42, 0.32), inset 0 0 24px rgba(255, 255, 255, 0.25);
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.25s ease, border-color 0.25s ease;
     }
-    .hero-avatar-box:hover {
-      transform: scale(1.03);
+    .hero-portrait-frame:hover {
+      transform: translateY(-3px) scale(1.02);
       border-color: #ffffff;
     }
-    .hero-avatar-box img {
+    .hero-portrait-frame img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: top center;
       display: block;
     }
+    .hero-portrait-overlay-btn {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transition: background 0.2s;
+    }
+    .hero-portrait-frame:hover .hero-portrait-overlay-btn {
+      background: #2563eb;
+    }
+    .hero-tagline-float {
+      position: absolute;
+      right: -18px;
+      bottom: 42px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #ffffff;
+      transform: rotate(-4deg);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+      pointer-events: none;
+    }
+
+    /* Overlapping Glass Feature / Stat Cards Row (Like Reference Image) */
+    .hero-overlapping-stats {
+      position: relative;
+      z-index: 5;
+      margin-top: -46px;
+      padding: 0 22px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .glass-stat-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 18px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 14px 30px -8px rgba(30, 58, 138, 0.14);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    .glass-stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 36px -8px rgba(30, 58, 138, 0.22);
+    }
+
     .topbar-avatar {
       width: 38px;
       height: 38px;
@@ -441,17 +642,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.16);
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      margin-bottom: 10px;
     }
 
     /* Cards & Stat Cards */
@@ -494,8 +684,8 @@
     }
     .stat-card:hover { transform: translateY(-2px); }
     .stat-icon {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 14px;
       display: flex;
       align-items: center;
@@ -775,8 +965,8 @@
       .print-sig-space { height: 62px; }
       .print-qr-cell img,
       .print-qr-cell canvas {
-        width: 110px !important;
-        height: 110px !important;
+        width: 82px !important;
+        height: 82px !important;
         margin: 4px auto;
         display: block;
       }
@@ -787,11 +977,13 @@
 
     /* Responsive Breakpoints */
     @media (max-width: 1200px) {
-      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-4, .hero-overlapping-stats { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 1024px) {
       .grid-3 { grid-template-columns: repeat(2, 1fr); }
       .content-area { padding: 18px; }
+      .hero-title-main { font-size: 1.65rem; }
+      .hero-portrait-frame { width: 195px; height: 210px; }
     }
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); width: 260px; }
@@ -799,7 +991,7 @@
       .sidebar-overlay.open { display: block; }
       .main-wrapper { margin-left: 0; width: 100%; }
       .mobile-menu-btn { display: inline-flex; min-width: 42px; min-height: 42px; align-items: center; justify-content: center; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border-color); }
-      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .grid-4, .hero-overlapping-stats { grid-template-columns: 1fr; }
       .content-area { padding: 12px; }
       .topbar {
         padding: 10px 14px;
@@ -810,12 +1002,14 @@
       }
       .btn { min-height: 40px; }
       .btn-sm { min-height: 36px; }
-      .form-control { font-size: 16px; } /* Mencegah auto-zoom di iOS/HP */
-      .hero-banner { padding: 20px 16px; border-radius: 16px; }
-      .hero-layout { flex-direction: column; text-align: center; gap: 16px; }
-      .hero-layout .flex { justify-content: center; }
-      .hero-avatar-box { width: 112px; height: 112px; }
-      .hero-banner h1 { font-size: 1.25rem !important; }
+      .form-control { font-size: 16px; }
+      .hero-banner { padding: 24px 18px 28px 18px; border-radius: 20px; }
+      .hero-layout { flex-direction: column-reverse; text-align: center; gap: 18px; }
+      .hero-cta-row { justify-content: center; }
+      .hero-portrait-frame { width: 170px; height: 185px; }
+      .hero-tagline-float { display: none; }
+      .hero-overlapping-stats { margin-top: 14px; padding: 0; }
+      .hero-title-main { font-size: 1.4rem; }
       .card { padding: 14px; border-radius: 14px; }
       .card-header { flex-direction: column; align-items: flex-start; }
       .card-header > .flex { width: 100%; }
@@ -826,11 +1020,9 @@
       #view-jurnal .grid-3 > .card { grid-column: span 1 !important; }
     }
     @media (max-width: 480px) {
-      .topbar-subtitle, #topbar-subtitle { display: none; }
+      #topbar-subtitle { display: none; }
       #badge-ta { font-size: 0.7rem; padding: 4px 9px; }
-      .hero-banner h1 { font-size: 1.12rem !important; }
-      .stat-card { gap: 12px; }
-      .stat-icon { width: 44px; height: 44px; }
+      .hero-title-main { font-size: 1.25rem; }
     }
   </style>
   <style id="dynamic-print-orientation"></style>
@@ -979,81 +1171,115 @@
 
       <main class="content-area">
         <!-- ===============================================================
-             MODULE 1: DASHBOARD (DENGAN FOTO PROFIL BESAR & SAPAAN ADMIN)
+             MODULE 1: DASHBOARD (HERO SECTION BERGAYA MODERN SCHOOL PORTAL)
              =============================================================== -->
         <section id="view-dashboard" class="module-view">
-          <div class="hero-banner">
-            <div class="hero-layout">
-              <!-- Foto Profil Besar Guru / Admin (Bisa diklik langsung untuk unggah) -->
-              <div class="hero-avatar-wrap">
-                <label for="upload-profile-photo-dash" class="hero-avatar-box" title="Klik untuk memilih & mengunggah Foto Profil Guru">
-                  <img id="hero-profile-img" src="" alt="Foto Profil Guru" class="hidden" />
-                  <div id="hero-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px; color: #ffffff;">
-                    <div id="hero-profile-initials" style="font-size: 2.2rem; font-weight: 800; letter-spacing: 1px; line-height: 1;">GR</div>
-                    <span style="font-size: 0.68rem; font-weight: 600; margin-top: 6px; background: rgba(15,23,42,0.28); padding: 2px 8px; border-radius: 999px;">Klik Unggah Foto</span>
+          <div class="hero-showcase-wrap">
+            <div class="hero-banner">
+              <!-- Optional School Cover Image Background -->
+              <img id="hero-cover-bg-img" src="" alt="" class="hero-cover-bg hidden" />
+
+              <!-- Decorative Bokeh & Glow Elements -->
+              <div class="hero-bokeh hero-bokeh-1"></div>
+              <div class="hero-bokeh hero-bokeh-2"></div>
+              <div class="hero-bokeh hero-bokeh-3"></div>
+              <div class="hero-bokeh-dot" style="width: 18px; height: 18px; top: 24px; right: 32%;"></div>
+              <div class="hero-bokeh-dot" style="width: 34px; height: 34px; bottom: 78px; right: 36%;"></div>
+              <div class="hero-bokeh-dot" style="width: 14px; height: 14px; top: 55%; left: 52%;"></div>
+
+              <div class="hero-layout">
+                <!-- Left Column: Welcome Badge, Headline, Description & Pill Buttons -->
+                <div class="hero-left-content">
+                  <div class="hero-badge">
+                    <i data-lucide="graduation-cap" width="15"></i>
+                    <span id="hero-role-badge">Portal Guru & Wali Kelas</span>
                   </div>
-                </label>
-                <label for="upload-profile-photo-dash" class="btn btn-sm" style="background: #ffffff; color: var(--primary-dark); cursor: pointer; font-size: 0.76rem; padding: 6px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                  <i data-lucide="camera" width="14"></i> Unggah Foto Profil
-                </label>
-                <input type="file" id="upload-profile-photo-dash" accept="image/*" class="hidden" />
+                  <h1 id="hero-welcome-title" class="hero-title-main">
+                    Selamat Datang, <span class="hero-title-accent">Bapak/Ibu Guru</span>
+                  </h1>
+                  <p id="hero-school-info" class="hero-desc-text">
+                    Silakan lengkapi Kop Surat, Data Kepala Sekolah, dan Identitas Guru Kelas di menu Pengaturan agar seluruh format cetak F4 terisi otomatis.
+                  </p>
+                  <div class="hero-cta-row">
+                    <button type="button" class="btn-hero-pill-primary" data-nav-target="absen">
+                      <span>Isi Absen Hari Ini</span>
+                      <i data-lucide="arrow-right" width="16"></i>
+                    </button>
+                    <label for="upload-profile-photo-dash" class="btn-hero-pill-glass">
+                      <i data-lucide="camera" width="16"></i>
+                      <span>Ganti Foto Profil</span>
+                    </label>
+                    <label for="upload-hero-cover-dash" class="btn-hero-pill-glass" title="Unggah foto gedung sekolah sebagai latar belakang banner">
+                      <i data-lucide="image" width="16"></i>
+                      <span>Latar Sekolah</span>
+                    </label>
+                  </div>
+                  <input type="file" id="upload-profile-photo-dash" accept="image/*" class="hidden" />
+                  <input type="file" id="upload-hero-cover-dash" accept="image/*" class="hidden" />
+                </div>
+
+                <!-- Right Column: Large Portrait Showcase (Teacher / Admin Photo) -->
+                <div class="hero-right-portrait">
+                  <label for="upload-profile-photo-dash" class="hero-portrait-frame" title="Klik untuk memilih & mengunggah Foto Profil Guru / Admin">
+                    <img id="hero-profile-img" src="" alt="Foto Profil Guru" class="hidden" />
+                    <div id="hero-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; color: #ffffff;">
+                      <div style="width: 78px; height: 78px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 2px solid rgba(255,255,255,0.45);">
+                        <span id="hero-profile-initials" style="font-size: 2rem; font-weight: 800; letter-spacing: 1px;">GR</span>
+                      </div>
+                      <span style="font-size: 0.78rem; font-weight: 700;">Foto Profil Guru</span>
+                      <span style="font-size: 0.68rem; color: #dbeafe; margin-top: 2px;">Klik untuk unggah</span>
+                    </div>
+                    <span class="hero-portrait-overlay-btn">
+                      <i data-lucide="camera" width="13"></i> Ubah Foto
+                    </span>
+                  </label>
+                  <div class="hero-tagline-float">
+                    Administrasi Rapi • Siap Cetak F4
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Overlapping Glass Cards Row (4 Stat Cards) -->
+            <div class="hero-overlapping-stats">
+              <div class="glass-stat-card" data-nav-target="siswa">
+                <div class="stat-icon bg-blue-grad"><i data-lucide="users" width="23"></i></div>
+                <div style="min-width: 0; flex: 1;">
+                  <div class="text-xs text-muted font-semibold">Total Peserta Didik</div>
+                  <div id="stat-total-siswa" style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">0</div>
+                  <div id="stat-gender-siswa" class="text-xs text-muted">L: 0 | P: 0</div>
+                </div>
+                <i data-lucide="arrow-right" width="16" style="color: var(--primary);"></i>
               </div>
 
-              <!-- Teks Selamat Datang dari Admin & Info Kelas -->
-              <div style="flex: 1; min-width: 0;">
-                <div class="hero-badge">
-                  <i data-lucide="sparkles" width="14"></i>
-                  <span id="hero-role-badge">Portal Guru & Wali Kelas</span>
+              <div class="glass-stat-card" data-nav-target="absen">
+                <div class="stat-icon bg-teal-grad"><i data-lucide="calendar-check-2" width="23"></i></div>
+                <div style="min-width: 0; flex: 1;">
+                  <div class="text-xs text-muted font-semibold">Kehadiran Bulan Ini</div>
+                  <div id="stat-persen-absen" style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">0%</div>
+                  <div id="stat-bulan-aktif" class="text-xs text-muted">Bulan berjalan</div>
                 </div>
-                <h1 id="hero-welcome-title" style="font-size: 1.55rem; font-weight: 800; margin-bottom: 6px; line-height: 1.3;">
-                  Selamat Datang, Bapak/Ibu Guru
-                </h1>
-                <p id="hero-school-info" style="font-size: 0.9rem; color: #dbeafe; max-width: 680px;">
-                  Silakan lengkapi Kop Surat, Data Kepala Sekolah, dan Identitas Guru Kelas di menu Pengaturan agar seluruh format cetak F4 terisi otomatis.
-                </p>
-                <div class="flex gap-2 mt-4" style="flex-wrap: wrap;">
-                  <button type="button" class="btn btn-outline btn-sm" style="background: #fff; color: var(--primary-dark);" data-nav-target="absen">
-                    <i data-lucide="check-square" width="15"></i> Isi Absen Hari Ini
-                  </button>
-                  <button type="button" class="btn btn-sm" style="background: rgba(255,255,255,0.18); color: #fff;" data-nav-target="pengaturan">
-                    <i data-lucide="settings" width="15"></i> Atur Profil & Kop Surat
-                  </button>
-                </div>
+                <i data-lucide="arrow-right" width="16" style="color: var(--accent-teal);"></i>
               </div>
-            </div>
-          </div>
 
-          <div class="grid-4 mb-4">
-            <div class="stat-card">
-              <div class="stat-icon bg-blue-grad"><i data-lucide="users" width="24"></i></div>
-              <div>
-                <div class="text-xs text-muted font-semibold">Total Peserta Didik</div>
-                <div id="stat-total-siswa" style="font-size: 1.5rem; font-weight: 800;">0</div>
-                <div id="stat-gender-siswa" class="text-xs text-muted">L: 0 | P: 0</div>
+              <div class="glass-stat-card" data-nav-target="jurnal">
+                <div class="stat-icon bg-orange-grad"><i data-lucide="notebook-text" width="23"></i></div>
+                <div style="min-width: 0; flex: 1;">
+                  <div class="text-xs text-muted font-semibold">Jurnal Mengajar</div>
+                  <div id="stat-total-jurnal" style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">0</div>
+                  <div class="text-xs text-muted">Catatan kegiatan</div>
+                </div>
+                <i data-lucide="arrow-right" width="16" style="color: var(--accent-orange);"></i>
               </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon bg-teal-grad"><i data-lucide="calendar-check-2" width="24"></i></div>
-              <div>
-                <div class="text-xs text-muted font-semibold">Kehadiran Bulan Ini</div>
-                <div id="stat-persen-absen" style="font-size: 1.5rem; font-weight: 800;">0%</div>
-                <div id="stat-bulan-aktif" class="text-xs text-muted">Bulan berjalan</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon bg-orange-grad"><i data-lucide="notebook-text" width="24"></i></div>
-              <div>
-                <div class="text-xs text-muted font-semibold">Jurnal Mengajar</div>
-                <div id="stat-total-jurnal" style="font-size: 1.5rem; font-weight: 800;">0</div>
-                <div class="text-xs text-muted">Catatan kegiatan</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon bg-purple-grad"><i data-lucide="qr-code" width="24"></i></div>
-              <div>
-                <div class="text-xs text-muted font-semibold">Perangkat Ajar</div>
-                <div id="stat-total-perangkat" style="font-size: 1.5rem; font-weight: 800;">0</div>
-                <div class="text-xs text-muted">Dokumen ber-barcode</div>
+
+              <div class="glass-stat-card" data-nav-target="perangkat">
+                <div class="stat-icon bg-purple-grad"><i data-lucide="qr-code" width="23"></i></div>
+                <div style="min-width: 0; flex: 1;">
+                  <div class="text-xs text-muted font-semibold">Perangkat Ajar</div>
+                  <div id="stat-total-perangkat" style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">0</div>
+                  <div class="text-xs text-muted">Dokumen ber-barcode</div>
+                </div>
+                <i data-lucide="arrow-right" width="16" style="color: var(--accent-purple);"></i>
               </div>
             </div>
           </div>
@@ -1483,12 +1709,12 @@
         </section>
 
         <!-- ===============================================================
-             MODULE 7: PENGATURAN (PROFIL, KOP, LOGO, KS, GURU, BACKUP/RESTORE)
+             MODULE 7: PENGATURAN (PROFIL, LATAR SEKOLAH, KOP, LOGO, KS, GURU)
              =============================================================== -->
         <section id="view-pengaturan" class="module-view hidden">
           <form id="settings-form">
             <div class="grid-2">
-              <!-- Foto Profil, Kop Surat & Logo -->
+              <!-- Foto Profil, Latar Banner, Kop Surat & Logo -->
               <div class="card">
                 <div class="form-group" style="background: #eff6ff; padding: 14px; border-radius: 12px; border: 1px solid #bfdbfe;">
                   <label class="form-label" style="color: #1e3a8a;">Foto Profil Guru / Wali Kelas (Tampil Besar di Dashboard)</label>
@@ -1502,6 +1728,17 @@
                       <div class="text-xs text-muted mt-2">Pilih foto formal/bebas rapi (JPG/PNG). Otomatis tersimpan ke cloud.</div>
                     </div>
                     <button type="button" id="clear-profile-photo" class="btn btn-outline btn-sm">Hapus</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="background: #f0fdf4; padding: 14px; border-radius: 12px; border: 1px solid #bbf7d0;">
+                  <label class="form-label" style="color: #166534;">Foto Latar Gedung Sekolah / Sampul Banner Dashboard (Opsional)</label>
+                  <div class="flex items-center gap-3" style="flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 180px;">
+                      <input type="file" id="upload-hero-cover" accept="image/*" class="form-control" />
+                      <div class="text-xs text-muted mt-2">Foto sekolah akan menyatu lembut dengan gradasi biru banner utama.</div>
+                    </div>
+                    <button type="button" id="clear-hero-cover" class="btn btn-outline btn-sm">Hapus Latar</button>
                   </div>
                 </div>
 
@@ -1626,19 +1863,19 @@
              =============================================================== -->
         <section id="view-admin" class="module-view hidden">
           <!-- Kartu Profil Admin + Unggah Foto Profil Admin -->
-          <div class="card" style="background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 100%); color: #fff; border: none;">
-            <div class="flex items-center gap-4" style="flex-wrap: wrap;">
-              <label for="upload-profile-photo-admin" class="hero-avatar-box" style="width: 96px; height: 96px; border-radius: 20px;" title="Klik untuk unggah Foto Profil Admin">
+          <div class="card" style="background: linear-gradient(125deg, #0b2466 0%, #1d4ed8 55%, #3b82f6 100%); color: #fff; border: none; position: relative; overflow: hidden;">
+            <div class="flex items-center gap-4" style="flex-wrap: wrap; position: relative; z-index: 2;">
+              <label for="upload-profile-photo-admin" class="hero-portrait-frame" style="width: 112px; height: 118px; border-radius: 22px;" title="Klik untuk unggah Foto Profil Admin">
                 <img id="admin-profile-img" src="" alt="Foto Profil Admin" class="hidden" />
                 <div id="admin-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff;">
-                  <div id="admin-profile-initials" style="font-size: 1.65rem; font-weight: 800; line-height: 1;">AD</div>
-                  <span style="font-size: 0.62rem; margin-top: 4px; background: rgba(15,23,42,0.3); padding: 2px 6px; border-radius: 999px;">Foto Admin</span>
+                  <div id="admin-profile-initials" style="font-size: 1.75rem; font-weight: 800; line-height: 1;">AD</div>
+                  <span style="font-size: 0.62rem; margin-top: 4px; background: rgba(15,23,42,0.35); padding: 2px 6px; border-radius: 999px;">Foto Admin</span>
                 </div>
               </label>
               <div style="flex: 1; min-width: 220px;">
                 <div class="text-xs font-semibold" style="color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.5px;">Profil Administrator Utama</div>
-                <h3 id="admin-profile-name" style="font-size: 1.25rem; font-weight: 800; margin: 2px 0;">Administrator</h3>
-                <div id="admin-profile-email" class="text-xs" style="color: #dbeafe; margin-bottom: 10px;">-</div>
+                <h3 id="admin-profile-name" style="font-size: 1.3rem; font-weight: 800; margin: 2px 0;">Administrator</h3>
+                <div id="admin-profile-email" class="text-xs" style="color: #dbeafe; margin-bottom: 12px;">-</div>
                 <div class="flex gap-2" style="flex-wrap: wrap;">
                   <label for="upload-profile-photo-admin" class="btn btn-sm" style="background: #fff; color: var(--primary-dark); cursor: pointer;">
                     <i data-lucide="camera" width="14"></i> Unggah / Ganti Foto Admin
@@ -1909,6 +2146,7 @@
       logoKiriBase64: '',
       logoKananBase64: '',
       profilePhotoBase64: '',
+      heroCoverBase64: '',
       kelas: 'Kelas I (Satu)',
       tahunAjaran: '2026 / 2027',
       kota: 'Jember',
@@ -2038,7 +2276,7 @@
       return activeTargetUid || (currentUser ? currentUser.uid : null);
     }
 
-    function compressImageToBase64(file, maxDim = 320, quality = 0.85) {
+    function compressImageToBase64(file, maxDim = 480, quality = 0.88) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
@@ -2062,7 +2300,7 @@
             canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/png', quality));
+            resolve(canvas.toDataURL('image/jpeg', quality));
           };
           img.src = ev.target.result;
         };
@@ -2192,7 +2430,6 @@
         activeTargetUid = user.uid;
       }
 
-      // Langsung tampilkan layar utama agar tidak pernah tertahan di layar login
       document.getElementById('auth-section').classList.add('hidden');
       document.getElementById('app-section').classList.remove('hidden');
 
@@ -2207,7 +2444,6 @@
         else adminNav.classList.add('hidden');
       }
 
-      // Set tanggal & bulan default pada kontrol filter
       const today = getTodayISO();
       const monthNow = getCurrentMonthISO();
       const absenDateEl = document.getElementById('absen-date-picker');
@@ -2229,7 +2465,6 @@
       refreshIcons();
     }
 
-    // Cek hasil redirect Google jika ada
     getRedirectResult(auth)
       .then((res) => {
         if (res && res.user) {
@@ -2277,7 +2512,6 @@
       document.getElementById('topbar-title').textContent = meta.title;
       document.getElementById('topbar-subtitle').textContent = meta.sub;
 
-      // Tutup sidebar mobile jika terbuka
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebar-overlay').classList.remove('open');
 
@@ -2288,7 +2522,7 @@
     }
 
     // =====================================================================
-    // SETTINGS, PROFILE PHOTO & GLOBAL ADMIN WELCOME
+    // SETTINGS, PROFILE PHOTO, HERO COVER & GLOBAL ADMIN WELCOME
     // =====================================================================
     async function loadGlobalAdminWelcome() {
       try {
@@ -2352,12 +2586,10 @@
     }
 
     function applySettingsToUI() {
-      // Sidebar & Topbar
       document.getElementById('sidebar-school-name').textContent = appSettings.sekolah || 'E-Admin Kelas';
       document.getElementById('sidebar-class-name').textContent = appSettings.kelas || 'Wali Kelas Digital';
       document.getElementById('badge-ta').textContent = `TA: ${appSettings.tahunAjaran || '-'}`;
 
-      // Dashboard Summary Table
       document.getElementById('dash-sekolah').textContent = appSettings.sekolah || '-';
       document.getElementById('dash-kelas-ta').textContent = `${appSettings.kelas || '-'} / ${appSettings.tahunAjaran || '-'}`;
       document.getElementById('dash-ks-label').textContent = appSettings.jabatanKS || 'Kepala Sekolah';
@@ -2365,28 +2597,49 @@
       document.getElementById('dash-guru-label').textContent = appSettings.jabatanGuru || 'Guru / Wali Kelas';
       document.getElementById('dash-guru').textContent = `${appSettings.namaGuru || '-'} (NIP. ${appSettings.nipGuru || '-'})`;
 
-      // Dashboard Hero Banner & Sapaan Admin
-      const displayName = appSettings.namaGuru || (currentUser ? currentUser.displayName : '') || 'Guru';
+      // Hero Banner Content & Two-tone Highlight
+      const displayName = appSettings.namaGuru || (currentUser ? currentUser.displayName : '') || 'Bapak/Ibu Guru';
       const initials = getInitials(displayName);
       const roleBadge = document.getElementById('hero-role-badge');
       if (roleBadge) {
         if (isAdminUser && getTargetUid() !== currentUser.uid) {
-          roleBadge.textContent = `Mode Tinjau Admin — Kelas ${appSettings.kelas || ''}`;
+          roleBadge.textContent = `Mode Tinjau Admin • ${appSettings.sekolah || ''} (${appSettings.kelas || ''})`;
         } else if (isAdminUser) {
-          roleBadge.textContent = 'Portal Administrator & Wali Kelas';
+          roleBadge.textContent = `Portal Administrator & Wali Kelas • ${appSettings.sekolah || ''}`;
         } else {
-          roleBadge.textContent = `Portal ${appSettings.jabatanGuru || 'Guru Kelas'} • ${appSettings.kelas || ''}`;
+          roleBadge.textContent = `Selamat Datang di ${appSettings.sekolah || 'Portal Kelas'} • ${appSettings.kelas || ''}`;
         }
       }
 
       const tpl = globalWelcomeConfig.welcomeTemplate || 'Selamat Datang, Bapak/Ibu {nama}';
       const formattedWelcome = tpl.replace(/\{nama\}/gi, displayName);
-      document.getElementById('hero-welcome-title').textContent = formattedWelcome;
+      const commaIdx = formattedWelcome.indexOf(',');
+      const titleEl = document.getElementById('hero-welcome-title');
+      if (commaIdx !== -1 && commaIdx < formattedWelcome.length - 1) {
+        const part1 = formattedWelcome.substring(0, commaIdx + 1);
+        const part2 = formattedWelcome.substring(commaIdx + 1);
+        titleEl.innerHTML = `${escapeHtml(part1)} <span class="hero-title-accent">${escapeHtml(part2)}</span>`;
+      } else {
+        titleEl.textContent = formattedWelcome;
+      }
+
       document.getElementById('hero-school-info').textContent =
         globalWelcomeConfig.welcomeSubtext ||
         `${appSettings.sekolah || ''} • ${appSettings.kelas || ''} • Tahun Ajaran ${appSettings.tahunAjaran || ''}`;
 
-      // Foto Profil (Dashboard, Topbar & Form Pengaturan)
+      // Optional Cover Background Photo
+      const coverBgEl = document.getElementById('hero-cover-bg-img');
+      if (coverBgEl) {
+        if (appSettings.heroCoverBase64) {
+          coverBgEl.src = appSettings.heroCoverBase64;
+          coverBgEl.classList.remove('hidden');
+        } else {
+          coverBgEl.src = '';
+          coverBgEl.classList.add('hidden');
+        }
+      }
+
+      // Foto Profil (Dashboard Portrait, Topbar & Pengaturan)
       const photoSrc = appSettings.profilePhotoBase64 || '';
       const heroImg = document.getElementById('hero-profile-img');
       const heroPlaceholder = document.getElementById('hero-profile-placeholder');
@@ -2432,7 +2685,7 @@
         }
       }
 
-      // Foto Profil Khusus Kartu Panel Admin (selalu memakai foto milik akun Admin sendiri)
+      // Foto Profil Khusus Kartu Panel Admin
       const adminImg = document.getElementById('admin-profile-img');
       const adminPlaceholder = document.getElementById('admin-profile-placeholder');
       const adminInitials = document.getElementById('admin-profile-initials');
@@ -2495,7 +2748,7 @@
 
       try {
         showToast('Memproses & menyimpan foto profil...', 'success');
-        const base64 = await compressImageToBase64(file, 320, 0.88);
+        const base64 = await compressImageToBase64(file, 480, 0.9);
         if (saveUid === currentUser.uid) {
           adminOwnProfilePhoto = base64;
         }
@@ -2526,6 +2779,39 @@
         showToast('Foto profil dihapus.');
       } catch (err) {
         showToast('Gagal menghapus foto: ' + err.message, 'error');
+      }
+    }
+
+    async function handleHeroCoverUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        showToast('Memproses foto latar sekolah...', 'success');
+        const base64 = await compressImageToBase64(file, 960, 0.82);
+        const uid = getTargetUid();
+        appSettings.heroCoverBase64 = base64;
+        await setDoc(doc(db, 'users', uid), {
+          heroCoverBase64: base64,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        applySettingsToUI();
+        showToast('Latar gedung sekolah pada banner berhasil diperbarui!');
+      } catch (err) {
+        showToast('Gagal memproses foto latar: ' + err.message, 'error');
+      } finally {
+        e.target.value = '';
+      }
+    }
+
+    async function clearHeroCover() {
+      try {
+        const uid = getTargetUid();
+        appSettings.heroCoverBase64 = '';
+        await setDoc(doc(db, 'users', uid), { heroCoverBase64: '' }, { merge: true });
+        applySettingsToUI();
+        showToast('Foto latar sekolah dihapus.');
+      } catch (err) {
+        showToast('Gagal menghapus latar: ' + err.message, 'error');
       }
     }
 
@@ -3492,6 +3778,89 @@
     }
 
     // =====================================================================
+    // BACKUP & RESTORE JSON
+    // =====================================================================
+    async function backupAllData() {
+      try {
+        const uid = getTargetUid();
+        const [attSnap, grdSnap] = await Promise.all([
+          getDocs(collection(db, 'users', uid, 'attendance')),
+          getDocs(collection(db, 'users', uid, 'grades'))
+        ]);
+
+        const backupPayload = {
+          exportedAt: new Date().toISOString(),
+          settings: appSettings,
+          students: studentsList,
+          attendance: attSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+          grades: grdSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+          journals: journalsList,
+          materials: materialsList
+        };
+
+        const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Backup_EAdmin_${(appSettings.sekolah || 'Kelas').replace(/\s+/g, '_')}_${getTodayISO()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('Backup data JSON berhasil diunduh!');
+      } catch (err) {
+        showToast('Gagal membuat backup: ' + err.message, 'error');
+      }
+    }
+
+    async function restoreAllData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const ok = await showConfirmModal(
+        'Pulihkan Data Cadangan',
+        'Data dari file JSON akan digabungkan/dipulihkan ke akun kelas ini. Lanjutkan?'
+      );
+      if (!ok) {
+        e.target.value = '';
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const uid = getTargetUid();
+
+        if (parsed.settings) {
+          appSettings = { ...appSettings, ...parsed.settings };
+          await setDoc(doc(db, 'users', uid), appSettings, { merge: true });
+        }
+
+        const writeItems = async (colName, items) => {
+          if (!Array.isArray(items)) return;
+          for (const item of items) {
+            const { id, ...rest } = item;
+            if (id) await setDoc(doc(db, 'users', uid, colName, id), rest, { merge: true });
+            else await addDoc(collection(db, 'users', uid, colName), rest);
+          }
+        };
+
+        await writeItems('students', parsed.students);
+        await writeItems('attendance', parsed.attendance);
+        await writeItems('grades', parsed.grades);
+        await writeItems('journals', parsed.journals);
+        await writeItems('materials', parsed.materials);
+
+        applySettingsToUI();
+        await loadAllUserWorkspaceData();
+        showToast('Data cadangan berhasil dipulihkan sepenuhnya!');
+      } catch (err) {
+        showToast('File JSON tidak valid atau gagal dipulihkan: ' + err.message, 'error');
+      } finally {
+        e.target.value = '';
+      }
+    }
+
+    // =====================================================================
     // MODULE 8: PANEL ADMIN (KELOLA SEMUA AKUN & DATA YANG MASUK)
     // =====================================================================
     function renderAdminUsersTable() {
@@ -3589,116 +3958,6 @@
       }
     }
 
-    async function restoreAllData(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const ok = await showConfirmModal(
-        'Pulihkan Data Cadangan',
-        'Data dari file JSON akan digabungkan/dipulihkan ke akun kelas ini. Lanjutkan?'
-      );
-      if (!ok) {
-        e.target.value = '';
-        return;
-      }
-
-      try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        const uid = getTargetUid();
-
-        if (parsed.settings) {
-          appSettings = { ...appSettings, ...parsed.settings };
-          await setDoc(doc(db, 'users', uid), appSettings, { merge: true });
-        }
-
-        const writeItems = async (colName, items) => {
-          if (!Array.isArray(items)) return;
-          for (const item of items) {
-            const { id, ...rest } = item;
-            if (id) await setDoc(doc(db, 'users', uid, colName, id), rest, { merge: true });
-            else await addDoc(collection(db, 'users', uid, colName), rest);
-          }
-        };
-
-        await writeItems('students', parsed.students);
-        await writeItems('attendance', parsed.attendance);
-        await writeItems('grades', parsed.grades);
-        await writeItems('journals', parsed.journals);
-        await writeItems('materials', parsed.materials);
-
-        applySettingsToUI();
-        await loadAllUserWorkspaceData();
-        showToast('Data cadangan berhasil dipulihkan sepenuhnya!');
-      } catch (err) {
-        showToast('File JSON tidak valid atau gagal dipulihkan: ' + err.message, 'error');
-      } finally {
-        e.target.value = '';
-      }
-    }
-
-    // =====================================================================
-    // MODULE 8: PANEL ADMIN (KELOLA SEMUA AKUN GURU)
-    // =====================================================================
-    async function loadAllAdminUsers() {
-      if (!isAdminUser) return;
-      const tbody = document.getElementById('admin-users-tbody');
-      if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Memuat seluruh data akun kelas...</td></tr>`;
-
-      try {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const rowsData = await Promise.all(
-          usersSnap.docs.map(async (uDoc) => {
-            const uData = uDoc.data();
-            const [sSnap, jSnap, mSnap] = await Promise.all([
-              getDocs(collection(db, 'users', uDoc.id, 'students')),
-              getDocs(collection(db, 'users', uDoc.id, 'journals')),
-              getDocs(collection(db, 'users', uDoc.id, 'materials'))
-            ]);
-            return {
-              uid: uDoc.id,
-              ...uData,
-              stuCount: sSnap.size,
-              jurCount: jSnap.size,
-              matCount: mSnap.size
-            };
-          })
-        );
-
-        adminAllUsersList = rowsData;
-        if (!rowsData.length) {
-          tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Belum ada akun guru terdaftar.</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = rowsData.map((u, idx) => {
-          const isCurrentTarget = u.uid === getTargetUid();
-          return `
-            <tr style="${isCurrentTarget ? 'background: #eff6ff;' : ''}">
-              <td>${idx + 1}</td>
-              <td class="font-bold">${escapeHtml(u.sekolah || '-')}</td>
-              <td>${escapeHtml(u.kelas || '-')} <span class="text-xs text-muted">(${escapeHtml(u.tahunAjaran || '-')})</span></td>
-              <td class="font-semibold">${escapeHtml(u.namaGuru || '-')}</td>
-              <td>${escapeHtml(u.email || u.uid)}</td>
-              <td>${escapeHtml(u.namaKS || '-')}</td>
-              <td style="text-align: center; font-weight: 700;">${u.stuCount}</td>
-              <td style="text-align: center; font-weight: 700;">${u.jurCount}</td>
-              <td style="text-align: center; font-weight: 700;">${u.matCount}</td>
-              <td>
-                <button type="button" class="btn ${isCurrentTarget ? 'btn-success' : 'btn-primary'} btn-sm" data-admin-uid="${u.uid}">
-                  <i data-lucide="folder-open" width="14"></i>
-                  <span>${isCurrentTarget ? 'Sedang Dibuka' : 'Buka & Kelola'}</span>
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-        refreshIcons();
-      } catch (err) {
-        console.error('Error Panel Admin:', err);
-        tbody.innerHTML = `<tr><td colspan="10" class="empty-state" style="color: #dc2626;">Gagal memuat daftar akun: ${escapeHtml(err.message)}</td></tr>`;
-      }
-    }
-
     async function switchAdminTargetUser(targetUid) {
       if (!isAdminUser || !targetUid) return;
       activeTargetUid = targetUid;
@@ -3711,6 +3970,18 @@
     // =====================================================================
     // PRINT F4 ENGINE (PORTRAIT & LANDSCAPE UNTUK SEMUA MODUL)
     // =====================================================================
+    function triggerPrintF4(htmlContent, orientation = 'portrait') {
+      const styleEl = document.getElementById('dynamic-print-orientation');
+      if (styleEl) {
+        styleEl.textContent = orientation === 'landscape'
+          ? '@media print { @page { size: 330mm 215mm; margin: 10mm 12mm; } }'
+          : '@media print { @page { size: 215mm 330mm; margin: 10mm 12mm; } }';
+      }
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = htmlContent;
+      setTimeout(() => window.print(), 180);
+    }
+
     function buildKopHTML() {
       const logoKiri = appSettings.logoKiriBase64
         ? `<img src="${appSettings.logoKiriBase64}" class="print-kop-logo" alt="Logo Kiri" />`
@@ -3756,54 +4027,40 @@
       `;
     }
 
-    // 5. Cetak Semua Perangkat Ajar Berurutan F4 (No, Nama Perangkat Ajar, Materi, Jenis Dokumen, Link G Drive) + TTD KS & Guru
-    function printAllMaterialsF4(orientation = 'portrait') {
-      const rows = materialsList.map((m, idx) => {
-        const namaPerangkat = m.namaPerangkat || m.mapel || m.judul || '-';
-        const materiText = m.materi || m.judul || '-';
-        const qrContainer = document.getElementById(`qr-container-${m.id}`);
-        let qrImgHtml = '';
-        if (qrContainer) {
-          const img = qrContainer.querySelector('img');
-          const canvas = qrContainer.querySelector('canvas');
-          if (img && img.src) {
-            qrImgHtml = `<img src="${img.src}" alt="QR" style="width: 68px !important; height: 68px !important; margin: 4px auto 0; display: block;" />`;
-          } else if (canvas) {
-            qrImgHtml = `<img src="${canvas.toDataURL('image/png')}" alt="QR" style="width: 68px !important; height: 68px !important; margin: 4px auto 0; display: block;" />`;
-          }
-        }
-        return `
-          <tr>
-            <td style="font-weight: 700;">${idx + 1}</td>
-            <td class="text-left"><strong>${escapeHtml(namaPerangkat)}</strong></td>
-            <td class="text-left">${escapeHtml(materiText)}</td>
-            <td>${escapeHtml(m.jenis || 'Perangkat Ajar')}</td>
-            <td class="text-left" style="word-break: break-all; font-size: 8pt;">
-              <div>${escapeHtml(m.tautan || '-')}</div>
-              ${qrImgHtml}
-            </td>
-          </tr>
-        `;
-      }).join('');
+    // 1. Cetak Data Siswa F4
+    function printStudentsF4(orientation = 'portrait') {
+      const rows = studentsList.map((s, idx) => `
+        <tr>
+          <td>${escapeHtml(s.noUrut || idx + 1)}</td>
+          <td>${escapeHtml(s.noInduk || '-')}</td>
+          <td>${escapeHtml(s.nisn || '-')}</td>
+          <td class="text-left">${escapeHtml(s.nama)}</td>
+          <td>${escapeHtml(s.jk || '-')}</td>
+          <td class="text-left">${escapeHtml(s.tmpLahir || '')}${s.tglLahir ? ', ' + formatDateIndo(s.tglLahir) : ''}</td>
+          <td class="text-left">${escapeHtml(s.ortu || '-')}</td>
+        </tr>
+      `).join('');
 
       const html = `
         ${buildKopHTML()}
         <div class="print-doc-title">
-          DAFTAR PERANGKAT PEMBELAJARAN<br/>
+          DAFTAR PESERTA DIDIK<br/>
           ${escapeHtml(appSettings.kelas || '')} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
         </div>
         <table class="print-table">
           <thead>
             <tr>
               <th style="width: 32px;">No</th>
-              <th style="width: 22%;">Nama Perangkat Ajar</th>
-              <th style="width: 24%;">Materi</th>
-              <th style="width: 17%;">Jenis Dokumen</th>
-              <th>Link G Drive</th>
+              <th style="width: 75px;">No Induk</th>
+              <th style="width: 90px;">NISN</th>
+              <th>Nama Lengkap Siswa</th>
+              <th style="width: 35px;">L/P</th>
+              <th style="width: 22%;">Tempat, Tanggal Lahir</th>
+              <th style="width: 18%;">Nama Orang Tua</th>
             </tr>
           </thead>
           <tbody>
-            ${rows || '<tr><td colspan="5">Belum ada perangkat ajar yang ditambahkan.</td></tr>'}
+            ${rows || '<tr><td colspan="7">Belum ada data peserta didik.</td></tr>'}
           </tbody>
         </table>
         ${buildSignatureHTML()}
@@ -3977,9 +4234,11 @@
       triggerPrintF4(html, orientation);
     }
 
-    // 5. Cetak Semua Perangkat Ajar + Barcode Berurutan F4 (1 Tabel Terpadu)
+    // 5. Cetak Semua Perangkat Ajar + Barcode Berurutan F4
     function printAllMaterialsF4(orientation = 'portrait') {
       const rows = materialsList.map((m, idx) => {
+        const namaPerangkat = m.namaPerangkat || m.mapel || m.judul || '-';
+        const materiText = m.materi || m.judul || '-';
         const qrContainer = document.getElementById(`qr-container-${m.id}`);
         let qrImgHtml = '';
         if (qrContainer) {
@@ -3994,15 +4253,13 @@
         return `
           <tr>
             <td style="font-weight: 700;">${idx + 1}</td>
-            <td class="text-left">
-              <strong>${escapeHtml(m.mapel || '-')}</strong><br/>
-              <span style="font-size: 8pt;">(${escapeHtml(m.jenis || 'Perangkat Ajar')})</span>
+            <td class="text-left"><strong>${escapeHtml(namaPerangkat)}</strong></td>
+            <td class="text-left">${escapeHtml(materiText)}</td>
+            <td>${escapeHtml(m.jenis || 'Perangkat Ajar')}</td>
+            <td class="print-qr-cell" style="word-break: break-all; font-size: 8pt;">
+              <div>${escapeHtml(m.tautan || '-')}</div>
+              ${qrImgHtml}
             </td>
-            <td class="text-left">
-              <strong>${escapeHtml(m.materi || m.judul || '-')}</strong>
-              ${m.judul && m.materi ? `<br/><span style="font-size: 8pt;">${escapeHtml(m.judul)}</span>` : ''}
-            </td>
-            <td class="print-qr-cell">${qrImgHtml || escapeHtml(m.tautan || '-')}</td>
           </tr>
         `;
       }).join('');
@@ -4016,14 +4273,15 @@
         <table class="print-table">
           <thead>
             <tr>
-              <th style="width: 36px;">No</th>
-              <th style="width: 26%;">Mata Pelajaran</th>
-              <th>Materi</th>
-              <th style="width: 135px;">Barcode</th>
+              <th style="width: 32px;">No</th>
+              <th style="width: 22%;">Nama Perangkat Ajar</th>
+              <th style="width: 24%;">Materi</th>
+              <th style="width: 17%;">Jenis Dokumen</th>
+              <th>Link G Drive & Barcode</th>
             </tr>
           </thead>
           <tbody>
-            ${rows || '<tr><td colspan="4">Belum ada perangkat ajar yang ditambahkan.</td></tr>'}
+            ${rows || '<tr><td colspan="5">Belum ada perangkat ajar yang ditambahkan.</td></tr>'}
           </tbody>
         </table>
         ${buildSignatureHTML()}
@@ -4051,7 +4309,7 @@
         document.getElementById('sidebar-overlay').classList.remove('open');
       });
 
-      // Sidebar Navigation & Quick Action Buttons
+      // Sidebar Navigation & Quick Action / Glass Stat Cards
       document.querySelectorAll('.nav-item[data-menu]').forEach((btn) => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.menu));
       });
@@ -4059,11 +4317,15 @@
         btn.addEventListener('click', () => navigateTo(btn.dataset.navTarget));
       });
 
-      // Profile Photo Upload (Dashboard, Admin Panel & Pengaturan)
+      // Profile Photo & Hero Cover Upload
       onEl('upload-profile-photo-dash', 'change', handleProfilePhotoUpload);
       onEl('upload-profile-photo-admin', 'change', handleProfilePhotoUpload);
       onEl('upload-profile-photo', 'change', handleProfilePhotoUpload);
       onEl('clear-profile-photo', 'click', clearProfilePhoto);
+
+      onEl('upload-hero-cover-dash', 'change', handleHeroCoverUpload);
+      onEl('upload-hero-cover', 'change', handleHeroCoverUpload);
+      onEl('clear-hero-cover', 'click', clearHeroCover);
 
       // Admin Panel Actions
       onEl('btn-admin-back-own', 'click', async () => {
