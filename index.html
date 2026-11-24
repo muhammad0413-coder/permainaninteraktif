@@ -1917,6 +1917,43 @@
             </form>
           </div>
 
+          <!-- Aksi Cepat Admin: Tambah & Upload Data Siswa / Kelola Kelas Langsung di Panel Admin -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="user-plus" width="20" style="color: var(--primary);"></i>
+                <span>Aksi Cepat Admin — Tambah / Upload Siswa & Kelola Kelas</span>
+              </div>
+            </div>
+            <p class="text-sm text-muted mb-4">
+              Pilih sekolah/kelas tujuan di bawah ini untuk langsung menambahkan data siswa baru, mengunggah file Excel peserta didik, atau mengelola administrasi kelas tersebut secara langsung dari Panel Admin.
+            </p>
+            <div class="grid-2 items-end">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Pilih Akun Sekolah / Kelas Tujuan</label>
+                <select id="admin-target-user-select" class="form-control"></select>
+              </div>
+              <div class="flex gap-2" style="flex-wrap: wrap;">
+                <button type="button" id="btn-admin-add-student" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus" width="15"></i> Tambah Siswa
+                </button>
+                <label class="btn btn-success btn-sm" style="cursor: pointer;">
+                  <i data-lucide="upload" width="15"></i> Upload Excel Siswa
+                  <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
+                </label>
+                <button type="button" id="btn-admin-download-stu-tpl" class="btn btn-outline btn-sm">
+                  <i data-lucide="download" width="15"></i> Template Excel
+                </button>
+                <button type="button" id="btn-admin-open-students" class="btn btn-outline btn-sm">
+                  <i data-lucide="users" width="15"></i> Lihat Daftar Siswa
+                </button>
+                <button type="button" id="btn-admin-open-materials" class="btn btn-outline btn-sm">
+                  <i data-lucide="qr-code" width="15"></i> Kelola Perangkat
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Daftar Seluruh Akun Guru / Kelas -->
           <div class="card">
             <div class="card-header">
@@ -3021,6 +3058,9 @@
         closeStudentModal();
         await loadStudents();
         updateDashboardStats();
+        if (isAdminUser && !document.getElementById('view-admin').classList.contains('hidden')) {
+          await loadAllAdminUsers();
+        }
       } catch (err) {
         showToast('Gagal menyimpan data siswa: ' + err.message, 'error');
       }
@@ -3035,6 +3075,9 @@
         showToast('Data siswa dihapus.');
         await loadStudents();
         updateDashboardStats();
+        if (isAdminUser && !document.getElementById('view-admin').classList.contains('hidden')) {
+          await loadAllAdminUsers();
+        }
       } catch (err) {
         showToast('Gagal menghapus siswa: ' + err.message, 'error');
       }
@@ -3110,6 +3153,9 @@
         showToast(`${importedCount} data siswa berhasil diimpor!`);
         await loadStudents();
         updateDashboardStats();
+        if (isAdminUser && !document.getElementById('view-admin').classList.contains('hidden')) {
+          await loadAllAdminUsers();
+        }
       } catch (err) {
         showToast('Gagal mengimpor Excel: ' + err.message, 'error');
       } finally {
@@ -3906,6 +3952,16 @@
       refreshIcons();
     }
 
+    function populateAdminTargetSelect() {
+      const sel = document.getElementById('admin-target-user-select');
+      if (!sel) return;
+      const currentTarget = getTargetUid();
+      sel.innerHTML = adminAllUsersList.map((u) => {
+        const label = `${u.sekolah || 'Sekolah'} • ${u.kelas || 'Kelas'} — ${u.namaGuru || u.email || u.uid}`;
+        return `<option value="${escapeHtml(u.uid)}" ${u.uid === currentTarget ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+      }).join('');
+    }
+
     async function loadAllAdminUsers() {
       if (!isAdminUser) return;
       const tbody = document.getElementById('admin-users-tbody');
@@ -3951,6 +4007,7 @@
         if (statJurEl) statJurEl.textContent = sumJurGrd;
         if (statMatEl) statMatEl.textContent = sumMat;
 
+        populateAdminTargetSelect();
         renderAdminUsersTable();
       } catch (err) {
         console.error('Error Panel Admin:', err);
@@ -3958,13 +4015,19 @@
       }
     }
 
-    async function switchAdminTargetUser(targetUid) {
+    async function switchAdminTargetUser(targetUid, targetMenu = 'dashboard', silent = false) {
       if (!isAdminUser || !targetUid) return;
       activeTargetUid = targetUid;
       await loadSettings();
       await loadAllUserWorkspaceData();
-      navigateTo('dashboard');
-      showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetUid})`);
+      populateAdminTargetSelect();
+      renderAdminUsersTable();
+      if (targetMenu) {
+        navigateTo(targetMenu);
+      }
+      if (!silent) {
+        showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetUid})`);
+      }
     }
 
     // =====================================================================
@@ -4339,6 +4402,35 @@
       onEl('admin-welcome-form', 'submit', saveGlobalAdminWelcome);
       onEl('admin-search-input', 'input', renderAdminUsersTable);
       onEl('btn-reload-admin', 'click', loadAllAdminUsers);
+      onEl('admin-target-user-select', 'change', async (e) => {
+        const chosenUid = e.target.value;
+        if (chosenUid) {
+          await switchAdminTargetUser(chosenUid, null, false);
+        }
+      });
+      onEl('btn-admin-add-student', 'click', async () => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value;
+        if (chosenUid && chosenUid !== getTargetUid()) {
+          await switchAdminTargetUser(chosenUid, null, true);
+        }
+        openStudentModal();
+      });
+      onEl('admin-import-student-file', 'change', async (e) => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value;
+        if (chosenUid && chosenUid !== getTargetUid()) {
+          await switchAdminTargetUser(chosenUid, null, true);
+        }
+        await importStudentsExcel(e);
+      });
+      onEl('btn-admin-download-stu-tpl', 'click', downloadStudentTemplate);
+      onEl('btn-admin-open-students', 'click', async () => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
+        await switchAdminTargetUser(chosenUid, 'siswa', false);
+      });
+      onEl('btn-admin-open-materials', 'click', async () => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
+        await switchAdminTargetUser(chosenUid, 'perangkat', false);
+      });
       onEl('admin-users-tbody', 'click', (e) => {
         const btn = e.target.closest('[data-admin-uid]');
         if (btn) switchAdminTargetUser(btn.dataset.adminUid);
