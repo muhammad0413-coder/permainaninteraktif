@@ -2119,6 +2119,47 @@
   </div>
 
   <!-- =====================================================================
+       MODAL: WAJIB PILIH PERAN & KELAS (UNTUK GURU SELAIN ADMIN)
+       ===================================================================== -->
+  <div id="role-select-modal" class="modal-backdrop hidden" style="z-index: 120;">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="auth-brand-icon" style="width: 42px; height: 42px;">
+          <i data-lucide="school" width="22"></i>
+        </div>
+        <div>
+          <h3 class="font-bold" style="font-size: 1.1rem; color: #0f172a;">Pilih Kelas / Mapel Diampu</h3>
+          <p class="text-xs text-muted">Data siswa dari Admin akan langsung terhubung otomatis sesuai pilihan Anda</p>
+        </div>
+      </div>
+      <form id="role-select-form">
+        <div class="form-group">
+          <label class="form-label">Pilih Peran & Kelas Anda</label>
+          <select id="initial-role-kelas" class="form-control" required>
+            <option value="">-- Silakan Pilih Kelas / Guru Mapel --</option>
+            <option value="Kelas I (Satu)">Guru Kelas 1 — Kelas I (Satu)</option>
+            <option value="Kelas II (Dua)">Guru Kelas 2 — Kelas II (Dua)</option>
+            <option value="Kelas III (Tiga)">Guru Kelas 3 — Kelas III (Tiga)</option>
+            <option value="Kelas IV (Empat)">Guru Kelas 4 — Kelas IV (Empat)</option>
+            <option value="Kelas V (Lima)">Guru Kelas 5 — Kelas V (Lima)</option>
+            <option value="Kelas VI (Enam)">Guru Kelas 6 — Kelas VI (Enam)</option>
+            <option value="Guru PAI">Guru PAI (Semua Kelas 1–6)</option>
+            <option value="Guru PJOK">Guru PJOK (Semua Kelas 1–6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap & Gelar Guru</label>
+          <input type="text" id="initial-role-nama" class="form-control" placeholder="Contoh: Siti Aminah, S.Pd." required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 6px;">
+          <i data-lucide="check-circle" width="18"></i>
+          <span>Masuk & Muat Data Kelas</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
        SECTION 4: PRINT TEMPLATES CONTAINER (F4)
        ===================================================================== -->
   <div id="print-area"></div>
@@ -2198,6 +2239,45 @@
     let adminOwnProfilePhoto = '';
     let adminAllUsersList = [];
     let isRegisterMode = false;
+
+    let appSettings = {
+      kop1: 'PEMERINTAH KABUPATEN JEMBER',
+      kop2: 'DINAS PENDIDIKAN',
+      sekolah: 'SDN KESILIR 02',
+      kop3: 'Jl. Raya Pendidikan No. 10, Kesilir, Wuluhan, Jember',
+      kelas: '',
+      tahunAjaran: '2026 / 2027',
+      kota: 'Jember',
+      jabatanKS: 'Kepala Sekolah',
+      namaKS: '',
+      nipKS: '',
+      jabatanGuru: 'Guru Kelas',
+      namaGuru: '',
+      nipGuru: '',
+      logoKiriBase64: '',
+      logoKananBase64: '',
+      profilePhotoBase64: '',
+      heroCoverBase64: '',
+      roleConfigured: false
+    };
+
+    let globalWelcomeConfig = {
+      welcomeTemplate: 'Selamat Datang, Bapak/Ibu {nama}',
+      welcomeSubtext: 'Selamat bertugas mencerdaskan generasi bangsa. Pastikan administrasi kelas selalu terbarui.'
+    };
+
+    let studentsList = [];
+    let attendanceData = { records: {}, notes: {} };
+    let gradesData = { scores: {} };
+    let journalsList = [];
+    let materialsList = [];
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
     function isMapelTeacherMode() {
       const roleVal = String(appSettings.kelas || '').toLowerCase();
       return roleVal.includes('pjok') || roleVal.includes('pai');
@@ -2565,6 +2645,12 @@
 
       await loadGlobalAdminWelcome();
       await loadSettings(fallbackName);
+
+      // Wajib pilih kelas/mapel bagi akun guru selain Admin jika belum memilih
+      if (!isAdminUser && (!appSettings.roleConfigured || !appSettings.kelas)) {
+        openInitialRoleModal();
+      }
+
       await loadAllUserWorkspaceData();
       if (isAdminUser) {
         await loadAllAdminUsers();
@@ -2572,97 +2658,68 @@
       refreshIcons();
     }
 
-    getRedirectResult(auth)
-      .then((res) => {
-        if (res && res.user) {
-          showToast('Berhasil masuk dengan akun Google!');
-          enterMainApp(res.user);
-        }
-      })
-      .catch((err) => {
-        console.warn('Redirect auth info:', err);
-      });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        enterMainApp(user);
-      } else {
-        document.getElementById('app-section').classList.add('hidden');
-        document.getElementById('auth-section').classList.remove('hidden');
+    function openInitialRoleModal() {
+      const modal = document.getElementById('role-select-modal');
+      const namaInput = document.getElementById('initial-role-nama');
+      const kelasSelect = document.getElementById('initial-role-kelas');
+      if (!modal) return;
+      if (namaInput) {
+        namaInput.value = appSettings.namaGuru || (currentUser ? currentUser.displayName : '') || '';
       }
-    });
-
-    // =====================================================================
-    // NAVIGATION & SIDEBAR
-    // =====================================================================
-    const MENU_META = {
-      dashboard: { title: 'Dashboard Administrasi', sub: 'Ringkasan data kelas & statistik kehadiran realtime' },
-      siswa: { title: 'Database Peserta Didik', sub: 'Kelola biodata siswa, impor/ekspor Excel & cetak F4' },
-      absen: { title: 'Absensi Harian & Rekap Bulanan', sub: 'Pencatatan kehadiran harian & matriks rekap 1–31 F4' },
-      nilai: { title: 'Daftar Nilai Kurikulum Merdeka', sub: 'Penilaian Formatif TP, Sumatif Lingkup Materi & SAS' },
-      jurnal: { title: 'Jurnal Mengajar Harian', sub: 'Catatan pelaksanaan pembelajaran harian & refleksi kelas' },
-      perangkat: { title: 'Perangkat Ajar & Barcode QR', sub: 'Kelola tautan modul ajar dengan kode QR & cetak berurutan F4' },
-      pengaturan: { title: 'Pengaturan Kelas & Kop Surat', sub: 'Identitas sekolah, kepala sekolah, wali kelas, foto & backup data' },
-      admin: { title: 'Panel Administrator Utama', sub: 'Kelola sapaan guru & pantau seluruh data kelas terdaftar' }
-    };
-
-    function navigateTo(menuKey) {
-      document.querySelectorAll('.module-view').forEach((sec) => sec.classList.add('hidden'));
-      const targetView = document.getElementById(`view-${menuKey}`);
-      if (targetView) targetView.classList.remove('hidden');
-
-      document.querySelectorAll('.nav-item').forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.menu === menuKey);
-      });
-
-      const meta = MENU_META[menuKey] || MENU_META.dashboard;
-      document.getElementById('topbar-title').textContent = meta.title;
-      document.getElementById('topbar-subtitle').textContent = meta.sub;
-
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebar-overlay').classList.remove('open');
-
-      if (menuKey === 'admin' && isAdminUser) {
-        loadAllAdminUsers();
+      if (kelasSelect && appSettings.kelas) {
+        kelasSelect.value = appSettings.kelas;
       }
+      modal.classList.remove('hidden');
       refreshIcons();
     }
 
-    // =====================================================================
-    // SETTINGS, PROFILE PHOTO, HERO COVER & GLOBAL ADMIN WELCOME
-    // =====================================================================
-    async function loadGlobalAdminWelcome() {
-      try {
-        const snap = await getDoc(doc(db, 'system_config', 'welcome_banner'));
-        if (snap.exists()) {
-          globalWelcomeConfig = { ...globalWelcomeConfig, ...snap.data() };
-        }
-      } catch (err) {
-        console.warn('Memakai teks sapaan default:', err);
-      }
-      const tplInput = document.getElementById('admin-welcome-tpl');
-      const subInput = document.getElementById('admin-welcome-sub');
-      if (tplInput) tplInput.value = globalWelcomeConfig.welcomeTemplate;
-      if (subInput) subInput.value = globalWelcomeConfig.welcomeSubtext;
-    }
-
-    async function saveGlobalAdminWelcome(e) {
+    async function handleInitialRoleSubmit(e) {
       e.preventDefault();
-      if (!isAdminUser) return;
-      const welcomeTemplate = document.getElementById('admin-welcome-tpl').value.trim();
-      const welcomeSubtext = document.getElementById('admin-welcome-sub').value.trim();
+      if (!currentUser) return;
+      const chosenRole = document.getElementById('initial-role-kelas').value;
+      const chosenNama = document.getElementById('initial-role-nama').value.trim();
+      if (!chosenRole) {
+        showToast('Silakan pilih Kelas atau Guru Mapel terlebih dahulu.', 'error');
+        return;
+      }
+
+      appSettings.kelas = chosenRole;
+      appSettings.namaGuru = chosenNama;
+      appSettings.roleConfigured = true;
+
+      const lower = chosenRole.toLowerCase();
+      let savedKelasId = '';
+      if (lower.includes('pjok')) {
+        appSettings.jabatanGuru = 'Guru PJOK';
+        savedKelasId = 'guru_pjok';
+        const subjEl = document.getElementById('grade-subject');
+        if (subjEl) subjEl.value = 'PJOK';
+      } else if (lower.includes('pai')) {
+        appSettings.jabatanGuru = 'Guru PAI';
+        savedKelasId = 'guru_pai';
+        const subjEl = document.getElementById('grade-subject');
+        if (subjEl) subjEl.value = 'Pendidikan Agama';
+      } else {
+        const stdKelas = getStandardClassInfo(chosenRole);
+        appSettings.kelas = stdKelas.label;
+        appSettings.jabatanGuru = 'Guru Kelas';
+        savedKelasId = stdKelas.id;
+      }
+
       try {
-        await setDoc(doc(db, 'system_config', 'welcome_banner'), {
-          welcomeTemplate,
-          welcomeSubtext,
-          updatedBy: currentUser.email,
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          ...appSettings,
+          kelasId: savedKelasId,
+          email: currentUser.email || '',
           updatedAt: new Date().toISOString()
         }, { merge: true });
-        globalWelcomeConfig = { welcomeTemplate, welcomeSubtext };
+
+        document.getElementById('role-select-modal').classList.add('hidden');
         applySettingsToUI();
-        showToast('Pengaturan kalimat "Selamat Datang" guru berhasil disimpan!');
+        await loadAllUserWorkspaceData();
+        showToast(`Selamat datang! Data ${getActiveClassDisplayLabel()} berhasil dimuat otomatis.`);
       } catch (err) {
-        showToast('Gagal menyimpan sapaan: ' + err.message, 'error');
+        showToast('Gagal menyimpan pilihan kelas: ' + err.message, 'error');
       }
     }
 
@@ -3008,6 +3065,7 @@
         }
         await setDoc(doc(db, 'users', uid), {
           ...appSettings,
+          roleConfigured: true,
           kelasId: savedKelasId,
           updatedAt: new Date().toISOString()
         }, { merge: true });
@@ -4763,7 +4821,7 @@
       onEl('auth-form', 'submit', handleAuthSubmit);
       onEl('auth-switch-btn', 'click', toggleAuthMode);
       onEl('logout-btn', 'click', handleLogout);
-
+      onEl('role-select-form', 'submit', handleInitialRoleSubmit);
       // Mobile Sidebar Toggle
       onEl('mobile-menu-btn', 'click', () => {
         document.getElementById('sidebar').classList.add('open');
