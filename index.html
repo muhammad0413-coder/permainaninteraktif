@@ -1786,14 +1786,16 @@
                 </div>
                 <div class="grid-2">
                   <div class="form-group">
-                    <label class="form-label">Nama Kelas / Rombel</label>
+                    <label class="form-label">Peran & Kelas / Mapel Diampu</label>
                     <select id="set-kelas" class="form-control" required>
-                      <option value="Kelas I (Satu)">Kelas 1 — Kelas I (Satu)</option>
-                      <option value="Kelas II (Dua)">Kelas 2 — Kelas II (Dua)</option>
-                      <option value="Kelas III (Tiga)">Kelas 3 — Kelas III (Tiga)</option>
-                      <option value="Kelas IV (Empat)">Kelas 4 — Kelas IV (Empat)</option>
-                      <option value="Kelas V (Lima)">Kelas 5 — Kelas V (Lima)</option>
-                      <option value="Kelas VI (Enam)">Kelas 6 — Kelas VI (Enam)</option>
+                      <option value="Kelas I (Satu)">Guru Kelas 1 — Kelas I (Satu)</option>
+                      <option value="Kelas II (Dua)">Guru Kelas 2 — Kelas II (Dua)</option>
+                      <option value="Kelas III (Tiga)">Guru Kelas 3 — Kelas III (Tiga)</option>
+                      <option value="Kelas IV (Empat)">Guru Kelas 4 — Kelas IV (Empat)</option>
+                      <option value="Kelas V (Lima)">Guru Kelas 5 — Kelas V (Lima)</option>
+                      <option value="Kelas VI (Enam)">Guru Kelas 6 — Kelas VI (Enam)</option>
+                      <option value="Guru PJOK">Guru PJOK (Semua Kelas 1–6)</option>
+                      <option value="Guru PAI">Guru PAI (Semua Kelas 1–6)</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -2192,47 +2194,94 @@
     let isAdminUser = false;
     let activeTargetUid = null;
     let activeMasterClassFilter = '';
+    let mapelActiveClassId = 'kelas_1';
     let adminOwnProfilePhoto = '';
     let adminAllUsersList = [];
     let isRegisterMode = false;
+    function isMapelTeacherMode() {
+      const roleVal = String(appSettings.kelas || '').toLowerCase();
+      return roleVal.includes('pjok') || roleVal.includes('pai');
+    }
 
-    let appSettings = {
-      kop1: 'PEMERINTAH KABUPATEN JEMBER',
-      kop2: 'DINAS PENDIDIKAN',
-      sekolah: 'SDN KESILIR 02',
-      kop3: 'Jl. Raya Pendidikan No. 10, Kec. Wuluhan, Kab. Jember',
-      logoKiriBase64: '',
-      logoKananBase64: '',
-      profilePhotoBase64: '',
-      heroCoverBase64: '',
-      kelas: 'Kelas I (Satu)',
-      tahunAjaran: '2026 / 2027',
-      kota: 'Jember',
-      jabatanKS: 'Kepala Sekolah',
-      namaKS: 'Abdullah Mahsar, S.Pd.',
-      nipKS: '198306012014121000',
-      jabatanGuru: 'Guru Kelas',
-      namaGuru: '',
-      nipGuru: ''
-    };
+    function getStandardClassInfo(kelasStr) {
+      const raw = String(kelasStr || '').trim();
+      const lower = raw.toLowerCase();
+      if (lower.includes('pjok')) {
+        return STANDARD_CLASSES.find(c => c.id === mapelActiveClassId) || STANDARD_CLASSES[0];
+      }
+      if (lower.includes('pai')) {
+        return STANDARD_CLASSES.find(c => c.id === mapelActiveClassId) || STANDARD_CLASSES[0];
+      }
+      const norm = normalizeKelasKey(raw);
+      for (const cls of STANDARD_CLASSES) {
+        if (norm.includes(cls.num)) return cls;
+      }
+      return STANDARD_CLASSES[0];
+    }
 
-    let globalWelcomeConfig = {
-      welcomeTemplate: 'Selamat Datang, Bapak/Ibu {nama}',
-      welcomeSubtext: 'Selamat bertugas mencerdaskan generasi bangsa. Pastikan seluruh administrasi kelas selalu terbarui dan siap cetak F4.'
-    };
+    function getActiveClassDocId() {
+      if (isAdminUser && activeMasterClassFilter && currentUser && getTargetUid() === currentUser.uid) {
+        return activeMasterClassFilter;
+      }
+      if (isMapelTeacherMode()) {
+        return mapelActiveClassId || 'kelas_1';
+      }
+      return getStandardClassInfo(appSettings.kelas).id;
+    }
 
-    let studentsList = [];
-    let attendanceData = { records: {}, notes: {} };
-    let gradesData = { scores: {} };
-    let journalsList = [];
-    let materialsList = [];
+    function getActiveClassDisplayLabel() {
+      const clsInfo = STANDARD_CLASSES.find(c => c.id === getActiveClassDocId()) || STANDARD_CLASSES[0];
+      if (isMapelTeacherMode()) {
+        return `${appSettings.kelas} • ${clsInfo.label}`;
+      }
+      return appSettings.kelas || clsInfo.label;
+    }
 
-    // =====================================================================
-    // HELPERS: TOAST, MODAL KONFIRMASI, ICON, FORMAT TANGGAL, INISIAL
-    // =====================================================================
-    function refreshIcons() {
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.lucide.createIcons();
+    function ensureMapelClassBars() {
+      const configs = [
+        { viewId: 'view-siswa', barId: 'mapel-bar-siswa' },
+        { viewId: 'view-absen', barId: 'mapel-bar-absen' },
+        { viewId: 'view-nilai', barId: 'mapel-bar-nilai' }
+      ];
+      configs.forEach(({ viewId, barId }) => {
+        const viewEl = document.getElementById(viewId);
+        if (!viewEl) return;
+        let bar = document.getElementById(barId);
+        if (!bar) {
+          bar = document.createElement('div');
+          bar.id = barId;
+          bar.className = 'card hidden';
+          bar.style.cssText = 'border: 2px solid #93c5fd; background: #eff6ff; padding: 14px 18px; margin-bottom: 16px;';
+          viewEl.insertBefore(bar, viewEl.firstChild);
+        }
+        if (isMapelTeacherMode()) {
+          bar.classList.remove('hidden');
+          const buttonsHtml = STANDARD_CLASSES.map((cls) => {
+            const active = mapelActiveClassId === cls.id;
+            return `<button type="button" class="btn ${active ? 'btn-primary' : 'btn-outline'} btn-sm" data-mapel-class="${cls.id}">${cls.shortLabel}</button>`;
+          }).join('');
+          bar.innerHTML = `
+            <div class="flex items-center justify-between gap-3" style="flex-wrap: wrap;">
+              <div>
+                <div class="font-bold text-sm" style="color: #1e3a8a;">Mode ${escapeHtml(appSettings.kelas)} — Pilih Kelas (Satu per Satu)</div>
+                <div class="text-xs text-muted">Data siswa bersumber langsung dari Admin / Wali Kelas (Hanya Lihat — tidak dapat mengubah/menambah siswa).</div>
+              </div>
+              <div class="flex gap-2" style="flex-wrap: wrap;">${buttonsHtml}</div>
+            </div>
+          `;
+        } else {
+          bar.classList.add('hidden');
+        }
+      });
+
+      const readOnlyStudents = isMapelTeacherMode();
+      ['btn-add-stu', 'btn-download-stu-tpl'].forEach((btnId) => {
+        const el = document.getElementById(btnId);
+        if (el) el.classList.toggle('hidden', readOnlyStudents);
+      });
+      const impInput = document.getElementById('import-student-file');
+      if (impInput && impInput.parentElement) {
+        impInput.parentElement.classList.toggle('hidden', readOnlyStudents);
       }
     }
 
@@ -2332,22 +2381,6 @@
 
     function getTargetUid() {
       return activeTargetUid || (currentUser ? currentUser.uid : null);
-    }
-
-    function getStandardClassInfo(kelasStr) {
-      const raw = String(kelasStr || '').trim();
-      const norm = normalizeKelasKey(raw);
-      for (const cls of STANDARD_CLASSES) {
-        if (norm.includes(cls.num)) return cls;
-      }
-      return STANDARD_CLASSES[0];
-    }
-
-    function getActiveClassDocId() {
-      if (isAdminUser && activeMasterClassFilter && currentUser && getTargetUid() === currentUser.uid) {
-        return activeMasterClassFilter;
-      }
-      return getStandardClassInfo(appSettings.kelas).id;
     }
 
     function compressImageToBase64(file, maxDim = 480, quality = 0.88) {
@@ -2660,12 +2693,13 @@
     }
 
     function applySettingsToUI() {
+      const activeKelasText = getActiveClassDisplayLabel();
       document.getElementById('sidebar-school-name').textContent = appSettings.sekolah || 'E-Admin Kelas';
-      document.getElementById('sidebar-class-name').textContent = appSettings.kelas || 'Wali Kelas Digital';
+      document.getElementById('sidebar-class-name').textContent = activeKelasText;
       document.getElementById('badge-ta').textContent = `TA: ${appSettings.tahunAjaran || '-'}`;
 
       document.getElementById('dash-sekolah').textContent = appSettings.sekolah || '-';
-      document.getElementById('dash-kelas-ta').textContent = `${appSettings.kelas || '-'} / ${appSettings.tahunAjaran || '-'}`;
+      document.getElementById('dash-kelas-ta').textContent = `${activeKelasText} / ${appSettings.tahunAjaran || '-'}`;
       document.getElementById('dash-ks-label').textContent = appSettings.jabatanKS || 'Kepala Sekolah';
       document.getElementById('dash-ks').textContent = `${appSettings.namaKS || '-'} (NIP. ${appSettings.nipKS || '-'})`;
       document.getElementById('dash-guru-label').textContent = appSettings.jabatanGuru || 'Guru / Wali Kelas';
@@ -2677,11 +2711,11 @@
       const roleBadge = document.getElementById('hero-role-badge');
       if (roleBadge) {
         if (isAdminUser && getTargetUid() !== currentUser.uid) {
-          roleBadge.textContent = `Mode Tinjau Admin • ${appSettings.sekolah || ''} (${appSettings.kelas || ''})`;
+          roleBadge.textContent = `Mode Tinjau Admin • ${appSettings.sekolah || ''} (${activeKelasText})`;
         } else if (isAdminUser) {
           roleBadge.textContent = `Portal Administrator & Wali Kelas • ${appSettings.sekolah || ''}`;
         } else {
-          roleBadge.textContent = `Selamat Datang di ${appSettings.sekolah || 'Portal Kelas'} • ${appSettings.kelas || ''}`;
+          roleBadge.textContent = `Selamat Datang di ${appSettings.sekolah || 'Portal Kelas'} • ${activeKelasText}`;
         }
       }
 
@@ -2792,9 +2826,18 @@
       document.getElementById('set-kop2').value = appSettings.kop2 || '';
       document.getElementById('set-sekolah').value = appSettings.sekolah || '';
       document.getElementById('set-kop3').value = appSettings.kop3 || '';
-      const stdKelas = getStandardClassInfo(appSettings.kelas);
-      appSettings.kelas = stdKelas.label;
-      document.getElementById('set-kelas').value = stdKelas.label;
+      const rawKelas = String(appSettings.kelas || '');
+      if (rawKelas.toLowerCase().includes('pjok')) {
+        appSettings.kelas = 'Guru PJOK';
+        document.getElementById('set-kelas').value = 'Guru PJOK';
+      } else if (rawKelas.toLowerCase().includes('pai')) {
+        appSettings.kelas = 'Guru PAI';
+        document.getElementById('set-kelas').value = 'Guru PAI';
+      } else {
+        const stdKelas = getStandardClassInfo(appSettings.kelas);
+        appSettings.kelas = stdKelas.label;
+        document.getElementById('set-kelas').value = stdKelas.label;
+      }
       document.getElementById('set-ta').value = appSettings.tahunAjaran || '';
       document.getElementById('set-kota').value = appSettings.kota || '';
       document.getElementById('set-ks-jabatan').value = appSettings.jabatanKS || '';
@@ -2804,19 +2847,25 @@
       document.getElementById('set-guru-nama').value = appSettings.namaGuru || '';
       document.getElementById('set-guru-nip').value = appSettings.nipGuru || '';
 
+      ensureMapelClassBars();
+
       const prevKiri = document.getElementById('preview-logo-kiri');
       const prevKanan = document.getElementById('preview-logo-kanan');
-      if (appSettings.logoKiriBase64) {
-        prevKiri.src = appSettings.logoKiriBase64;
-        prevKiri.classList.remove('hidden');
-      } else {
-        prevKiri.classList.add('hidden');
+      if (prevKiri) {
+        if (appSettings.logoKiriBase64) {
+          prevKiri.src = appSettings.logoKiriBase64;
+          prevKiri.classList.remove('hidden');
+        } else {
+          prevKiri.classList.add('hidden');
+        }
       }
-      if (appSettings.logoKananBase64) {
-        prevKanan.src = appSettings.logoKananBase64;
-        prevKanan.classList.remove('hidden');
-      } else {
-        prevKanan.classList.add('hidden');
+      if (prevKanan) {
+        if (appSettings.logoKananBase64) {
+          prevKanan.src = appSettings.logoKananBase64;
+          prevKanan.classList.remove('hidden');
+        } else {
+          prevKanan.classList.add('hidden');
+        }
       }
     }
 
@@ -2936,16 +2985,35 @@
 
       try {
         const uid = getTargetUid();
-        const stdKelas = getStandardClassInfo(appSettings.kelas);
-        appSettings.kelas = stdKelas.label;
+        const lowerKelas = appSettings.kelas.toLowerCase();
+        let savedKelasId = '';
+        if (lowerKelas.includes('pjok')) {
+          appSettings.kelas = 'Guru PJOK';
+          savedKelasId = 'guru_pjok';
+          if (!appSettings.jabatanGuru || appSettings.jabatanGuru === 'Guru Kelas') {
+            appSettings.jabatanGuru = 'Guru PJOK';
+          }
+          document.getElementById('grade-subject').value = 'PJOK';
+        } else if (lowerKelas.includes('pai')) {
+          appSettings.kelas = 'Guru PAI';
+          savedKelasId = 'guru_pai';
+          if (!appSettings.jabatanGuru || appSettings.jabatanGuru === 'Guru Kelas') {
+            appSettings.jabatanGuru = 'Guru PAI';
+          }
+          document.getElementById('grade-subject').value = 'Pendidikan Agama';
+        } else {
+          const stdKelas = getStandardClassInfo(appSettings.kelas);
+          appSettings.kelas = stdKelas.label;
+          savedKelasId = stdKelas.id;
+        }
         await setDoc(doc(db, 'users', uid), {
           ...appSettings,
-          kelasId: stdKelas.id,
+          kelasId: savedKelasId,
           updatedAt: new Date().toISOString()
         }, { merge: true });
         applySettingsToUI();
         await loadAllUserWorkspaceData();
-        showToast(`Pengaturan & data siswa ${stdKelas.label} berhasil dimuat dan tersinkron!`);
+        showToast(`Pengaturan & data ${getActiveClassDisplayLabel()} berhasil dimuat dan tersinkron!`);
       } catch (err) {
         showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
       }
@@ -3062,14 +3130,18 @@
           <td>${escapeHtml(s.tmpLahir || '')}${s.tglLahir ? ', ' + formatDateIndo(s.tglLahir) : ''}</td>
           <td>${escapeHtml(s.ortu || '-')}</td>
           <td>
-            <div class="flex gap-2">
-              <button type="button" class="btn btn-outline btn-sm" data-edit-stu="${s.id}" title="Edit">
-                <i data-lucide="edit-3" width="14"></i>
-              </button>
-              <button type="button" class="btn btn-danger btn-sm" data-del-stu="${s.id}" title="Hapus">
-                <i data-lucide="trash-2" width="14"></i>
-              </button>
-            </div>
+            ${isMapelTeacherMode() ? `
+              <span class="text-xs text-muted" style="font-weight: 600;">Terkunci (Master)</span>
+            ` : `
+              <div class="flex gap-2">
+                <button type="button" class="btn btn-outline btn-sm" data-edit-stu="${s.id}" title="Edit">
+                  <i data-lucide="edit-3" width="14"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" data-del-stu="${s.id}" title="Hapus">
+                  <i data-lucide="trash-2" width="14"></i>
+                </button>
+              </div>
+            `}
           </td>
         </tr>
       `).join('');
@@ -3077,6 +3149,10 @@
     }
 
     function openStudentModal(student = null) {
+      if (isMapelTeacherMode()) {
+        showToast('Guru PJOK / Guru PAI tidak dapat mengubah atau menambah data master siswa.', 'error');
+        return;
+      }
       const modal = document.getElementById('student-modal');
       const title = document.getElementById('student-modal-title');
       if (student) {
@@ -3105,6 +3181,10 @@
 
     async function saveStudent(e) {
       e.preventDefault();
+      if (isMapelTeacherMode()) {
+        showToast('Guru PJOK / Guru PAI tidak memiliki akses mengubah data siswa.', 'error');
+        return;
+      }
       const uid = getTargetUid();
       const classDocId = getActiveClassDocId();
       const stdKelas = STANDARD_CLASSES.find(c => c.id === classDocId) || getStandardClassInfo(appSettings.kelas);
@@ -3146,6 +3226,10 @@
     }
 
     async function deleteStudent(id) {
+      if (isMapelTeacherMode()) {
+        showToast('Guru PJOK / Guru PAI tidak memiliki akses menghapus data siswa.', 'error');
+        return;
+      }
       const ok = await showConfirmModal('Hapus Data Siswa', 'Yakin ingin menghapus data siswa ini secara permanen?');
       if (!ok) return;
       try {
@@ -3256,6 +3340,11 @@
     async function importStudentsExcel(e, forceAutoSync = false) {
       const file = e.target.files[0];
       if (!file) return;
+      if (isMapelTeacherMode()) {
+        showToast('Guru PJOK / Guru PAI tidak dapat mengimpor atau mengubah data master siswa.', 'error');
+        e.target.value = '';
+        return;
+      }
       try {
         if (isAdminUser && !adminAllUsersList.length) {
           await loadAllAdminUsers();
@@ -3465,7 +3554,8 @@
     async function loadAttendanceForMonth(ymStr) {
       try {
         const uid = getTargetUid();
-        const snap = await getDoc(doc(db, 'users', uid, 'attendance', ymStr));
+        const attDocId = isMapelTeacherMode() ? `${getActiveClassDocId()}_${ymStr}` : ymStr;
+        const snap = await getDoc(doc(db, 'users', uid, 'attendance', attDocId));
         if (snap.exists()) {
           const data = snap.data();
           attendanceData = {
@@ -3650,13 +3740,16 @@
       try {
         const uid = getTargetUid();
         const ym = document.getElementById('absen-month-picker').value || getCurrentMonthISO();
-        await setDoc(doc(db, 'users', uid, 'attendance', ym), {
+        const attDocId = isMapelTeacherMode() ? `${getActiveClassDocId()}_${ym}` : ym;
+        await setDoc(doc(db, 'users', uid, 'attendance', attDocId), {
+          kelasId: getActiveClassDocId(),
+          month: ym,
           records: attendanceData.records,
           notes: attendanceData.notes,
           updatedAt: new Date().toISOString()
         }, { merge: true });
         updateDashboardStats();
-        showToast(`Data absensi bulan ${formatMonthYearIndo(ym)} berhasil disimpan!`);
+        showToast(`Data absensi ${getActiveClassDisplayLabel()} bulan ${formatMonthYearIndo(ym)} berhasil disimpan!`);
       } catch (err) {
         showToast('Gagal menyimpan absensi: ' + err.message, 'error');
       }
@@ -3678,7 +3771,8 @@
     function getGradeDocId() {
       const sem = document.getElementById('grade-semester').value || '1';
       const subj = (document.getElementById('grade-subject').value || 'Matematika').replace(/[^a-zA-Z0-9]/g, '_');
-      return `sem${sem}_${subj}`;
+      const baseId = `sem${sem}_${subj}`;
+      return isMapelTeacherMode() ? `${getActiveClassDocId()}_${baseId}` : baseId;
     }
 
     async function loadGradesForSubject() {
@@ -4318,40 +4412,27 @@
         if (targetMenu) navigateTo(targetMenu);
         if (!silent) {
           showToast(`Membuka Master ${clsObj.label} (terhubung otomatis ke guru ${clsObj.shortLabel})`);
-        }
-        return;
       }
-
-      activeMasterClassFilter = '';
-      activeTargetUid = targetValue;
-      await loadSettings();
-      await loadAllUserWorkspaceData();
-      populateAdminTargetSelect();
-      renderAdminUsersTable();
-      if (targetMenu) {
-        navigateTo(targetMenu);
-      }
-      if (!silent) {
-        showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetValue})`);
-      }
+      return;
     }
 
-    async function switchAdminTargetUser(targetUid, targetMenu = 'dashboard', silent = false) {
-      if (!isAdminUser || !targetUid) return;
-      activeTargetUid = targetUid;
-      await loadSettings();
-      await loadAllUserWorkspaceData();
-      populateAdminTargetSelect();
-      renderAdminUsersTable();
-      if (targetMenu) {
-        navigateTo(targetMenu);
-      }
-      if (!silent) {
-        showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetUid})`);
-      }
+    activeMasterClassFilter = '';
+    activeTargetUid = targetValue;
+    await loadSettings();
+    await loadAllUserWorkspaceData();
+    populateAdminTargetSelect();
+    renderAdminUsersTable();
+    if (targetMenu) {
+      navigateTo(targetMenu);
     }
+    if (!silent) {
+      showToast(`Berhasil membuka data kelas: ${appSettings.sekolah || ''} (${appSettings.namaGuru || targetValue})`);
+    }
+  }
 
-    // =====================================================================
+  // =====================================================================
+  // PRINT F4 ENGINE (PORTRAIT & LANDSCAPE UNTUK SEMUA MODUL)
+  // =====================================================================
     // PRINT F4 ENGINE (PORTRAIT & LANDSCAPE UNTUK SEMUA MODUL)
     // =====================================================================
     function triggerPrintF4(htmlContent, orientation = 'portrait') {
@@ -4429,7 +4510,7 @@
         ${buildKopHTML()}
         <div class="print-doc-title">
           DAFTAR PESERTA DIDIK<br/>
-          ${escapeHtml(appSettings.kelas || '')} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
+          ${escapeHtml(getActiveClassDisplayLabel())} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
         </div>
         <table class="print-table">
           <thead>
@@ -4490,7 +4571,7 @@
         ${buildKopHTML()}
         <div class="print-doc-title">
           DAFTAR HADIR PESERTA DIDIK BULAN ${escapeHtml(formatMonthYearIndo(ym).toUpperCase())}<br/>
-          ${escapeHtml(appSettings.kelas || '')} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
+          ${escapeHtml(getActiveClassDisplayLabel())} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
         </div>
         <table class="print-table">
           <thead>
@@ -4542,7 +4623,7 @@
         <div class="print-doc-title">
           DAFTAR NILAI FORMATIF DAN SUMATIF (KURIKULUM MERDEKA)<br/>
           MATA PELAJARAN: ${escapeHtml(subj.toUpperCase())} • SEMESTER ${escapeHtml(sem)}<br/>
-          ${escapeHtml(appSettings.kelas || '')} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
+          ${escapeHtml(getActiveClassDisplayLabel())} • TAHUN AJARAN ${escapeHtml(appSettings.tahunAjaran || '')}
         </div>
         <table class="print-table">
           <thead>
@@ -4763,6 +4844,16 @@
       });
 
       // Students
+      document.addEventListener('click', async (e) => {
+        const mapelClsBtn = e.target.closest('[data-mapel-class]');
+        if (mapelClsBtn) {
+          mapelActiveClassId = mapelClsBtn.dataset.mapelClass;
+          applySettingsToUI();
+          await loadAllUserWorkspaceData();
+          const clsObj = STANDARD_CLASSES.find(c => c.id === mapelActiveClassId);
+          if (clsObj) showToast(`Menampilkan data ${clsObj.label}`);
+        }
+      });
       onEl('search-student', 'input', renderStudentsTable);
       onEl('btn-download-stu-tpl', 'click', downloadStudentTemplate);
       onEl('import-student-file', 'change', importStudentsExcel);
