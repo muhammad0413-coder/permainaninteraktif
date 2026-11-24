@@ -1516,6 +1516,7 @@
                     <th>Nama Sekolah</th>
                     <th>Kelas / TA</th>
                     <th>Nama Guru / Wali Kelas</th>
+                    <th>Email Akun</th>
                     <th>Kepala Sekolah</th>
                     <th>Jml Siswa</th>
                     <th>Jml Jurnal</th>
@@ -1524,7 +1525,7 @@
                   </tr>
                 </thead>
                 <tbody id="admin-users-tbody">
-                  <tr><td colspan="9" class="empty-state">Memuat data seluruh akun...</td></tr>
+                  <tr><td colspan="10" class="empty-state">Memuat data seluruh akun...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1615,7 +1616,7 @@
   <div id="toast-container"></div>
 
   <!-- =====================================================================
-       SECTION 5: FIREBASE & APPLICATION LOGIC
+       SECTION 5: FIREBASE & APPLICATION LOGIC (PRODUKSI LIVE)
        ===================================================================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1643,7 +1644,7 @@
       writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Konfigurasi Firebase proyek administrasikelas-9982f
+    // Konfigurasi Firebase Produksi: administrasikelas-9982f
     const firebaseConfig = {
       apiKey: "AIzaSyDOqV_TCn_Wppgd3q9VGa9RxHJu7yYFTu8",
       authDomain: "administrasikelas-9982f.firebaseapp.com",
@@ -1753,12 +1754,11 @@
       }
     }
 
-    // Fungsi terpusat untuk langsung membuka tampilan utama aplikasi setelah login
+    // Fungsi terpusat untuk membuka ruang kerja utama dengan akun terautentikasi
     async function enterMainApp(user) {
       if (!user) return;
       currentUser = user;
 
-      // Segera alihkan layar agar tidak tertahan di halaman login
       document.getElementById('auth-section').classList.add('hidden');
       document.getElementById('app-section').classList.remove('hidden');
       document.getElementById('user-email-display').textContent = user.email || user.displayName || 'Akun Guru';
@@ -1769,11 +1769,9 @@
       const adminNav = document.getElementById('nav-admin-panel');
       if (adminNav) adminNav.classList.toggle('hidden', !isAdminUser);
 
-      // Pastikan panel Dashboard aktif sebagai halaman pertama
       navigateTo('dashboard');
       refreshIcons();
 
-      // Simpan profil dasar & muat data dari Firestore di latar belakang dengan penanganan error aman
       try {
         await setDoc(doc(db, 'users', user.uid), {
           email: user.email || '',
@@ -1781,14 +1779,14 @@
           lastLoginAt: new Date().toISOString()
         }, { merge: true });
       } catch (e) {
-        console.warn('Info: Metadata root user tidak tersimpan:', e.message);
+        console.warn('Info: Metadata root user:', e.message);
       }
 
       await initUserData();
     }
 
     // =====================================================================
-    // AUTHENTICATION LOGIC
+    // AUTHENTICATION LOGIC (GOOGLE & EMAIL/PASSWORD)
     // =====================================================================
     function toggleAuthMode() {
       authMode = authMode === 'login' ? 'register' : 'login';
@@ -1860,7 +1858,6 @@
         showToast('Berhasil masuk dengan akun Google');
         await enterMainApp(user);
 
-        // Perbarui nama guru dari profil Google jika belum ada pengaturan
         try {
           const settingsRef = doc(db, 'users', user.uid, 'settings', 'general');
           const snap = await getDoc(settingsRef);
@@ -1901,7 +1898,7 @@
       showToast('Anda telah keluar dari aplikasi');
     }
 
-    // Tangani hasil redirect jika login Google menggunakan mode redirect
+    // Tangani hasil redirect Google OAuth
     getRedirectResult(auth).then(async (result) => {
       if (result && result.user) {
         activeTargetUid = result.user.uid;
@@ -1998,6 +1995,24 @@
         const snap = await getDoc(doc(db, 'users', uid, 'settings', 'general'));
         if (snap.exists()) {
           appSettings = { ...appSettings, ...snap.data() };
+        } else {
+          appSettings = {
+            kopBaris1: 'PEMERINTAH KABUPATEN / KOTA',
+            kopBaris2: 'DINAS PENDIDIKAN',
+            namaSekolah: 'NAMA SEKOLAH ANDA',
+            kopBaris3: 'Alamat Lengkap Sekolah',
+            logoKiriBase64: '',
+            logoKananBase64: '',
+            namaKelas: 'Kelas I',
+            tahunAjaran: '2026 / 2027',
+            kotaTandaTangan: 'Jember',
+            jabatanKS: 'Kepala Sekolah',
+            namaKS: '',
+            nipKS: '',
+            jabatanGuru: 'Guru Kelas',
+            namaGuru: (uid === currentUser?.uid && currentUser?.displayName) ? currentUser.displayName : '',
+            nipGuru: ''
+          };
         }
         applySettingsToUI();
       } catch (err) {
@@ -2129,15 +2144,16 @@
     async function loadAllAdminUsers() {
       if (!isAdminUser) return;
       const tbody = document.getElementById('admin-users-tbody');
-      tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Memuat data seluruh akun terdaftar...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Memuat data seluruh akun terdaftar...</td></tr>`;
       try {
         const usersSnap = await getDocs(collection(db, 'users'));
         adminAllUsersList = [];
 
-        const uidSet = new Set([currentUser.uid]);
-        usersSnap.forEach(d => uidSet.add(d.id));
+        const uidMap = new Map();
+        uidMap.set(currentUser.uid, { email: currentUser.email || '', displayName: currentUser.displayName || '' });
+        usersSnap.forEach(d => uidMap.set(d.id, d.data() || {}));
 
-        for (const uid of uidSet) {
+        for (const [uid, meta] of uidMap.entries()) {
           const [setSnap, stuSnap, jurSnap, matSnap] = await Promise.all([
             getDoc(doc(db, 'users', uid, 'settings', 'general')),
             getDocs(collection(db, 'users', uid, 'students')),
@@ -2147,6 +2163,7 @@
           const sData = setSnap.exists() ? setSnap.data() : {};
           adminAllUsersList.push({
             uid,
+            email: meta.email || '-',
             settings: sData,
             studentCount: stuSnap.size,
             journalCount: jurSnap.size,
@@ -2155,7 +2172,7 @@
         }
 
         if (adminAllUsersList.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Belum ada data akun guru ditemukan.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Belum ada data akun guru ditemukan.</td></tr>`;
           return;
         }
 
@@ -2167,6 +2184,7 @@
               <td class="font-semibold">${escapeHtml(item.settings.namaSekolah || 'Belum diisi')}</td>
               <td>${escapeHtml(item.settings.namaKelas || '-')} • ${escapeHtml(item.settings.tahunAjaran || '-')}</td>
               <td>${escapeHtml(item.settings.namaGuru || item.uid.slice(0, 10) + '...')}</td>
+              <td class="text-xs">${escapeHtml(item.email)}</td>
               <td>${escapeHtml(item.settings.namaKS || '-')}</td>
               <td style="text-align:center; font-weight:700;">${item.studentCount}</td>
               <td style="text-align:center; font-weight:700;">${item.journalCount}</td>
@@ -2181,7 +2199,7 @@
         }).join('');
       } catch (err) {
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Pastikan Firestore Rules mengizinkan akses Admin untuk membaca koleksi users.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Pastikan Firestore Rules mengizinkan akses Admin untuk membaca koleksi users.</td></tr>`;
       }
     }
 
@@ -3416,7 +3434,7 @@
     }
 
     // =====================================================================
-    // EVENT LISTENERS BINDING (SEMUA TOMBOL TERIKAT SECARA EKSPLISIT)
+    // EVENT LISTENERS BINDING
     // =====================================================================
     function bindAllEvents() {
       // Auth
