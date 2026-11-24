@@ -1862,7 +1862,7 @@
              MODULE 8: PANEL ADMIN (PENGATURAN SAPAAN GURU & AKSES SEMUA DATA)
              =============================================================== -->
         <section id="view-admin" class="module-view hidden">
-          <!-- Kartu Profil Admin + Unggah Foto Profil Admin -->
+          <!-- Kartu Profil Admin + Unggah Foto Profil Admin + Aksi Cepat Data Siswa -->
           <div class="card" style="background: linear-gradient(125deg, #0b2466 0%, #1d4ed8 55%, #3b82f6 100%); color: #fff; border: none; position: relative; overflow: hidden;">
             <div class="flex items-center gap-4" style="flex-wrap: wrap; position: relative; z-index: 2;">
               <label for="upload-profile-photo-admin" class="hero-portrait-frame" style="width: 112px; height: 118px; border-radius: 22px;" title="Klik untuk unggah Foto Profil Admin">
@@ -1872,19 +1872,69 @@
                   <span style="font-size: 0.62rem; margin-top: 4px; background: rgba(15,23,42,0.35); padding: 2px 6px; border-radius: 999px;">Foto Admin</span>
                 </div>
               </label>
-              <div style="flex: 1; min-width: 220px;">
-                <div class="text-xs font-semibold" style="color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.5px;">Profil Administrator Utama</div>
-                <h3 id="admin-profile-name" style="font-size: 1.3rem; font-weight: 800; margin: 2px 0;">Administrator</h3>
-                <div id="admin-profile-email" class="text-xs" style="color: #dbeafe; margin-bottom: 12px;">-</div>
+              <div style="flex: 1; min-width: 240px;">
+                <div class="text-xs font-semibold" style="color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.5px;">Administrator Sistem</div>
+                <h3 id="admin-profile-name" style="font-size: 1.35rem; font-weight: 800; margin: 2px 0;">Panel Kontrol Utama</h3>
+                <div id="admin-profile-email" class="text-xs" style="color: #dbeafe; margin-bottom: 12px;">Pantau seluruh akun guru, peserta didik, jurnal, dan perangkat ajar yang masuk ke aplikasi.</div>
                 <div class="flex gap-2" style="flex-wrap: wrap;">
                   <label for="upload-profile-photo-admin" class="btn btn-sm" style="background: #fff; color: var(--primary-dark); cursor: pointer;">
-                    <i data-lucide="camera" width="14"></i> Unggah / Ganti Foto Admin
+                    <i data-lucide="camera" width="14"></i> Unggah Foto Admin
                   </label>
-                  <button type="button" id="btn-admin-back-own" class="btn btn-sm" style="background: rgba(255,255,255,0.18); color: #fff;">
-                    <i data-lucide="home" width="14"></i> Kembali ke Dashboard Saya
+                  <button type="button" id="btn-admin-back-own" class="btn btn-sm" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i data-lucide="home" width="14"></i> Kembali ke Akun Admin
+                  </button>
+                  <button type="button" id="btn-admin-top-tpl" class="btn btn-sm" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+                    <i data-lucide="download" width="14"></i> Template Siswa
+                  </button>
+                  <label class="btn btn-sm" style="background: #10b981; color: #fff; cursor: pointer;">
+                    <i data-lucide="upload" width="14"></i> Impor Siswa
+                    <input type="file" id="admin-top-import-stu" accept=".xlsx,.xls" class="hidden" />
+                  </label>
+                  <button type="button" id="btn-admin-top-export" class="btn btn-sm" style="background: #f59e0b; color: #fff;">
+                    <i data-lucide="file-spreadsheet" width="14"></i> Ekspor Siswa
                   </button>
                 </div>
                 <input type="file" id="upload-profile-photo-admin" accept="image/*" class="hidden" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Aksi Cepat Admin: Kelola & Sinkronisasi Data Siswa Berdasarkan Acuan Kelas -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="user-plus" width="20" style="color: var(--primary);"></i>
+                <span>Kelola, Template, Impor & Ekspor Data Siswa (Terhubung ke Guru Sesuai Kelas)</span>
+              </div>
+            </div>
+            <p class="text-sm text-muted mb-4">
+              Pilih <strong>Kelas / Akun Guru Tujuan</strong> di bawah ini, atau gunakan kolom <strong>Kelas</strong> di dalam file Excel saat Impor Massal agar data siswa otomatis masuk dan tersambung ke akun guru yang sesuai dengan kelasnya.
+            </p>
+            <div class="grid-2 items-end">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Acuan Kelas & Akun Guru Tujuan</label>
+                <select id="admin-target-user-select" class="form-control"></select>
+              </div>
+              <div class="flex gap-2" style="flex-wrap: wrap;">
+                <button type="button" id="btn-admin-add-student" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus" width="15"></i> Tambah Siswa
+                </button>
+                <button type="button" id="btn-admin-download-stu-tpl" class="btn btn-outline btn-sm">
+                  <i data-lucide="download" width="15"></i> Template Siswa
+                </button>
+                <label class="btn btn-success btn-sm" style="cursor: pointer;">
+                  <i data-lucide="upload" width="15"></i> Impor Siswa (Auto-Sync Kelas)
+                  <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
+                </label>
+                <button type="button" id="btn-admin-export-stu" class="btn btn-warning btn-sm">
+                  <i data-lucide="file-spreadsheet" width="15"></i> Ekspor Kelas Ini
+                </button>
+                <button type="button" id="btn-admin-export-all-stu" class="btn btn-outline btn-sm">
+                  <i data-lucide="layers" width="15"></i> Ekspor Semua Kelas
+                </button>
+                <button type="button" id="btn-admin-open-students" class="btn btn-outline btn-sm">
+                  <i data-lucide="users" width="15"></i> Lihat Daftar Siswa
+                </button>
               </div>
             </div>
           </div>
@@ -2732,8 +2782,12 @@
       const adminNameEl = document.getElementById('admin-profile-name');
       const adminEmailEl = document.getElementById('admin-profile-email');
 
-      if (adminNameEl && currentUser) adminNameEl.textContent = currentUser.displayName || 'Administrator Utama';
-      if (adminEmailEl && currentUser) adminEmailEl.textContent = currentUser.email || '-';
+      if (adminNameEl) adminNameEl.textContent = 'Panel Kontrol Utama';
+      if (adminEmailEl) {
+        adminEmailEl.textContent = currentUser
+          ? `Akun Admin: ${currentUser.email} • Pantau seluruh akun guru, peserta didik, jurnal, dan perangkat ajar.`
+          : 'Pantau seluruh akun guru, peserta didik, jurnal, dan perangkat ajar yang masuk ke aplikasi.';
+      }
       if (adminInitials && currentUser) adminInitials.textContent = getInitials(currentUser.displayName || 'Admin');
 
       const adminPhotoSrc = adminOwnProfilePhoto || (currentUser ? currentUser.photoURL : '') || '';
@@ -4515,6 +4569,15 @@
         await importStudentsExcel(e, true);
       });
       onEl('btn-admin-download-stu-tpl', 'click', downloadStudentTemplate);
+      onEl('btn-admin-top-tpl', 'click', downloadStudentTemplate);
+      onEl('admin-top-import-stu', 'change', async (e) => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value;
+        if (chosenUid && chosenUid !== getTargetUid()) {
+          await switchAdminTargetUser(chosenUid, null, true);
+        }
+        await importStudentsExcel(e, true);
+      });
+      onEl('btn-admin-top-export', 'click', exportAllClassesStudentsExcel);
       onEl('btn-admin-export-stu', 'click', async () => {
         const chosenUid = document.getElementById('admin-target-user-select')?.value;
         if (chosenUid && chosenUid !== getTargetUid()) {
