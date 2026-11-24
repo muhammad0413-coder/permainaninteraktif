@@ -1922,15 +1922,15 @@
             <div class="card-header">
               <div class="card-title">
                 <i data-lucide="user-plus" width="20" style="color: var(--primary);"></i>
-                <span>Aksi Cepat Admin — Tambah, Impor, Ekspor & Template Excel Siswa</span>
+                <span>Aksi Cepat Admin — Template, Impor & Ekspor Data Siswa Terhubung ke Guru (Acuan Kelas)</span>
               </div>
             </div>
             <p class="text-sm text-muted mb-4">
-              Pilih sekolah/kelas tujuan di bawah ini untuk langsung menambahkan siswa baru, mengunduh template Excel, mengimpor data siswa dari Excel, maupun mengekspor data siswa kelas tersebut ke Excel.
+              Pilih <strong>Kelas / Akun Guru Tujuan</strong> di bawah ini, atau gunakan kolom <strong>Kelas</strong> di dalam file Excel saat Impor Massal agar sistem otomatis menyambungkan dan menyimpan data siswa ke akun guru yang sesuai dengan kelasnya.
             </p>
             <div class="grid-2 items-end">
               <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Pilih Akun Sekolah / Kelas Tujuan</label>
+                <label class="form-label">Acuan Kelas & Akun Guru Tujuan</label>
                 <select id="admin-target-user-select" class="form-control"></select>
               </div>
               <div class="flex gap-2" style="flex-wrap: wrap;">
@@ -1941,17 +1941,17 @@
                   <i data-lucide="download" width="15"></i> Template Excel
                 </button>
                 <label class="btn btn-success btn-sm" style="cursor: pointer;">
-                  <i data-lucide="upload" width="15"></i> Impor Excel
+                  <i data-lucide="upload" width="15"></i> Impor Excel (Auto-Sync Kelas)
                   <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
                 </label>
                 <button type="button" id="btn-admin-export-stu" class="btn btn-warning btn-sm">
-                  <i data-lucide="file-spreadsheet" width="15"></i> Ekspor Excel
+                  <i data-lucide="file-spreadsheet" width="15"></i> Ekspor Excel Kelas Ini
+                </button>
+                <button type="button" id="btn-admin-export-all-stu" class="btn btn-outline btn-sm">
+                  <i data-lucide="layers" width="15"></i> Ekspor Semua Kelas
                 </button>
                 <button type="button" id="btn-admin-open-students" class="btn btn-outline btn-sm">
                   <i data-lucide="users" width="15"></i> Lihat Daftar Siswa
-                </button>
-                <button type="button" id="btn-admin-open-materials" class="btn btn-outline btn-sm">
-                  <i data-lucide="qr-code" width="15"></i> Kelola Perangkat
                 </button>
               </div>
             </div>
@@ -3087,8 +3087,10 @@
     }
 
     function downloadStudentTemplate() {
+      const currentKelas = appSettings.kelas || 'Kelas I (Satu)';
       const rows = [
         {
+          'Kelas': currentKelas,
           'No Urut': 1,
           'No Induk': '1001',
           'NISN': '0161234567',
@@ -3099,6 +3101,7 @@
           'Nama Orang Tua': 'Bapak Hendra'
         },
         {
+          'Kelas': currentKelas,
           'No Urut': 2,
           'No Induk': '1002',
           'NISN': '0167654321',
@@ -3113,10 +3116,31 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Template_Siswa');
       XLSX.writeFile(wb, 'Template_Data_Siswa_EAdmin.xlsx');
-      showToast('Template Excel siswa berhasil diunduh.');
+      showToast('Template Excel siswa (dengan acuan Kelas) berhasil diunduh.');
     }
 
-    async function importStudentsExcel(e) {
+    function normalizeKelasKey(str) {
+      return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function findTeacherUidByKelas(kelasStr, fallbackUid) {
+      const norm = normalizeKelasKey(kelasStr);
+      if (!norm || !Array.isArray(adminAllUsersList) || !adminAllUsersList.length) {
+        return fallbackUid;
+      }
+      // 1. Cocokkan persis setelah normalisasi (misal "Kelas I (Satu)" == "kelasisatu")
+      const exactMatch = adminAllUsersList.find((u) => normalizeKelasKey(u.kelas) === norm);
+      if (exactMatch) return exactMatch.uid;
+
+      // 2. Cocokkan sebagian jika guru menuliskan singkat (misal "Kelas 1" cocok dengan "Kelas 1A")
+      const partialMatch = adminAllUsersList.find((u) => {
+        const uNorm = normalizeKelasKey(u.kelas);
+        return uNorm && (uNorm.includes(norm) || norm.includes(uNorm));
+      });
+      return partialMatch ? partialMatch.uid : fallbackUid;
+    }
+
+    async function importStudentsExcel(e, isFromAdminPanel = false) {
       const file = e.target.files[0];
       if (!file) return;
       try {
@@ -3130,16 +3154,28 @@
           return;
         }
 
-        const uid = getTargetUid();
+        const defaultUid = getTargetUid();
         const batch = writeBatch(db);
         let importedCount = 0;
+        const matchedTeachers = new Set();
 
         jsonRows.forEach((row, i) => {
           const nama = row['Nama Lengkap'] || row['Nama'] || row['nama'] || '';
           if (!String(nama).trim()) return;
-          const ref = doc(collection(db, 'users', uid, 'students'));
+
+          const rowKelas = String(row['Kelas'] || row['kelas'] || row['Rombel'] || '').trim();
+          const targetUidForRow = isFromAdminPanel && rowKelas
+            ? findTeacherUidByKelas(rowKelas, defaultUid)
+            : defaultUid;
+
+          const teacherObj = adminAllUsersList.find((u) => u.uid === targetUidForRow);
+          if (teacherObj) {
+            matchedTeachers.add(`${teacherObj.kelas || rowKelas || 'Kelas'} (${teacherObj.namaGuru || teacherObj.email})`);
+          }
+
+          const ref = doc(collection(db, 'users', targetUidForRow, 'students'));
           batch.set(ref, {
-            noUrut: Number(row['No Urut'] || row['No'] || studentsList.length + i + 1),
+            noUrut: Number(row['No Urut'] || row['No'] || i + 1),
             noInduk: String(row['No Induk'] || row['NIS'] || '').trim(),
             nisn: String(row['NISN'] || '').trim(),
             nama: String(nama).trim(),
@@ -3147,13 +3183,18 @@
             tmpLahir: String(row['Tempat Lahir'] || '').trim(),
             tglLahir: String(row['Tanggal Lahir (YYYY-MM-DD)'] || row['Tanggal Lahir'] || '').trim(),
             ortu: String(row['Nama Orang Tua'] || row['Orang Tua'] || '').trim(),
+            kelasAcuan: rowKelas || (teacherObj ? teacherObj.kelas : appSettings.kelas) || '',
             updatedAt: new Date().toISOString()
           });
           importedCount++;
         });
 
         await batch.commit();
-        showToast(`${importedCount} data siswa berhasil diimpor!`);
+        if (isFromAdminPanel && matchedTeachers.size > 0) {
+          showToast(`${importedCount} siswa diimpor & terhubung ke guru: ${Array.from(matchedTeachers).join(', ')}`);
+        } else {
+          showToast(`${importedCount} data siswa berhasil diimpor!`);
+        }
         await loadStudents();
         updateDashboardStats();
         if (isAdminUser && !document.getElementById('view-admin').classList.contains('hidden')) {
@@ -3172,6 +3213,8 @@
         return;
       }
       const rows = studentsList.map((s, i) => ({
+        'Kelas': appSettings.kelas || s.kelasAcuan || '',
+        'Guru / Wali Kelas': appSettings.namaGuru || '',
         'No Urut': s.noUrut || i + 1,
         'No Induk': s.noInduk || '',
         'NISN': s.nisn || '',
@@ -3186,6 +3229,52 @@
       XLSX.utils.book_append_sheet(wb, ws, 'Data_Siswa');
       XLSX.writeFile(wb, `Data_Siswa_${(appSettings.kelas || 'Kelas').replace(/\s+/g, '_')}.xlsx`);
       showToast('Data siswa berhasil diekspor ke Excel.');
+    }
+
+    async function exportAllClassesStudentsExcel() {
+      if (!isAdminUser) return;
+      try {
+        showToast('Menyiapkan ekspor gabungan seluruh kelas...');
+        const usersSnap = await getDocs(collection(db, 'users'));
+        const allRows = [];
+
+        for (const uDoc of usersSnap.docs) {
+          const uData = uDoc.data();
+          const sSnap = await getDocs(collection(db, 'users', uDoc.id, 'students'));
+          const stuDocs = sSnap.docs
+            .map((d) => d.data())
+            .sort((a, b) => (Number(a.noUrut) || 999) - (Number(b.noUrut) || 999));
+
+          stuDocs.forEach((s, idx) => {
+            allRows.push({
+              'Sekolah': uData.sekolah || '-',
+              'Kelas': uData.kelas || s.kelasAcuan || '-',
+              'Guru / Wali Kelas': uData.namaGuru || uData.email || '-',
+              'No Urut': s.noUrut || idx + 1,
+              'No Induk': s.noInduk || '',
+              'NISN': s.nisn || '',
+              'Nama Lengkap': s.nama || '',
+              'L/P': s.jk || '',
+              'Tempat Lahir': s.tmpLahir || '',
+              'Tanggal Lahir': s.tglLahir || '',
+              'Nama Orang Tua': s.ortu || ''
+            });
+          });
+        }
+
+        if (!allRows.length) {
+          showToast('Belum ada data siswa di seluruh kelas.', 'error');
+          return;
+        }
+
+        const ws = XLSX.utils.json_to_sheet(allRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Semua_Siswa_Per_Kelas');
+        XLSX.writeFile(wb, `Rekap_Semua_Siswa_Per_Kelas_${getTodayISO()}.xlsx`);
+        showToast(`Berhasil mengekspor ${allRows.length} siswa dari seluruh kelas!`);
+      } catch (err) {
+        showToast('Gagal mengekspor seluruh kelas: ' + err.message, 'error');
+      }
     }
 
     // =====================================================================
@@ -4423,7 +4512,7 @@
         if (chosenUid && chosenUid !== getTargetUid()) {
           await switchAdminTargetUser(chosenUid, null, true);
         }
-        await importStudentsExcel(e);
+        await importStudentsExcel(e, true);
       });
       onEl('btn-admin-download-stu-tpl', 'click', downloadStudentTemplate);
       onEl('btn-admin-export-stu', 'click', async () => {
@@ -4433,6 +4522,7 @@
         }
         exportStudentsExcel();
       });
+      onEl('btn-admin-export-all-stu', 'click', exportAllClassesStudentsExcel);
       onEl('btn-admin-open-students', 'click', async () => {
         const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
         await switchAdminTargetUser(chosenUid, 'siswa', false);
