@@ -398,17 +398,49 @@
       flex-shrink: 0;
     }
     .hero-avatar-box {
-      width: 128px;
-      height: 128px;
-      border-radius: 24px;
-      border: 4px solid rgba(255, 255, 255, 0.35);
-      background: rgba(255, 255, 255, 0.14);
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+      width: 136px;
+      height: 136px;
+      border-radius: 26px;
+      border: 4px solid rgba(255, 255, 255, 0.45);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .hero-avatar-box:hover {
+      transform: scale(1.03);
+      border-color: #ffffff;
+    }
+    .hero-avatar-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .topbar-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .topbar-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .hero-avatar-box img {
       width: 100%;
@@ -917,18 +949,13 @@
     <div class="main-wrapper">
       <header class="topbar">
         <div class="flex items-center gap-3">
-          <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Buka Menu">
-            <i data-lucide="menu" width="24" height="24"></i>
-          </button>
-          <div>
-            <h2 id="topbar-title" style="font-size: 1.1rem; font-weight: 700;">Dashboard Administrasi</h2>
-            <p id="topbar-subtitle" class="text-xs text-muted">Ringkasan data kelas secara realtime</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
           <span id="badge-ta" class="text-xs font-semibold" style="background: var(--primary-soft); color: var(--primary); padding: 6px 12px; border-radius: 999px;">
             TA: -
           </span>
+          <div class="topbar-avatar" title="Foto Profil Guru">
+            <img id="topbar-profile-img" src="" alt="Profil" class="hidden" />
+            <span id="topbar-profile-initials">GR</span>
+          </div>
         </div>
       </header>
 
@@ -939,19 +966,19 @@
         <section id="view-dashboard" class="module-view">
           <div class="hero-banner">
             <div class="hero-layout">
-              <!-- Foto Profil Besar Guru / Admin -->
+              <!-- Foto Profil Besar Guru / Admin (Bisa diklik langsung untuk unggah) -->
               <div class="hero-avatar-wrap">
-                <div class="hero-avatar-box">
-                  <img id="hero-profile-img" src="" alt="Foto Profil" class="hidden" />
-                  <div id="hero-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; color: #dbeafe;">
-                    <i data-lucide="user-circle-2" width="54" height="54"></i>
-                    <span style="font-size: 0.7rem; font-weight: 600; margin-top: 4px;">Foto Profil</span>
+                <label for="upload-profile-photo-dash" class="hero-avatar-box" title="Klik untuk memilih & mengunggah Foto Profil Guru">
+                  <img id="hero-profile-img" src="" alt="Foto Profil Guru" class="hidden" />
+                  <div id="hero-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8px; color: #ffffff;">
+                    <div id="hero-profile-initials" style="font-size: 2.2rem; font-weight: 800; letter-spacing: 1px; line-height: 1;">GR</div>
+                    <span style="font-size: 0.68rem; font-weight: 600; margin-top: 6px; background: rgba(15,23,42,0.28); padding: 2px 8px; border-radius: 999px;">Klik Unggah Foto</span>
                   </div>
-                </div>
-                <label class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff; cursor: pointer; font-size: 0.75rem; padding: 5px 10px;">
-                  <i data-lucide="camera" width="13"></i> Ubah Foto
-                  <input type="file" id="upload-profile-photo-dash" accept="image/*" class="hidden" />
                 </label>
+                <label for="upload-profile-photo-dash" class="btn btn-sm" style="background: #ffffff; color: var(--primary-dark); cursor: pointer; font-size: 0.76rem; padding: 6px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                  <i data-lucide="camera" width="14"></i> Unggah Foto Profil
+                </label>
+                <input type="file" id="upload-profile-photo-dash" accept="image/*" class="hidden" />
               </div>
 
               <!-- Teks Selamat Datang dari Admin & Info Kelas -->
@@ -1446,16 +1473,16 @@
             <div class="grid-2">
               <!-- Foto Profil, Kop Surat & Logo -->
               <div class="card">
-                <div class="card-header">
-                  <div class="card-title"><i data-lucide="file-text" width="18" style="color: var(--primary);"></i> Profil Pengguna, Kop Surat & Logo</div>
-                </div>
-
-                <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
-                  <label class="form-label">Foto Profil Guru / Admin (Tampil Besar di Dashboard)</label>
-                  <div class="flex items-center gap-3">
-                    <img id="preview-profile-photo" src="" alt="Foto Profil" class="hidden" style="width: 64px; height: 64px; object-fit: cover; border-radius: 12px; border: 2px solid var(--primary);" />
-                    <div style="flex: 1;">
+                <div class="form-group" style="background: #eff6ff; padding: 14px; border-radius: 12px; border: 1px solid #bfdbfe;">
+                  <label class="form-label" style="color: #1e3a8a;">Foto Profil Guru / Wali Kelas (Tampil Besar di Dashboard)</label>
+                  <div class="flex items-center gap-3" style="flex-wrap: wrap;">
+                    <div style="width: 72px; height: 72px; border-radius: 16px; border: 2px solid var(--primary); background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                      <img id="preview-profile-photo" src="" alt="Foto Profil" class="hidden" style="width: 100%; height: 100%; object-fit: cover;" />
+                      <span id="preview-profile-initials" style="font-weight: 800; font-size: 1.3rem; color: var(--primary-dark);">GR</span>
+                    </div>
+                    <div style="flex: 1; min-width: 180px;">
                       <input type="file" id="upload-profile-photo" accept="image/*" class="form-control" />
+                      <div class="text-xs text-muted mt-2">Pilih foto formal/bebas rapi (JPG/PNG). Otomatis tersimpan ke cloud.</div>
                     </div>
                     <button type="button" id="clear-profile-photo" class="btn btn-outline btn-sm">Hapus</button>
                   </div>
@@ -2177,15 +2204,56 @@
 
       const heroImg = document.getElementById('hero-profile-img');
       const heroPlaceholder = document.getElementById('hero-profile-placeholder');
+      const heroInitials = document.getElementById('hero-profile-initials');
+      const topbarImg = document.getElementById('topbar-profile-img');
+      const topbarInitials = document.getElementById('topbar-profile-initials');
+      const prevProf = document.getElementById('preview-profile-photo');
+      const prevProfInitials = document.getElementById('preview-profile-initials');
+
+      // Buat inisial 2 huruf dari nama guru
+      const cleanName = displayName.replace(/,.*$/, '').trim();
+      const initials = cleanName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('') || 'GR';
+
+      if (heroInitials) heroInitials.textContent = initials;
+      if (topbarInitials) topbarInitials.textContent = initials;
+      if (prevProfInitials) prevProfInitials.textContent = initials;
+
       const photoSrc = appSettings.profilePhotoBase64 || (currentUser && activeTargetUid === currentUser.uid ? currentUser.photoURL : '');
       if (photoSrc) {
         heroImg.src = photoSrc;
         heroImg.classList.remove('hidden');
         heroPlaceholder.classList.add('hidden');
+
+        if (topbarImg) {
+          topbarImg.src = photoSrc;
+          topbarImg.classList.remove('hidden');
+          topbarInitials.classList.add('hidden');
+        }
+        if (prevProf) {
+          prevProf.src = photoSrc;
+          prevProf.classList.remove('hidden');
+          if (prevProfInitials) prevProfInitials.classList.add('hidden');
+        }
       } else {
         heroImg.src = '';
         heroImg.classList.add('hidden');
         heroPlaceholder.classList.remove('hidden');
+
+        if (topbarImg) {
+          topbarImg.src = '';
+          topbarImg.classList.add('hidden');
+          topbarInitials.classList.remove('hidden');
+        }
+        if (prevProf) {
+          prevProf.src = '';
+          prevProf.classList.add('hidden');
+          if (prevProfInitials) prevProfInitials.classList.remove('hidden');
+        }
       }
 
       // Dashboard Table
@@ -2210,14 +2278,6 @@
       document.getElementById('set-guru-jabatan').value = appSettings.jabatanGuru || 'Guru Kelas';
       document.getElementById('set-guru-nama').value = appSettings.namaGuru || '';
       document.getElementById('set-guru-nip').value = appSettings.nipGuru || '';
-
-      const prevProf = document.getElementById('preview-profile-photo');
-      if (photoSrc) {
-        prevProf.src = photoSrc;
-        prevProf.classList.remove('hidden');
-      } else {
-        prevProf.classList.add('hidden');
-      }
 
       const prevKiri = document.getElementById('preview-logo-kiri');
       if (appSettings.logoKiriBase64) {
