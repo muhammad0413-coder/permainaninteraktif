@@ -1922,11 +1922,11 @@
             <div class="card-header">
               <div class="card-title">
                 <i data-lucide="user-plus" width="20" style="color: var(--primary);"></i>
-                <span>Aksi Cepat Admin — Tambah / Upload Siswa & Kelola Kelas</span>
+                <span>Aksi Cepat Admin — Tambah, Impor, Ekspor & Template Excel Siswa</span>
               </div>
             </div>
             <p class="text-sm text-muted mb-4">
-              Pilih sekolah/kelas tujuan di bawah ini untuk langsung menambahkan data siswa baru, mengunggah file Excel peserta didik, atau mengelola administrasi kelas tersebut secara langsung dari Panel Admin.
+              Pilih sekolah/kelas tujuan di bawah ini untuk langsung menambahkan siswa baru, mengunduh template Excel, mengimpor data siswa dari Excel, maupun mengekspor data siswa kelas tersebut ke Excel.
             </p>
             <div class="grid-2 items-end">
               <div class="form-group" style="margin-bottom: 0;">
@@ -1937,12 +1937,15 @@
                 <button type="button" id="btn-admin-add-student" class="btn btn-primary btn-sm">
                   <i data-lucide="plus" width="15"></i> Tambah Siswa
                 </button>
-                <label class="btn btn-success btn-sm" style="cursor: pointer;">
-                  <i data-lucide="upload" width="15"></i> Upload Excel Siswa
-                  <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
-                </label>
                 <button type="button" id="btn-admin-download-stu-tpl" class="btn btn-outline btn-sm">
                   <i data-lucide="download" width="15"></i> Template Excel
+                </button>
+                <label class="btn btn-success btn-sm" style="cursor: pointer;">
+                  <i data-lucide="upload" width="15"></i> Impor Excel
+                  <input type="file" id="admin-import-student-file" accept=".xlsx,.xls" class="hidden" />
+                </label>
+                <button type="button" id="btn-admin-export-stu" class="btn btn-warning btn-sm">
+                  <i data-lucide="file-spreadsheet" width="15"></i> Ekspor Excel
                 </button>
                 <button type="button" id="btn-admin-open-students" class="btn btn-outline btn-sm">
                   <i data-lucide="users" width="15"></i> Lihat Daftar Siswa
@@ -4423,6 +4426,13 @@
         await importStudentsExcel(e);
       });
       onEl('btn-admin-download-stu-tpl', 'click', downloadStudentTemplate);
+      onEl('btn-admin-export-stu', 'click', async () => {
+        const chosenUid = document.getElementById('admin-target-user-select')?.value;
+        if (chosenUid && chosenUid !== getTargetUid()) {
+          await switchAdminTargetUser(chosenUid, null, true);
+        }
+        exportStudentsExcel();
+      });
       onEl('btn-admin-open-students', 'click', async () => {
         const chosenUid = document.getElementById('admin-target-user-select')?.value || getTargetUid();
         await switchAdminTargetUser(chosenUid, 'siswa', false);
