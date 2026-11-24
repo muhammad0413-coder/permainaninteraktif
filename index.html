@@ -949,6 +949,15 @@
     <div class="main-wrapper">
       <header class="topbar">
         <div class="flex items-center gap-3">
+          <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Buka Menu">
+            <i data-lucide="menu" width="24" height="24"></i>
+          </button>
+          <div>
+            <h2 id="topbar-title" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); line-height: 1.2;">Dashboard Administrasi</h2>
+            <p id="topbar-subtitle" class="text-xs text-muted">Ringkasan data kelas & statistik kehadiran realtime</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
           <span id="badge-ta" class="text-xs font-semibold" style="background: var(--primary-soft); color: var(--primary); padding: 6px 12px; border-radius: 999px;">
             TA: -
           </span>
@@ -1608,6 +1617,33 @@
              MODULE 8: PANEL ADMIN (PENGATURAN SAPAAN GURU & AKSES SEMUA DATA)
              =============================================================== -->
         <section id="view-admin" class="module-view hidden">
+          <!-- Kartu Profil Admin + Unggah Foto Profil Admin -->
+          <div class="card" style="background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 100%); color: #fff; border: none;">
+            <div class="flex items-center gap-4" style="flex-wrap: wrap;">
+              <label for="upload-profile-photo-admin" class="hero-avatar-box" style="width: 96px; height: 96px; border-radius: 20px;" title="Klik untuk unggah Foto Profil Admin">
+                <img id="admin-profile-img" src="" alt="Foto Profil Admin" class="hidden" />
+                <div id="admin-profile-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #fff;">
+                  <div id="admin-profile-initials" style="font-size: 1.65rem; font-weight: 800; line-height: 1;">AD</div>
+                  <span style="font-size: 0.62rem; margin-top: 4px; background: rgba(15,23,42,0.3); padding: 2px 6px; border-radius: 999px;">Foto Admin</span>
+                </div>
+              </label>
+              <div style="flex: 1; min-width: 220px;">
+                <div class="text-xs font-semibold" style="color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.5px;">Profil Administrator Utama</div>
+                <h3 id="admin-profile-name" style="font-size: 1.25rem; font-weight: 800; margin: 2px 0;">Administrator</h3>
+                <div id="admin-profile-email" class="text-xs" style="color: #dbeafe; margin-bottom: 10px;">-</div>
+                <div class="flex gap-2" style="flex-wrap: wrap;">
+                  <label for="upload-profile-photo-admin" class="btn btn-sm" style="background: #fff; color: var(--primary-dark); cursor: pointer;">
+                    <i data-lucide="camera" width="14"></i> Unggah / Ganti Foto Admin
+                  </label>
+                  <button type="button" id="btn-admin-back-own" class="btn btn-sm" style="background: rgba(255,255,255,0.18); color: #fff;">
+                    <i data-lucide="home" width="14"></i> Kembali ke Dashboard Saya
+                  </button>
+                </div>
+                <input type="file" id="upload-profile-photo-admin" accept="image/*" class="hidden" />
+              </div>
+            </div>
+          </div>
+
           <!-- Pengaturan Sapaan Selamat Datang Guru (Diatur oleh Admin) -->
           <div class="card">
             <div class="card-header">
@@ -2209,6 +2245,9 @@
       const topbarInitials = document.getElementById('topbar-profile-initials');
       const prevProf = document.getElementById('preview-profile-photo');
       const prevProfInitials = document.getElementById('preview-profile-initials');
+      const adminImg = document.getElementById('admin-profile-img');
+      const adminPlaceholder = document.getElementById('admin-profile-placeholder');
+      const adminInitials = document.getElementById('admin-profile-initials');
 
       // Buat inisial 2 huruf dari nama guru
       const cleanName = displayName.replace(/,.*$/, '').trim();
@@ -2222,6 +2261,13 @@
       if (heroInitials) heroInitials.textContent = initials;
       if (topbarInitials) topbarInitials.textContent = initials;
       if (prevProfInitials) prevProfInitials.textContent = initials;
+      if (adminInitials) adminInitials.textContent = initials;
+      if (document.getElementById('admin-profile-name')) {
+        document.getElementById('admin-profile-name').textContent = displayName;
+      }
+      if (document.getElementById('admin-profile-email') && currentUser) {
+        document.getElementById('admin-profile-email').textContent = currentUser.email || '';
+      }
 
       const photoSrc = appSettings.profilePhotoBase64 || (currentUser && activeTargetUid === currentUser.uid ? currentUser.photoURL : '');
       if (photoSrc) {
@@ -2239,6 +2285,11 @@
           prevProf.classList.remove('hidden');
           if (prevProfInitials) prevProfInitials.classList.add('hidden');
         }
+        if (adminImg && adminPlaceholder) {
+          adminImg.src = photoSrc;
+          adminImg.classList.remove('hidden');
+          adminPlaceholder.classList.add('hidden');
+        }
       } else {
         heroImg.src = '';
         heroImg.classList.add('hidden');
@@ -2253,6 +2304,11 @@
           prevProf.src = '';
           prevProf.classList.add('hidden');
           if (prevProfInitials) prevProfInitials.classList.remove('hidden');
+        }
+        if (adminImg && adminPlaceholder) {
+          adminImg.src = '';
+          adminImg.classList.add('hidden');
+          adminPlaceholder.classList.remove('hidden');
         }
       }
 
@@ -3856,16 +3912,21 @@
     // =====================================================================
     // EVENT LISTENERS BINDING
     // =====================================================================
+    function onEl(id, event, handler) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(event, handler);
+    }
+
     function bindAllEvents() {
       // Auth
-      document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin);
-      document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
-      document.getElementById('auth-switch-btn').addEventListener('click', toggleAuthMode);
-      document.getElementById('logout-btn').addEventListener('click', handleLogout);
+      onEl('google-login-btn', 'click', handleGoogleLogin);
+      onEl('auth-form', 'submit', handleAuthSubmit);
+      onEl('auth-switch-btn', 'click', toggleAuthMode);
+      onEl('logout-btn', 'click', handleLogout);
 
       // Sidebar & Navigation
-      document.getElementById('mobile-menu-btn').addEventListener('click', () => toggleSidebar(true));
-      document.getElementById('sidebar-overlay').addEventListener('click', () => toggleSidebar(false));
+      onEl('mobile-menu-btn', 'click', () => toggleSidebar(true));
+      onEl('sidebar-overlay', 'click', () => toggleSidebar(false));
       document.querySelectorAll('.nav-item').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.menu));
       });
@@ -3873,133 +3934,9 @@
         btn.addEventListener('click', () => navigateTo(btn.dataset.navTarget));
       });
 
-      // Profile Photo Upload (Dashboard & Pengaturan)
-      document.getElementById('upload-profile-photo-dash').addEventListener('change', handleProfilePhotoUpload);
-      document.getElementById('upload-profile-photo').addEventListener('change', handleProfilePhotoUpload);
-      document.getElementById('clear-profile-photo').addEventListener('click', clearProfilePhoto);
-
-      // Module 2: Data Siswa
-      document.getElementById('btn-download-stu-tpl').addEventListener('click', downloadStudentTemplate);
-      document.getElementById('import-student-file').addEventListener('change', importStudentsExcel);
-      document.getElementById('btn-export-stu').addEventListener('click', exportStudentsExcel);
-      document.getElementById('btn-print-stu-portrait').addEventListener('click', () => printStudentsF4('portrait'));
-      document.getElementById('btn-print-stu-landscape').addEventListener('click', () => printStudentsF4('landscape'));
-      document.getElementById('btn-add-stu').addEventListener('click', () => openStudentModal());
-      document.getElementById('search-student').addEventListener('input', renderStudentsTable);
-      document.getElementById('btn-close-stu-modal-1').addEventListener('click', closeStudentModal);
-      document.getElementById('btn-close-stu-modal-2').addEventListener('click', closeStudentModal);
-      document.getElementById('student-form').addEventListener('submit', saveStudent);
-
-      document.getElementById('students-tbody').addEventListener('click', (e) => {
-        const editBtn = e.target.closest('[data-edit-stu]');
-        const delBtn = e.target.closest('[data-del-stu]');
-        if (editBtn) {
-          const stu = studentsList.find(s => s.id === editBtn.dataset.editStu);
-          if (stu) openStudentModal(stu);
-        }
-        if (delBtn) {
-          deleteStudent(delBtn.dataset.delStu);
-        }
-      });
-
-      // Module 3: Absen
-      document.getElementById('btn-mode-harian').addEventListener('click', () => switchAbsenMode('harian'));
-      document.getElementById('btn-mode-bulanan').addEventListener('click', () => switchAbsenMode('bulanan'));
-      document.getElementById('btn-print-absen-portrait').addEventListener('click', () => printAbsenF4('portrait'));
-      document.getElementById('btn-print-absen-landscape').addEventListener('click', () => printAbsenF4('landscape'));
-      document.getElementById('absen-date-picker').addEventListener('change', onAbsenDateChange);
-      document.getElementById('absen-month-picker').addEventListener('change', onAbsenMonthChange);
-      document.getElementById('btn-mark-all-h').addEventListener('click', markAllHadirToday);
-      document.getElementById('btn-save-absen-1').addEventListener('click', saveAttendanceToFirestore);
-      document.getElementById('btn-save-absen-2').addEventListener('click', saveAttendanceToFirestore);
-
-      document.getElementById('absen-harian-tbody').addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-att-stu]');
-        if (btn) {
-          setDailyAttendance(btn.dataset.attStu, btn.dataset.attDay, btn.dataset.attCode);
-        }
-      });
-      document.getElementById('absen-harian-tbody').addEventListener('change', (e) => {
-        if (e.target.classList.contains('att-note-input')) {
-          attendanceData.notes[e.target.dataset.noteStu] = e.target.value;
-        }
-      });
-      document.getElementById('absen-bulanan-tbody').addEventListener('click', (e) => {
-        const cell = e.target.closest('[data-matrix-stu]');
-        if (cell) {
-          cycleMatrixCell(cell.dataset.matrixStu, cell.dataset.matrixDay);
-        }
-      });
-      document.getElementById('absen-bulanan-tbody').addEventListener('change', (e) => {
-        if (e.target.classList.contains('att-note-input')) {
-          attendanceData.notes[e.target.dataset.noteStu] = e.target.value;
-        }
-      });
-
-      // Module 4: Daftar Nilai
-      document.getElementById('btn-download-grades-tpl').addEventListener('click', downloadGradesTemplate);
-      document.getElementById('import-grades-file').addEventListener('change', importGradesExcel);
-      document.getElementById('btn-export-grades').addEventListener('click', exportGradesExcel);
-      document.getElementById('btn-save-grades').addEventListener('click', saveGradesToFirestore);
-      document.getElementById('btn-print-grades-portrait').addEventListener('click', () => printGradesF4('portrait'));
-      document.getElementById('btn-print-grades-landscape').addEventListener('click', () => printGradesF4('landscape'));
-      document.getElementById('grade-semester').addEventListener('change', loadGradesForSubject);
-      document.getElementById('grade-subject').addEventListener('change', loadGradesForSubject);
-
-      document.getElementById('grades-tbody').addEventListener('input', (e) => {
-        if (e.target.classList.contains('grade-input')) {
-          updateScoreField(e.target.dataset.gradeStu, e.target.dataset.gradeKey, e.target.value);
-        }
-      });
-
-      // Module 5: Jurnal Harian
-      document.getElementById('journal-form').addEventListener('submit', saveJournal);
-      document.getElementById('journal-cancel-btn').addEventListener('click', resetJournalForm);
-      document.getElementById('journal-filter-month').addEventListener('change', renderJournalsTable);
-      document.getElementById('btn-print-journals-portrait').addEventListener('click', () => printJournalsF4('portrait'));
-      document.getElementById('btn-print-journals-landscape').addEventListener('click', () => printJournalsF4('landscape'));
-
-      document.getElementById('journals-tbody').addEventListener('click', (e) => {
-        const editBtn = e.target.closest('[data-edit-jur]');
-        const delBtn = e.target.closest('[data-del-jur]');
-        if (editBtn) editJournal(editBtn.dataset.editJur);
-        if (delBtn) deleteJournal(delBtn.dataset.delJur);
-      });
-
-      // Module 6: Perangkat Ajar
-      document.getElementById('material-form').addEventListener('submit', saveTeachingMaterial);
-      document.getElementById('btn-print-materials-portrait').addEventListener('click', () => printAllMaterialsF4('portrait'));
-      document.getElementById('btn-print-materials-landscape').addEventListener('click', () => printAllMaterialsF4('landscape'));
-      document.getElementById('materials-tbody').addEventListener('click', (e) => {
-        const delBtn = e.target.closest('[data-del-mat]');
-        if (delBtn) {
-          deleteTeachingMaterial(delBtn.dataset.delMat);
-        }
-      });
-
-      // Module 7: Pengaturan & Backup/Restore
-      document.getElementById('settings-form').addEventListener('submit', saveSettingsToFirestore);
-      document.getElementById('upload-logo-kiri').addEventListener('change', (e) => handleLogoUpload(e, 'kiri'));
-      document.getElementById('clear-logo-kiri').addEventListener('click', () => clearLogo('kiri'));
-      document.getElementById('upload-logo-kanan').addEventListener('change', (e) => handleLogoUpload(e, 'kanan'));
-      document.getElementById('clear-logo-kanan').addEventListener('click', () => clearLogo('kanan'));
-      document.getElementById('btn-backup-data').addEventListener('click', backupAllData);
-      document.getElementById('restore-data-input').addEventListener('change', restoreAllData);
-
-      // Module 8: Admin Panel
-      document.getElementById('admin-welcome-form').addEventListener('submit', saveGlobalAdminWelcome);
-      document.getElementById('btn-reload-admin').addEventListener('click', loadAllAdminUsers);
-      document.getElementById('admin-users-tbody').addEventListener('click', (e) => {
-        const switchBtn = e.target.closest('[data-admin-uid]');
-        if (switchBtn) {
-          switchAdminTargetUser(switchBtn.dataset.adminUid);
-        }
-      });
-    }
-
-    // Jalankan pengikatan event dan inisialisasi ikon saat halaman siap
-    bindAllEvents();
-    refreshIcons();
-  </script>
-</body>
-</html>
+      // Profile Photo Upload (Dashboard, Admin Panel & Pengaturan)
+      onEl('upload-profile-photo-dash', 'change', handleProfilePhotoUpload);
+      onEl('upload-profile-photo-admin', 'change', handleProfilePhotoUpload);
+      onEl('upload-profile-photo', 'change', handleProfilePhotoUpload);
+      onEl('clear-profile-photo', 'click', clearProfilePhoto);
+// ... existing code ... -->
